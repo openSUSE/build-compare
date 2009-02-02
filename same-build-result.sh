@@ -1,9 +1,11 @@
 #!/bin/bash
-
-# The script decides if the new build differes from the former one,
-# using rpm-check.sh.
+#
+# Copyright (c) 2009 SUSE Linux Product Gmbh, Germany.  All rights reserved.
 #
 # Written by Adrian Schroeter <adrian@suse.de>
+#
+# The script decides if the new build differes from the former one,
+# using rpm-check.sh.
 
 CMPSCRIPT=${0%/*}/rpm-check.sh
 

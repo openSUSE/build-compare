@@ -1,5 +1,9 @@
 #! /bin/bash
+#
+# Copyright (c) 2009 SUSE Linux Product Gmbh, Germany.  All rights reserved.
+#
 # Written by Michael Matz and Stephan Coolo
+#
 RPM="rpm -qp --nodigest --nosignature"
 
 if test "$#" != 2; then
