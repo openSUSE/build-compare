@@ -43,12 +43,13 @@ mkdir $RPM_BUILD_DIR/%name-%version
 %build
 
 %install
-mkdir -p $RPM_BUILD_ROOT/usr/lib/build/
+mkdir -p $RPM_BUILD_ROOT/usr/lib/build/ $RPM_BUILD_ROOT/%_defaultdocdir/%name
 install -m 0755 %SOURCE0 %SOURCE1 $RPM_BUILD_ROOT/usr/lib/build/
+install -m 0644 %SOURCE2 $RPM_BUILD_ROOT/%_defaultdocdir/%name/
 
 %files
 %defattr(-,root,root)
-%doc %SOURCE2
+%doc %_defaultdocdir/%name
 /usr/lib/build
 
 %changelog
