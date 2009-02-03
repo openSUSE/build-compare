@@ -38,6 +38,11 @@ for opac in "$OLDRPMS"; do
   bash $CMPSCRIPT "$opac" "$npac" || exit 1
 done
 
+if [ -n "${NEWRPMS[0]}" ]; then
+  echo additional new package
+  exit 1
+fi
+
 echo compare validated built as indentical !
 exit 0
 
