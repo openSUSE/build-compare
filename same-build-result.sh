@@ -25,9 +25,11 @@ if [ -z "$NEWDIRS" ]; then
   exit 1
 fi
 
-OLDRPMS=($(find "$OLDDIR" -name \*src.rpm|sort) $(find "$OLDDIR" -name \*rpm -a ! -name \*src.rpm|sort))
-NEWRPMS=($(find $NEWDIRS -name \*src.rpm|sort) $(find $NEWDIRS -name \*rpm -a ! -name \*src.rpm|sort))
-
+#OLDRPMS=($(find "$OLDDIR" -name \*src.rpm|sort) $(find "$OLDDIR" -name \*rpm -a ! -name \*src.rpm|sort))
+#NEWRPMS=($(find $NEWDIRS -name \*src.rpm|sort) $(find $NEWDIRS -name \*rpm -a ! -name \*src.rpm|sort))
+# Exclude src rpms for now:
+OLDRPMS=($(find "$OLDDIR" -name \*rpm -a ! -name \*src.rpm|sort))
+NEWRPMS=($(find $NEWDIRS -name \*rpm -a ! -name \*src.rpm|sort))
 
 for opac in "$OLDRPMS"; do
   npac=${NEWRPMS[0]}
