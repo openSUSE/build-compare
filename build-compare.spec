@@ -27,6 +27,7 @@ Version:        2009.01.27
 Release:        2
 Source:         same-build-result.sh
 Source1:        rpm-check.sh
+Source2:        COPYING
 BuildRoot:      %{_tmppath}/%{name}-%{version}-build
 BuildArch:      noarch
 
@@ -47,6 +48,7 @@ install -m 0755 %SOURCE0 %SOURCE1 $RPM_BUILD_ROOT/usr/lib/build/
 
 %files
 %defattr(-,root,root)
+%doc %SOURCE2
 /usr/lib/build
 
 %changelog

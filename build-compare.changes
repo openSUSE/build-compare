@@ -5,4 +5,5 @@ Tue Jan 27 14:27:19 CET 2009 - adrian@suse.de
   This package provides script for the main build script to be able
   to check if a new build has the same result than the former one.
   The Build Service is able to skip the new build than.
+- changes in source rpms are currently ignored, is that okay ?
 
