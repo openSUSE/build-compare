@@ -1,6 +1,7 @@
 #!/bin/bash
 #
-# Copyright (c) 2009 SUSE Linux Product Gmbh, Germany.  All rights reserved.
+# Copyright (c) 2009 SUSE Linux Product Gmbh, Germany.
+# Licensed under GPL v2, see COPYING file for details.
 #
 # Written by Adrian Schroeter <adrian@suse.de>
 #

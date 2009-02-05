@@ -37,8 +37,7 @@ chroot environment.
 
 
 %prep
-mkdir $RPM_BUILD_DIR/%name-%version
-%setup -T 0 -D
+%setup -T 0 -c
 
 %build
 
