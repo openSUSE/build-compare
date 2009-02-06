@@ -24,7 +24,7 @@ Group:          Development/Tools/Building
 AutoReqProv:    on
 Summary:        Build Result Compare Script
 Version:        2009.01.27
-Release:        3
+Release:        4
 Source:         same-build-result.sh
 Source1:        rpm-check.sh
 Source2:        COPYING
@@ -54,6 +54,10 @@ install -m 0644 %SOURCE2 $RPM_BUILD_ROOT/%_defaultdocdir/%name/
 /usr/lib/build
 
 %changelog
+* Fri Feb 06 2009 coolo@suse.de
+- use --no-show-raw-insn for objdump -d
+* Fri Feb 06 2009 coolo@suse.de
+- hopefully fixed shell quoting for rpm command line
 * Thu Feb 05 2009 coolo@suse.de
 - fix 2 bugs
 - don't ignore source rpms - changed sources should output

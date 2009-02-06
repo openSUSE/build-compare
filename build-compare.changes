@@ -1,4 +1,14 @@
 -------------------------------------------------------------------
+Fri Feb  6 19:25:20 CET 2009 - coolo@suse.de
+
+- use --no-show-raw-insn for objdump -d
+
+-------------------------------------------------------------------
+Fri Feb  6 18:18:15 CET 2009 - coolo@suse.de
+
+- hopefully fixed shell quoting for rpm command line
+
+-------------------------------------------------------------------
 Thu Feb  5 17:34:29 CET 2009 - coolo@suse.de
 
 - fix 2 bugs

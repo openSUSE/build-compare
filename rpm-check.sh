@@ -187,9 +187,9 @@ check_single_file()
   ftype=`/usr/bin/file old/$file | cut -d: -f2-`
   case $ftype in
     *executable*|*LSB\ shared\ object*)
-       objdump -d old/$file | filter_disasm > $file1
+       objdump -d --no-show-raw-insn old/$file | filter_disasm > $file1
        sed -i -e "s,old/,," $file1
-       objdump -d new/$file | filter_disasm > $file2
+       objdump -d --no-show-raw-insn new/$file | filter_disasm > $file2
        sed -i -e "s,new/,," $file2
        if ! diff -u $file1 $file2 > $dfile; then
           echo "$file differs in assembler output"

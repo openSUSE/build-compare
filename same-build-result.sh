@@ -51,7 +51,7 @@ bash $CMPSCRIPT "$osrpm" "$nsrpm" || exit 1
 OLDRPMS=($(find "$OLDDIR" -name \*rpm -a ! -name \*src.rpm|sort))
 NEWRPMS=($(find $NEWDIRS -name \*rpm -a ! -name \*src.rpm|sort))
 
-rpmqp="rpm -qp --qf --nodigest --nosignature %{NAME}"
+rpmqp='rpm -qp --qf --nodigest --nosignature %{NAME}'
 for opac in ${OLDRPMS[*]}; do
   npac=${NEWRPMS[0]}
   NEWRPMS=(${NEWRPMS[@]:1}) # shift
