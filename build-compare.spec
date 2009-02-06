@@ -24,7 +24,7 @@ Group:          Development/Tools/Building
 AutoReqProv:    on
 Summary:        Build Result Compare Script
 Version:        2009.01.27
-Release:        2
+Release:        3
 Source:         same-build-result.sh
 Source1:        rpm-check.sh
 Source2:        COPYING
@@ -54,6 +54,11 @@ install -m 0644 %SOURCE2 $RPM_BUILD_ROOT/%_defaultdocdir/%name/
 /usr/lib/build
 
 %changelog
+* Thu Feb 05 2009 coolo@suse.de
+- fix 2 bugs
+- don't ignore source rpms - changed sources should output
+  changed source rpms, no matter if they create the same binaries
+  (think of changed copyright header in spec files)
 * Tue Jan 27 2009 adrian@suse.de
 - Create initial package based on the work of Matz and Coolo
   This package provides script for the main build script to be able
