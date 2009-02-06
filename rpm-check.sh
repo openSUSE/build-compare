@@ -193,7 +193,7 @@ check_single_file()
        sed -i -e "s,new/,," $file2
        if ! diff -u $file1 $file2 > $dfile; then
           echo "$file differs in assembler output"
-          head -n 2000 $dfile
+          head -n 200 $dfile
           ret=1
           break
        fi
@@ -213,7 +213,7 @@ check_single_file()
      *ASCII*|*text*)
        if ! cmp -s old/$file new/$file; then
          echo "$file differs ($ftype)"
-         diff -u old/$file1 new/$file2 | head -n 200
+         diff -u old/$file new/$file | head -n 200
          ret=1
          break
        fi

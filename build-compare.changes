@@ -1,4 +1,12 @@
 -------------------------------------------------------------------
+Thu Feb  5 17:34:29 CET 2009 - coolo@suse.de
+
+- fix 2 bugs
+- don't ignore source rpms - changed sources should output 
+  changed source rpms, no matter if they create the same binaries
+  (think of changed copyright header in spec files)
+
+-------------------------------------------------------------------
 Tue Jan 27 14:27:19 CET 2009 - adrian@suse.de
 
 - Create initial package based on the work of Matz and Coolo

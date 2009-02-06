@@ -26,16 +26,42 @@ if [ -z "$NEWDIRS" ]; then
   exit 1
 fi
 
-#OLDRPMS=($(find "$OLDDIR" -name \*src.rpm|sort) $(find "$OLDDIR" -name \*rpm -a ! -name \*src.rpm|sort))
-#NEWRPMS=($(find $NEWDIRS -name \*src.rpm|sort) $(find $NEWDIRS -name \*rpm -a ! -name \*src.rpm|sort))
-# Exclude src rpms for now:
+if test `find $NEWDIRS -name *.rpm  | wc -l` != `find $OLDDIR -name *.rpm  | wc -l`; then
+   echo "different number of subpackages"
+   find $OLDDIR $NEWDIRS -name *.rpm
+   exit 1
+fi
+
+osrpm=$(find "$OLDDIR" -name \*src.rpm)
+nsrpm=$(find $NEWDIRS -name \*src.rpm)
+
+if test ! -f "$osrpm"; then
+  echo no old source rpm in $OLDDIR
+  exit 1
+fi
+
+if test ! -f "$nsrpm"; then
+  echo no new source rpm in $NEWDIRS
+  exit 1
+fi
+
+echo "compare $osrpm $nsrpm"
+bash $CMPSCRIPT "$osrpm" "$nsrpm" || exit 1
+
 OLDRPMS=($(find "$OLDDIR" -name \*rpm -a ! -name \*src.rpm|sort))
 NEWRPMS=($(find $NEWDIRS -name \*rpm -a ! -name \*src.rpm|sort))
 
-for opac in "$OLDRPMS"; do
+rpmqp="rpm -qp --qf --nodigest --nosignature %{NAME}"
+for opac in ${OLDRPMS[*]}; do
   npac=${NEWRPMS[0]}
   NEWRPMS=(${NEWRPMS[@]:1}) # shift
   echo compare "$opac" "$npac"
+  oname=`$rpmqp $opac`
+  nname=`$rpmqp $npac`
+  if test "$oname" != "$nname"; then
+     echo "names differ: $oname $nname"
+     exit 1
+  fi
   bash $CMPSCRIPT "$opac" "$npac" || exit 1
 done
 

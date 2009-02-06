@@ -1,5 +1,5 @@
 #
-# spec file for package build (Version 2009.01.27)
+# spec file for package build-compare (Version 2009.01.27)
 #
 # Copyright (c) 2009 SUSE LINUX Products GmbH, Nuernberg, Germany.
 #
@@ -22,7 +22,7 @@ Name:           build-compare
 License:        GPL v2 or later
 Group:          Development/Tools/Building
 AutoReqProv:    on
-Summary:        A Script to Build SUSE Linux RPMs
+Summary:        Build Result Compare Script
 Version:        2009.01.27
 Release:        2
 Source:         same-build-result.sh
@@ -32,12 +32,14 @@ BuildRoot:      %{_tmppath}/%{name}-%{version}-build
 BuildArch:      noarch
 
 %description
-This package provides a script for building RPMs for SUSE Linux in a
-chroot environment.
+This package contains scripts to find out if the build result differs
+to a former build.
+
 
 
 %prep
-%setup -T 0 -c
+mkdir $RPM_BUILD_DIR/%name-%version
+%setup -T 0 -D
 
 %build
 
@@ -53,5 +55,8 @@ install -m 0644 %SOURCE2 $RPM_BUILD_ROOT/%_defaultdocdir/%name/
 
 %changelog
 * Tue Jan 27 2009 adrian@suse.de
-- Initial package based on the work of Matz and Coolo
-
+- Create initial package based on the work of Matz and Coolo
+  This package provides script for the main build script to be able
+  to check if a new build has the same result than the former one.
+  The Build Service is able to skip the new build than.
+- changes in source rpms are currently ignored, is that okay ?
