@@ -1,4 +1,9 @@
 -------------------------------------------------------------------
+Sat Feb  7 14:58:48 CET 2009 - coolo@suse.de
+
+- fix command line order
+
+-------------------------------------------------------------------
 Fri Feb  6 19:25:20 CET 2009 - coolo@suse.de
 
 - use --no-show-raw-insn for objdump -d
