@@ -24,7 +24,7 @@ Group:          Development/Tools/Building
 AutoReqProv:    on
 Summary:        Build Result Compare Script
 Version:        2009.01.27
-Release:        6
+Release:        7
 Source:         same-build-result.sh
 Source1:        rpm-check.sh
 Source2:        COPYING
@@ -54,6 +54,8 @@ install -m 0644 %SOURCE2 $RPM_BUILD_ROOT/%_defaultdocdir/%name/
 /usr/lib/build
 
 %changelog
+* Sun Feb 08 2009 coolo@suse.de
+- fix handling of hardlinks to compressed files
 * Sat Feb 07 2009 coolo@suse.de
 - fix handling of -32bit and -64bit
 * Sat Feb 07 2009 coolo@suse.de

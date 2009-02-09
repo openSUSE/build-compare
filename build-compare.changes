@@ -1,4 +1,9 @@
 -------------------------------------------------------------------
+Sun Feb  8 21:48:27 CET 2009 - coolo@suse.de
+
+- fix handling of hardlinks to compressed files
+
+-------------------------------------------------------------------
 Sat Feb  7 21:05:30 CET 2009 - coolo@suse.de
 
 - fix handling of -32bit and -64bit

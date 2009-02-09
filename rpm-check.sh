@@ -175,11 +175,13 @@ check_single_file()
         perl -E "open fh, '+<', 'new/$file'; seek fh, 3, SEEK_SET; print fh '0000';"
         ;;
      *.bz2)
-        bunzip2 old/$file new/$file
+        bunzip2 -c old/$file > old/${file/.bz2/}
+        bunzip2 -c new/$file > new/${file/.bz2/}
         check_single_file ${file/.bz2/}
         continue;;
      *.gz)
-        gunzip old/$file new/$file
+        gunzip -c old/$file > old/${file/.gz/}
+        gunzip -c new/$file > new/${file/.gz/}
         check_single_file ${file/.gz/}
         continue;;
   esac
