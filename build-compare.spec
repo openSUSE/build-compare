@@ -24,7 +24,7 @@ Group:          Development/Tools/Building
 AutoReqProv:    on
 Summary:        Build Result Compare Script
 Version:        2009.01.27
-Release:        7
+Release:        8
 Source:         same-build-result.sh
 Source1:        rpm-check.sh
 Source2:        COPYING
@@ -54,6 +54,15 @@ install -m 0644 %SOURCE2 $RPM_BUILD_ROOT/%_defaultdocdir/%name/
 /usr/lib/build
 
 %changelog
+* Mon May 04 2009 coolo@suse.de
+- compare content of *.tar too
+* Mon May 04 2009 coolo@suse.de
+- if objdump fails, fall back to hexdump (bnc#489965)
+* Mon May 04 2009 coolo@suse.de
+- ignore dates in mo files (bnc#489198)
+* Tue Apr 28 2009 mmarek@suse.cz
+- rpm-check.sh: add option --check-all to check all packaged files
+  (useful for debugging)
 * Sun Feb 08 2009 coolo@suse.de
 - fix handling of hardlinks to compressed files
 * Sat Feb 07 2009 coolo@suse.de

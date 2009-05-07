@@ -7,8 +7,15 @@
 #
 RPM="rpm -qp --nodigest --nosignature"
 
+check_all=
+case $1 in
+  -a | --check-all)
+    check_all=1
+    shift
+esac
+
 if test "$#" != 2; then
-   echo "usage: $0 old.rpm new.rpm"
+   echo "usage: $0 [-a|--check-all] old.rpm new.rpm"
    exit 1
 fi
 
@@ -142,11 +149,22 @@ cd new
 cd ..
 
 dfile=`mktemp`
-ret=0
+
+diff_two_files()
+{
+  if ! cmp -s old/$file new/$file; then
+     echo "$file differs ($ftype)"
+     hexdump -C old/$file > $file1
+     hexdump -C new/$file > $file2
+     diff -u $file1 $file2 | head -n 200
+     return 1
+  fi
+  return 0
+}
 
 check_single_file()
 { 
-  file=$1
+  local file=$1
   case $file in
     *.spec)
        sed -i -e "s,Release:.*$release1,Release: @RELEASE@," old/$file
@@ -155,8 +173,7 @@ check_single_file()
     *.dll|*.exe)
        # we can't handle it well enough
        echo "mono files unhandled ($file)"
-       ret=1
-       break;;
+       return 1;;
     *.a)
        flist=`ar t new/$file`
        pwd=$PWD
@@ -170,6 +187,25 @@ check_single_file()
           check_single_file $fdir/$f
        done
        continue;;
+    *.tar|*.tar.bz2|*.tar.gz|*.tgz|*.tbz2)
+       flist=`tar tf new/$file`
+       pwd=$PWD
+       fdir=`dirname $file`
+       cd old/$fdir
+       tar xf `basename $file`
+       cd $pwd/new/$fdir
+       tar xf `basename $file`
+       cd $pwd
+       local ret=0
+       for f in $flist; do
+         if ! check_single_file $fdir/$f; then
+           ret=1
+           if test -z "$check_all"; then
+             break
+           fi
+         fi
+       done
+       return $ret;;
      *.pyc|*.pyo)
         perl -E "open fh, '+<', 'old/$file'; seek fh, 3, SEEK_SET; print fh '0000';"
         perl -E "open fh, '+<', 'new/$file'; seek fh, 3, SEEK_SET; print fh '0000';"
@@ -178,26 +214,36 @@ check_single_file()
         bunzip2 -c old/$file > old/${file/.bz2/}
         bunzip2 -c new/$file > new/${file/.bz2/}
         check_single_file ${file/.bz2/}
-        continue;;
+	return;;
      *.gz)
         gunzip -c old/$file > old/${file/.gz/}
         gunzip -c new/$file > new/${file/.gz/}
         check_single_file ${file/.gz/}
-        continue;;
+	return;;
+     /usr/share/locale/*/LC_MESSAGES/*.mo|/usr/share/locale-bundle/*/LC_MESSAGES/*.mo)
+       sed -i -e "s,POT-Creation-Date: ....-..-.. ..:..+....,POT-Creation-Date: 1970-01-01 00:00+0000," old/$file
+       sed -i -e "s,POT-Creation-Date: ....-..-.. ..:..+....,POT-Creation-Date: 1970-01-01 00:00+0000," new/$file
+       ;;
   esac
 
   ftype=`/usr/bin/file old/$file | cut -d: -f2-`
   case $ftype in
     *executable*|*LSB\ shared\ object*)
        objdump -d --no-show-raw-insn old/$file | filter_disasm > $file1
+       if ! test -s $file1; then
+         # objdump has no idea how to handle it
+         if diff_two_files; then
+           ret=1
+           break
+         fi
+       fi       
        sed -i -e "s,old/,," $file1
        objdump -d --no-show-raw-insn new/$file | filter_disasm > $file2
        sed -i -e "s,new/,," $file2
        if ! diff -u $file1 $file2 > $dfile; then
           echo "$file differs in assembler output"
           head -n 200 $dfile
-          ret=1
-          break
+          return 1
        fi
        objdump -s old/$file > $file1
        sed -i -e "s,old/,," $file1
@@ -209,32 +255,32 @@ check_single_file()
        else
           echo "WARNING: no idea about $file"
        fi
-       ret=1
-       break
+       return 1
        ;;
      *ASCII*|*text*)
        if ! cmp -s old/$file new/$file; then
          echo "$file differs ($ftype)"
          diff -u old/$file new/$file | head -n 200
-         ret=1
-         break
+         return 1
        fi
        ;;
      *)
-       if ! cmp -s old/$file new/$file; then
-         echo "$file differs ($ftype)"
-         hexdump -C old/$file > $file1
-         hexdump -C new/$file > $file2
-         diff -u $file1 $file2 | head -n 200
-         ret=1
-         break
+       if diff_two_files; then
+	   return 1
        fi
        ;;
   esac
+  return 0
 }
 
+ret=0
 for file in $files; do
-   check_single_file $file
+   if ! check_single_file $file; then
+       ret=1
+       if test -z "$check_all"; then
+	   break
+       fi
+   fi
 done
 
 rm $file1 $file2 $dfile

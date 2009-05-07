@@ -1,4 +1,25 @@
 -------------------------------------------------------------------
+Mon May  4 15:19:04 CEST 2009 - coolo@suse.de
+
+- compare content of *.tar too
+
+-------------------------------------------------------------------
+Mon May  4 14:17:07 CEST 2009 - coolo@suse.de
+
+- if objdump fails, fall back to hexdump (bnc#489965)
+
+-------------------------------------------------------------------
+Mon May  4 14:10:24 CEST 2009 - coolo@suse.de
+
+- ignore dates in mo files (bnc#489198)
+
+-------------------------------------------------------------------
+Tue Apr 28 13:47:36 CEST 2009 - mmarek@suse.cz
+
+- rpm-check.sh: add option --check-all to check all packaged files
+  (useful for debugging)
+
+-------------------------------------------------------------------
 Sun Feb  8 21:48:27 CET 2009 - coolo@suse.de
 
 - fix handling of hardlinks to compressed files
