@@ -1,4 +1,10 @@
 -------------------------------------------------------------------
+Tue Jul 14 11:46:04 CEST 2009 - coolo@novell.com
+
+- support .jar and .zip files
+- fix support of gzipped files
+
+-------------------------------------------------------------------
 Mon May  4 15:19:04 CEST 2009 - coolo@suse.de
 
 - compare content of *.tar too

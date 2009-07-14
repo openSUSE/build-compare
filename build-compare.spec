@@ -24,7 +24,7 @@ Group:          Development/Tools/Building
 AutoReqProv:    on
 Summary:        Build Result Compare Script
 Version:        2009.01.27
-Release:        8
+Release:        9
 Source:         same-build-result.sh
 Source1:        rpm-check.sh
 Source2:        COPYING
@@ -54,33 +54,3 @@ install -m 0644 %SOURCE2 $RPM_BUILD_ROOT/%_defaultdocdir/%name/
 /usr/lib/build
 
 %changelog
-* Mon May 04 2009 coolo@suse.de
-- compare content of *.tar too
-* Mon May 04 2009 coolo@suse.de
-- if objdump fails, fall back to hexdump (bnc#489965)
-* Mon May 04 2009 coolo@suse.de
-- ignore dates in mo files (bnc#489198)
-* Tue Apr 28 2009 mmarek@suse.cz
-- rpm-check.sh: add option --check-all to check all packaged files
-  (useful for debugging)
-* Sun Feb 08 2009 coolo@suse.de
-- fix handling of hardlinks to compressed files
-* Sat Feb 07 2009 coolo@suse.de
-- fix handling of -32bit and -64bit
-* Sat Feb 07 2009 coolo@suse.de
-- fix command line order
-* Fri Feb 06 2009 coolo@suse.de
-- use --no-show-raw-insn for objdump -d
-* Fri Feb 06 2009 coolo@suse.de
-- hopefully fixed shell quoting for rpm command line
-* Thu Feb 05 2009 coolo@suse.de
-- fix 2 bugs
-- don't ignore source rpms - changed sources should output
-  changed source rpms, no matter if they create the same binaries
-  (think of changed copyright header in spec files)
-* Tue Jan 27 2009 adrian@suse.de
-- Create initial package based on the work of Matz and Coolo
-  This package provides script for the main build script to be able
-  to check if a new build has the same result than the former one.
-  The Build Service is able to skip the new build than.
-- changes in source rpms are currently ignored, is that okay ?

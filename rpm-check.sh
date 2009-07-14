@@ -184,9 +184,11 @@ check_single_file()
        ar x `basename $file`
        cd $pwd
        for f in $flist; do
-          check_single_file $fdir/$f
+          if ! check_single_file $fdir/$f; then
+             return 1
+          fi
        done
-       continue;;
+       ;;
     *.tar|*.tar.bz2|*.tar.gz|*.tgz|*.tbz2)
        flist=`tar tf new/$file`
        pwd=$PWD
@@ -206,6 +208,37 @@ check_single_file()
          fi
        done
        return $ret;;
+    *.zip|*.jar)
+       cd old
+       unzip -l ./$file > flist
+       sed -i -e "s, [0-9][0-9]-[0-9][0-9]-[0-9][0-9] [0-9][0-9]:[0-9][0-9] , date ," flist
+       cd ../new
+       unzip -l ./$file > flist
+       sed -i -e "s, [0-9][0-9]-[0-9][0-9]-[0-9][0-9] [0-9][0-9]:[0-9][0-9] , date ,; " flist
+       cd ..
+       if ! cmp -s old/flist new/flist; then
+          echo "$file has different file list"
+          diff -u old/flist new/flist
+          return 1
+       fi
+       flist=`grep date new/flist | sed -e 's,.* date ,,'`
+       pwd=$PWD
+       fdir=`dirname $file`
+       cd old/$fdir
+       unzip -qq `basename $file`
+       cd $pwd/new/$fdir
+       unzip -qq `basename $file`
+       cd $pwd
+       local ret=0
+       for f in $flist; do
+         if test -f new/$fdir/$f && ! check_single_file $fdir/$f; then
+           ret=1
+           if test -z "$check_all"; then
+             break
+           fi
+         fi
+       done
+       return $ret;;
      *.pyc|*.pyo)
         perl -E "open fh, '+<', 'old/$file'; seek fh, 3, SEEK_SET; print fh '0000';"
         perl -E "open fh, '+<', 'new/$file'; seek fh, 3, SEEK_SET; print fh '0000';"
@@ -214,12 +247,14 @@ check_single_file()
         bunzip2 -c old/$file > old/${file/.bz2/}
         bunzip2 -c new/$file > new/${file/.bz2/}
         check_single_file ${file/.bz2/}
-	return;;
+        return $?
+        ;;
      *.gz)
         gunzip -c old/$file > old/${file/.gz/}
         gunzip -c new/$file > new/${file/.gz/}
         check_single_file ${file/.gz/}
-	return;;
+	return $?
+        ;;
      /usr/share/locale/*/LC_MESSAGES/*.mo|/usr/share/locale-bundle/*/LC_MESSAGES/*.mo)
        sed -i -e "s,POT-Creation-Date: ....-..-.. ..:..+....,POT-Creation-Date: 1970-01-01 00:00+0000," old/$file
        sed -i -e "s,POT-Creation-Date: ....-..-.. ..:..+....,POT-Creation-Date: 1970-01-01 00:00+0000," new/$file
@@ -232,7 +267,7 @@ check_single_file()
        objdump -d --no-show-raw-insn old/$file | filter_disasm > $file1
        if ! test -s $file1; then
          # objdump has no idea how to handle it
-         if diff_two_files; then
+         if ! diff_two_files; then
            ret=1
            break
          fi
@@ -265,7 +300,7 @@ check_single_file()
        fi
        ;;
      *)
-       if diff_two_files; then
+       if ! diff_two_files; then
 	   return 1
        fi
        ;;
