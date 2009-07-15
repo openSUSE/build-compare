@@ -225,9 +225,9 @@ check_single_file()
        pwd=$PWD
        fdir=`dirname $file`
        cd old/$fdir
-       unzip -qq `basename $file`
+       unzip -o -qq `basename $file`
        cd $pwd/new/$fdir
-       unzip -qq `basename $file`
+       unzip -o -qq `basename $file`
        cd $pwd
        local ret=0
        for f in $flist; do

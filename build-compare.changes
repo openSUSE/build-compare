@@ -1,4 +1,9 @@
 -------------------------------------------------------------------
+Wed Jul 15 13:31:30 CEST 2009 - coolo@novell.com
+
+- overwrite duplicated files in zip files
+
+-------------------------------------------------------------------
 Tue Jul 14 11:46:04 CEST 2009 - coolo@novell.com
 
 - support .jar and .zip files
