@@ -72,6 +72,6 @@ if [ -n "${NEWRPMS[0]}" ]; then
   exit 1
 fi
 
-echo compare validated built as indentical !
+echo compare validated built as identical !
 exit 0
 

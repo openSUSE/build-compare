@@ -1,4 +1,41 @@
 -------------------------------------------------------------------
+Mon Jul 27 10:36:49 CEST 2009 - aj@suse.de
+
+- Fail rpm-check if unrpm does not exist (noticed with package 
+  build).
+
+-------------------------------------------------------------------
+Sun Jul 26 21:06:06 CEST 2009 - aj@suse.de
+
+- Fix problem found with building gettext-tools: tar packages 
+  directories.
+
+-------------------------------------------------------------------
+Thu Jul 23 15:30:30 CEST 2009 - aj@suse.de
+
+- Update version number.
+
+-------------------------------------------------------------------
+Tue Jul 21 16:41:39 CEST 2009 - aj@suse.de
+
+- Handle emacs bytecompiled files.
+- Handle /usr/share/man/man3/*3pm perl man pages.
+- Handle /var/adm/perl-modules/*.
+- Handle fonts.dir, fonts.scale and encoding.dir.
+
+-------------------------------------------------------------------
+Tue Jul 21 13:02:36 CEST 2009 - aj@suse.de
+
+- Add return value for .a case so that it can succeed.
+
+-------------------------------------------------------------------
+Mon Jul 20 15:50:46 CEST 2009 - aj@suse.de
+
+- Fix typo in same-build-results.sh
+- Ignore javadoc build stamp in javadoc html files.
+- Use jar,fastjar or unzip to extract jar files.
+
+-------------------------------------------------------------------
 Wed Jul 15 13:31:30 CEST 2009 - coolo@novell.com
 
 - overwrite duplicated files in zip files
