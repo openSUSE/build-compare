@@ -234,8 +234,12 @@ check_single_file()
        ;;
     *.dll|*.exe)
        # we can't handle it well enough
-       echo "mono files unhandled ($file)"
-       return 1;;
+       if ! cmp -s old/$file new/$file; then
+         echo "mono $file differs"
+         return 1
+       fi
+       return 0
+       ;;
     *.a)
        echo "$file is .a"
        flist=`ar t new/$file`
@@ -275,10 +279,10 @@ check_single_file()
        ;;
     *.zip|*.jar)
        cd old
-       unjar_l ./$file > flist
+       unjar_l ./$file |sort > flist
        sed -i -e "s, [0-9][0-9]-[0-9][0-9]-[0-9][0-9] [0-9][0-9]:[0-9][0-9] , date ," flist
        cd ../new
-       unjar_l ./$file > flist
+       unjar_l ./$file |sort> flist
        sed -i -e "s, [0-9][0-9]-[0-9][0-9]-[0-9][0-9] [0-9][0-9]:[0-9][0-9] , date ,; " flist
        cd ..
        if ! cmp -s old/flist new/flist; then
