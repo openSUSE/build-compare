@@ -1,4 +1,9 @@
 -------------------------------------------------------------------
+Thu Aug  6 09:23:17 CEST 2009 - aj@suse.de
+
+- adjust gjdoc sed to match "August 1" and similar one-digit days.
+
+-------------------------------------------------------------------
 Tue Aug  4 08:05:22 CEST 2009 - aj@suse.de
 
 - Compare mono files with cmp, just in case (handles rfc).
