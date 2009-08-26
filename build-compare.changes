@@ -1,4 +1,15 @@
 -------------------------------------------------------------------
+Tue Aug 25 10:28:17 CEST 2009 - mls@suse.de
+
+- the COPYRIGHT tag does not exist, map it back to LICENSE to
+  be backward compatible
+
+-------------------------------------------------------------------
+Mon Aug 17 22:24:50 CEST 2009 - aj@suse.de
+
+- Handle texi2html output.
+
+-------------------------------------------------------------------
 Thu Aug  6 09:23:17 CEST 2009 - aj@suse.de
 
 - adjust gjdoc sed to match "August 1" and similar one-digit days.
