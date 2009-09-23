@@ -1,4 +1,9 @@
 -------------------------------------------------------------------
+Wed Sep 23 15:17:49 UTC 2009 - aj@suse.de
+
+- Handle noarch subpackage in sort correctly.
+
+-------------------------------------------------------------------
 Tue Aug 25 10:28:17 CEST 2009 - mls@suse.de
 
 - the COPYRIGHT tag does not exist, map it back to LICENSE to

@@ -51,7 +51,7 @@ bash $CMPSCRIPT "$osrpm" "$nsrpm" || exit 1
 # technically we should not all exclude all -32bit but filter for different archs, but it would be better
 # if this script ran earlier in the build
 OLDRPMS=($(find "$OLDDIR" -name \*rpm -a ! -name \*src.rpm|sort|grep -v -- -32bit|grep -v -- -64bit|grep -v -- -x86))
-NEWRPMS=($(find $NEWDIRS -name \*rpm -a ! -name \*src.rpm|sort|grep -v -- -32bit|grep -v -- -64bit|grep -v -- -x86))
+NEWRPMS=($(find $NEWDIRS -name \*rpm -a ! -name \*src.rpm|sort --field-separator=/ --key=7|grep -v -- -32bit|grep -v -- -64bit|grep -v -- -x86))
 
 rpmqp='rpm -qp --qf %{NAME} --nodigest --nosignature '
 for opac in ${OLDRPMS[*]}; do
