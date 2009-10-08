@@ -1,4 +1,9 @@
 -------------------------------------------------------------------
+Thu Sep 24 06:47:22 UTC 2009 - aj@suse.de
+
+- Add comments.
+
+-------------------------------------------------------------------
 Wed Sep 23 15:17:49 UTC 2009 - aj@suse.de
 
 - Handle noarch subpackage in sort correctly.
