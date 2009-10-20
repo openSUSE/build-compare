@@ -8,11 +8,6 @@
 
 RPM="rpm -qp --nodigest --nosignature"
 
-if [ ! -e /usr/bin/unrpm ] ; then
-  echo "unrpm is not installed - comparison not possible"
-  exit 1
-fi
-
 check_all=
 case $1 in
   -a | --check-all)
@@ -37,6 +32,18 @@ if test ! -f $newrpm; then
     echo "can't open $newrpm"
     exit 1
 fi
+
+#usage unrpm <file>
+# Unpack rpm files in current directory
+# like /usr/bin/unrpm - just for one file and with no options
+function unrpm()
+{
+    local file
+    file=$1
+    CPIO_OPTS="--extract --unconditional --preserve-modification-time --make-directories --quiet"
+
+    rpm2cpio $file | cpio ${CPIO_OPTS}
+}
 
 #usage unjar <file>
 function unjar()
@@ -202,12 +209,12 @@ dir=`mktemp -d`
 cd $dir
 mkdir old
 cd old
-/usr/bin/unrpm -q $oldrpm
+unrpm $oldrpm
 cd ..
 
 mkdir new
 cd new
-/usr/bin/unrpm -q $newrpm
+unrpm $newrpm
 cd ..
 
 dfile=`mktemp`
