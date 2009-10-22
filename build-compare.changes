@@ -1,4 +1,9 @@
 -------------------------------------------------------------------
+Thu Oct 22 09:03:46 UTC 2009 - coolo@novell.com
+
+- take out debugging code
+
+-------------------------------------------------------------------
 Wed Oct 14 07:14:37 UTC 2009 - aj@suse.de
 
 - Replace external /usr/bin/unrpm by small function to get 

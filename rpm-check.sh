@@ -111,8 +111,7 @@ QF="%{NAME}"
 # don't look at RELEASE, it contains our build number
 QF="$QF %{VERSION} %{EPOCH}\\n"
 QF="$QF %{SUMMARY}\\n%{DESCRIPTION}\\n"
-# ignored for now
-#QF="$QF %{VENDOR} %{DISTRIBUTION}"
+QF="$QF %{VENDOR} %{DISTRIBUTION} %{DISTURL}"
 QF="$QF %{LICENSE} %{LICENSE}\\n"
 QF="$QF %{GROUP} %{URL} %{EXCLUDEARCH} %{EXCLUDEOS} %{EXCLUSIVEARCH}\\n"
 QF="$QF %{EXCLUSIVEOS} %{RPMVERSION} %{PLATFORM}\\n"
