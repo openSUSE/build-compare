@@ -19,12 +19,12 @@
 
 
 Name:           build-compare
-License:        GPL v2 or later
+License:        GPLv2+
 Group:          Development/Tools/Building
 AutoReqProv:    on
 Summary:        Build Result Compare Script
 Version:        2009.10.14
-Release:        2
+Release:        4
 Source:         same-build-result.sh
 Source1:        rpm-check.sh
 Source2:        COPYING
