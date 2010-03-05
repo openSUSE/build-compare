@@ -376,6 +376,14 @@ check_single_file()
          sed -i -e 's| 3 "20..-..-.." "perl v5....." "User Contributed Perl Documentation"$| 3 "2009-01-01" "perl v5.10.0" "User Contributed Perl Documentation"|' $f
        done
        ;;
+     /usr/share/man/man*/*)
+	 # Handles lines like:
+	 # .TH debhelper 7 "2010-02-27" "7.4.15" "Debhelper"
+	 # .TH DIRMNGR-CLIENT 1 2010-02-27 "Dirmngr 1.0.3" "GNU Privacy Guard"
+       for f in old/$file new/$file; do
+	 sed -i -e 's|^\.TH \(.*\) . 20..-..-.. |.TH . 2000-01-01 |' $f
+       done
+       ;;
      *.elc)
        # emacs lisp files
        for f in old/$file new/$file; do

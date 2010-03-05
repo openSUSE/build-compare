@@ -1,4 +1,9 @@
 -------------------------------------------------------------------
+Fri Mar  5 09:46:01 UTC 2010 - aj@suse.de
+
+- Handle more man files.
+
+-------------------------------------------------------------------
 Sun Dec 13 12:59:16 UTC 2009 - aj@suse.de
 
 - Handle libtool writing the hostname
