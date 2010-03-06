@@ -380,8 +380,9 @@ check_single_file()
 	 # Handles lines like:
 	 # .TH debhelper 7 "2010-02-27" "7.4.15" "Debhelper"
 	 # .TH DIRMNGR-CLIENT 1 2010-02-27 "Dirmngr 1.0.3" "GNU Privacy Guard"
+	 # .TH ccmake 1 "March 06, 2010" "ccmake 2.8.1-rc3"
        for f in old/$file new/$file; do
-	 sed -i -e 's|^\.TH \(.*\) . 20..-..-.. |.TH . 2000-01-01 |' $f
+	 sed -i -e 's|^\.TH \(.*\) \(.\) \("\?20..-..-.."\?\|"[a-zA-Z]* [0-9][0-9], 20[0-9][0-9]"\) |.TH \1 \2 "2000-01-01" |' $f
        done
        ;;
      *.elc)
