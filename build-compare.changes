@@ -1,4 +1,9 @@
 -------------------------------------------------------------------
+Sun Mar 14 09:22:39 UTC 2010 - aj@suse.de
+
+- Improve last regexp to fix virt-utils.
+
+-------------------------------------------------------------------
 Sat Mar  6 04:01:36 UTC 2010 - aj@suse.de
 
 - Improve regexp for last change.
