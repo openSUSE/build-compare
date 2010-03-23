@@ -1,4 +1,11 @@
 -------------------------------------------------------------------
+Tue Mar 23 13:37:47 UTC 2010 - aj@suse.de
+
+- Handle mono files.
+- Mount /proc if it's not mounted already to work around bug in
+  build script.
+
+-------------------------------------------------------------------
 Sun Mar 14 09:22:39 UTC 2010 - aj@suse.de
 
 - Improve last regexp to fix virt-utils.

@@ -16,7 +16,6 @@ OLDDIR="$1"
 shift
 NEWDIRS="$*"
 
-
 echo "$CMPSCRIPT"
 
 if [ ! -d "$OLDDIR" ]; then

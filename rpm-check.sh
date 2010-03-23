@@ -1,6 +1,6 @@
 #! /bin/bash
 #
-# Copyright (c) 2009 SUSE Linux Product Gmbh, Germany.
+# Copyright (c) 2009, 2010 SUSE Linux Product GmbH, Germany.
 # Licensed under GPL v2, see COPYING file for details.
 #
 # Written by Michael Matz and Stephan Coolo
@@ -238,12 +238,9 @@ check_single_file()
        sed -i -e "s,Release:.*$release1,Release: @RELEASE@," old/$file
        sed -i -e "s,Release:.*$release2,Release: @RELEASE@," new/$file
        ;;
-    *.dll|*.exe)
-       # we can't handle it well enough
-       if ! cmp -s old/$file new/$file; then
-         echo "mono $file differs"
-         return 1
-       fi
+    *.exe.mdb|*.dll.mdb)
+       # Just debug information, we can skip them
+       echo "$file skipped as debug file."
        return 0
        ;;
     *.a)
@@ -417,6 +414,21 @@ check_single_file()
 
   ftype=`/usr/bin/file old/$file | cut -d: -f2-`
   case $ftype in
+     *PE32\ executable*Mono\/\.Net\ assembly*)
+       echo "PE32 Mono/.Net assembly: $file"
+       if [ -x /usr/bin/monodis ] ; then
+         monodis old/$file 2>/dev/null|sed -e 's/GUID = {.*}/GUID = { 42 }/;'> ${file1}
+         monodis new/$file 2>/dev/null|sed -e 's/GUID = {.*}/GUID = { 42 }/;'> ${file2}
+         if ! cmp -s ${file1} ${file2}; then
+           echo "$file differs ($ftype)"
+           diff -u ${file1} ${file2}
+           return 1
+         fi
+       else
+         echo "Cannot compare, no monodis installed"
+         return 1
+       fi
+       ;;
     *executable*|*LSB\ shared\ object*)
        objdump -d --no-show-raw-insn old/$file | filter_disasm > $file1
        if ! test -s $file1; then
@@ -466,6 +478,15 @@ check_single_file()
   return 0
 }
 
+# We need /proc mounted for some tests, so check that it's mounted and
+# complain if not.
+PROC_MOUNTED=0
+if [ ! -d /proc/self/ ]; then
+  echo "/proc is not mounted"
+  mount -orw -n -tproc none /proc
+  PROC_MOUNTED=1
+fi
+
 ret=0
 for file in $files; do
    if ! check_single_file $file; then
@@ -475,6 +496,11 @@ for file in $files; do
        fi
    fi
 done
+
+if [ "$PROC_MOUNTED" -eq "1" ]; then
+  echo "Unmounting proc"
+  umount /proc
+fi
 
 rm $file1 $file2 $dfile
 rm -r $dir
