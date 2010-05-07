@@ -410,6 +410,13 @@ check_single_file()
 	  sed -i -e 's|^# Libtool was configured on host [a-z0-9]*:$|Libtool was configured on host x42:|' $f
        done
        ;;
+     /etc/mail/*cf)
+       # from sendmail package
+       for f in old/$file new/$file; do
+	  # - ##### built by abuild@build33 on Thu May 6 11:21:17 UTC 2010
+	  sed -i -e 's|built by abuild@[a-z0-0]* on ... ... [0-9]* [0-9]*:[0-9][0-9]:[0-9][0-9] .* 20[0-9][0-9]|built by abuild@build42 on Thu May 6 11:21:17 UTC 2010|'; $f
+       done
+       ;;
   esac
 
   ftype=`/usr/bin/file old/$file | cut -d: -f2-`
