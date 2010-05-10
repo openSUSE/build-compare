@@ -1,4 +1,20 @@
 -------------------------------------------------------------------
+Mon May 10 12:27:16 UTC 2010 - aj@suse.de
+
+- Handle kde index.cache files (bnc#604049).
+- Fix for handling of man pages and javadoc files.
+
+-------------------------------------------------------------------
+Mon May 10 09:13:38 UTC 2010 - aj@suse.de
+
+- Handle kdelibs4
+
+-------------------------------------------------------------------
+Sat May  8 19:41:30 UTC 2010 - aj@suse.de
+
+- Fix typo in last change - thanks Dirk Müller.
+
+-------------------------------------------------------------------
 Fri May  7 13:05:57 UTC 2010 - aj@suse.de
 
 - Handle sendmail .cf files.
