@@ -394,8 +394,9 @@ check_single_file()
 	 # .TH kdecmake 1 "May 07, 2010" "cmake 2.8.1"
 	 # .TH "appender.h" 3 "12 May 2010" "Version 1.2.1" "log4c" \" -*- nroff -*-
 	 # .TH "OFFLINEIMAP" "1" "11 May 2010" "John Goerzen" "OfflineIMAP Manual"
+	 # TH gv 3guile "13 May 2010"
        for f in old/$file new/$file; do
-	 sed -i  -e 's/^.TH "\?\([^ "]*\)"\? "\?\([0-9]\)"\? "\?\(20[0-9][0-9]-[0-9][0-9]-[0-9][0-9]\|[A-Z][a-z]* [0-9][0-9], 20[0-9][0-9]\|[0-9]* [A-Z][a-z]* 20[0-9][0-9]\)"\? /.TH \1 \2 "2000-01-01" /' $f
+	 sed -i  -e 's/^.TH "\?\([^ "]*\)"\? "\?\([0-9][a-z]*\)"\? "\?\(20[0-9][0-9]-[0-9][0-9]-[0-9][0-9]\|[A-Z][a-z]* [0-9][0-9], 20[0-9][0-9]\|[0-9]* [A-Z][a-z]* 20[0-9][0-9]\)"\? /.TH \1 \2 "2000-01-01" /' $f
        done
        ;;
      *.elc)
@@ -435,8 +436,10 @@ check_single_file()
      /usr/share/doc/kde/HTML/*/*/index.cache|/usr/share/doc/kde/HTML/*/*/*/index.cache)
        # various kde packages
        for f in old/$file new/$file; do
-	  sed -i -e 's|name="id[0-9]*">|name="id424242">|g' $f
-	  sed -i -e 's|\.html#id[0-9]*">|.html#id424242">|g' $f
+	  sed -i -e 's%name="id[0-9]*"\([> ]\)%name="id424242"\1%g' $f
+	  sed -i -e 's%name="[a-z]*\.id[0-9]*"%name="ftn.id111111"%g' $f
+	  sed -i -e 's%\.html#id[0-9]*">%.html#id424242">%g' $f
+	  sed -i -e 's%href="#\([a-z]*\.\)\?id[0-9]*">%href="#\1id0000000">%g' $f
        done
        ;;
 
