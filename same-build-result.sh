@@ -49,14 +49,15 @@ fi
 echo "compare $osrpm $nsrpm"
 bash $CMPSCRIPT "$osrpm" "$nsrpm" || exit 1
 
-# technically we should not all exclude all -32bit but filter for different archs, but it would be better
-# if this script ran earlier in the build
+# technically we should not all exclude all -32bit but filter for different archs,
+# like done with -x86
+# but it would be better if this script ran earlier in the build
 # sort the rpms so that both lists have the same order
 # problem: a package can contain both noarch and arch subpackages, so we have to 
 # take care of proper sorting of NEWRPMS, e.g. noarch/x.rpm and x86_64/w.rpm since OLDRPMS 
 # has all the packages in a single directory and would sort this as w.rpm, x.rpm.
-OLDRPMS=($(find "$OLDDIR" -name \*rpm -a ! -name \*src.rpm|sort|grep -v -- -32bit|grep -v -- -64bit|grep -v -- -x86))
-NEWRPMS=($(find $NEWDIRS -name \*rpm -a ! -name \*src.rpm|sort --field-separator=/ --key=7|grep -v -- -32bit|grep -v -- -64bit|grep -v -- -x86))
+OLDRPMS=($(find "$OLDDIR" -name \*rpm -a ! -name \*src.rpm|sort|grep -v -- -32bit-|grep -v -- -64bit-|grep -v -- '-x86-.*\.ia64\.rpm'))
+NEWRPMS=($(find $NEWDIRS -name \*rpm -a ! -name \*src.rpm|sort --field-separator=/ --key=7|grep -v -- -32bit-|grep -v -- -64bit-|grep -v -- '-x86-.*\.ia64\.rpm'))
 
 rpmqp='rpm -qp --qf %{NAME} --nodigest --nosignature '
 for opac in ${OLDRPMS[*]}; do

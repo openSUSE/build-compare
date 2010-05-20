@@ -1,4 +1,10 @@
 -------------------------------------------------------------------
+Thu May 20 08:23:52 UTC 2010 - aj@suse.de
+
+- Don't skip cross-x86_64-gcc-icecream-backend binary rpms: tighten
+  the checks for -32bit packages.
+
+-------------------------------------------------------------------
 Sun May 16 12:55:43 UTC 2010 - aj@suse.de
 
 - Further man pages tweek.
