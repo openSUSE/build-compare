@@ -1,4 +1,14 @@
 -------------------------------------------------------------------
+Sun May 23 12:19:56 UTC 2010 - aj@suse.de
+
+- Release is at end of line, avoid wrong matches.
+
+-------------------------------------------------------------------
+Fri May 21 21:46:47 UTC 2010 - cmorve69@yahoo.es
+
+- Improved ELF executable detection (bnc#604049).
+
+-------------------------------------------------------------------
 Thu May 20 08:23:52 UTC 2010 - aj@suse.de
 
 - Don't skip cross-x86_64-gcc-icecream-backend binary rpms: tighten

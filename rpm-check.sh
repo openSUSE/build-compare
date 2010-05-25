@@ -159,7 +159,7 @@ check_provides()
   QF="$QF [%{REQUIRENAME} %{REQUIREFLAGS} %{REQUIREVERSION}\\n]\\n"
   QF="$QF [%{CONFLICTNAME} %{CONFLICTFLAGS} %{CONFLICTVERSION}\\n]\\n"
   QF="$QF [%{OBSOLETENAME} %{OBSOLETEFLAGS} %{OBSOLETEVERSION}\\n]\\n"
-  check_header "$1" | sed -e "s,-$2,-@RELEASE@,"
+  check_header "$1" | sed -e "s,-$2$,-@RELEASE@,"
 }
 
 check_provides $oldrpm $release1 > $file1
@@ -462,7 +462,7 @@ check_single_file()
          return 1
        fi
        ;;
-    *executable*|*LSB\ shared\ object*)
+    *ELF*executable*|*ELF*LSB\ shared\ object*)
        objdump -d --no-show-raw-insn old/$file | filter_disasm > $file1
        if ! test -s $file1; then
          # objdump has no idea how to handle it
