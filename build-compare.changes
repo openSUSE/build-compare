@@ -1,4 +1,14 @@
 -------------------------------------------------------------------
+Fri Aug 27 08:59:22 UTC 2010 - aj@suse.de
+
+- Handle png files with timestamp if convert is installed.
+
+-------------------------------------------------------------------
+Fri Aug 27 06:50:13 UTC 2010 - aj@suse.de
+
+- Handle one more doxygen variation.
+
+-------------------------------------------------------------------
 Sun May 23 12:19:56 UTC 2010 - aj@suse.de
 
 - Release is at end of line, avoid wrong matches.
