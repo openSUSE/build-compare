@@ -1,4 +1,15 @@
 -------------------------------------------------------------------
+Thu Sep  9 20:02:33 UTC 2010 - aj@suse.de
+
+- Handle another date format for man pages found in coreutils.
+- Handle more html files, e.g. kdelibs4 and libvdpau.
+
+-------------------------------------------------------------------
+Thu Sep  9 07:58:35 UTC 2010 - aj@suse.de
+
+- Handle weekday in man page.
+
+-------------------------------------------------------------------
 Tue Aug 31 11:57:26 UTC 2010 - aj@suse.de
 
 - Refine texi2html rule (found in zsh)

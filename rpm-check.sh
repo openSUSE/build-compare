@@ -347,7 +347,8 @@ check_single_file()
          sed -i -e "s,POT-Creation-Date: ....-..-.. ..:..+....,POT-Creation-Date: 1970-01-01 00:00+0000," $f
        done
        ;;
-     /usr/share/doc/packages/*/*.html)
+     /usr/share/doc/packages/*/*.html|\
+     /usr/share/doc/kde/HTML/*/*/*.html|/usr/share/doc/*/html/*.html)
        for f in old/$file new/$file; do
          # texi2html output, e.g. in kvm, indent, qemu
 	 sed -i -e "s|^<!-- Created on .*, 20.. by texi2html .\...|<!-- Created on August 7, 2009 by texi2html 1.82|" $f
@@ -410,10 +411,12 @@ check_single_file()
 	 # .TH QEMU-IMG 1 "2010-03-14" " " " "
 	 # .TH kdecmake 1 "May 07, 2010" "cmake 2.8.1"
 	 # .TH "appender.h" 3 "12 May 2010" "Version 1.2.1" "log4c" \" -*- nroff -*-
+	 # .TH "appender.h" 3 "Tue Aug 31 2010" "Version 1.2.1" "log4c" \" -*- nroff -*-
 	 # .TH "OFFLINEIMAP" "1" "11 May 2010" "John Goerzen" "OfflineIMAP Manual"
-	 # TH gv 3guile "13 May 2010"
+	 # .TH gv 3guile "13 May 2010"
+	 # .TH ARCH "1" "September 2010" "GNU coreutils 8.5" "User Commands"
        for f in old/$file new/$file; do
-	 sed -i  -e 's/^.TH "\?\([^ "]*\)"\? "\?\([0-9][a-z]*\)"\? "\?\(20[0-9][0-9]-[0-9][0-9]-[0-9][0-9]\|[A-Z][a-z]* [0-9][0-9], 20[0-9][0-9]\|[0-9]* [A-Z][a-z]* 20[0-9][0-9]\)"\? /.TH \1 \2 "2000-01-01" /' $f
+	 sed -i -e 's/.TH "\?\([^ "]*\)"\? "\?\([0-9][a-z]*\)"\? "\?\(20[0-9][0-9]-[0-9][0-9]-[0-9][0-9]\|[A-Z][a-z]* [0-9][0-9], 20[0-9][0-9]\|[0-9]* [A-Z][a-z]* 20[0-9][0-9]\|[A-Z][a-z]* [A-Z][a-z]* [0-9]\+ 20[0-9][0-9]\|[A-Z][a-z]* 20[0-9][0-9]\)"\? /.TH \1 \2 "2000-01-01" /' $f
        done
        ;;
      *.elc)

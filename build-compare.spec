@@ -24,7 +24,7 @@ Group:          Development/Tools/Building
 AutoReqProv:    on
 Summary:        Build Result Compare Script
 Version:        2009.10.14
-Release:        19
+Release:        20
 Source:         same-build-result.sh
 Source1:        rpm-check.sh
 Source2:        COPYING
