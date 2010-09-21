@@ -10,9 +10,15 @@ Mon Sep 20 18:45:01 UTC 2010 - aj@suse.de
 - Create common file functions.sh and cleanup code.
 
 -------------------------------------------------------------------
+Mon Sep 20 15:21:55 UTC 2010 - lnussel@suse.de
+
+- exclude delta rpms
+
+-------------------------------------------------------------------
 Mon Sep 20 07:58:59 UTC 2010 - aj@suse.de
 
 - Create script for just checking source rpms.
+
 
 -------------------------------------------------------------------
 Thu Sep  9 20:02:33 UTC 2010 - aj@suse.de

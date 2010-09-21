@@ -28,9 +28,9 @@ if [ -z "$NEWDIRS" ]; then
   exit 1
 fi
 
-if test `find $NEWDIRS -name *.rpm  | wc -l` != `find $OLDDIR -name *.rpm  | wc -l`; then
+if test `find $NEWDIRS -name '*.rpm' -and ! -name '*.delta.rpm' | wc -l` != `find $OLDDIR -name '*.rpm' -and ! -name '*.delta.rpm' | wc -l`; then
    echo "different number of subpackages"
-   find $OLDDIR $NEWDIRS -name *.rpm
+   find $OLDDIR $NEWDIRS -name '*.rpm' -and ! -name '*.delta.rpm'
    exit 1
 fi
 
@@ -57,8 +57,8 @@ bash $SCMPSCRIPT "$osrpm" "$nsrpm" || exit 1
 # problem: a package can contain both noarch and arch subpackages, so we have to 
 # take care of proper sorting of NEWRPMS, e.g. noarch/x.rpm and x86_64/w.rpm since OLDRPMS 
 # has all the packages in a single directory and would sort this as w.rpm, x.rpm.
-OLDRPMS=($(find "$OLDDIR" -name \*rpm -a ! -name \*src.rpm|sort|grep -v -- -32bit-|grep -v -- -64bit-|grep -v -- '-x86-.*\.ia64\.rpm'))
-NEWRPMS=($(find $NEWDIRS -name \*rpm -a ! -name \*src.rpm|sort --field-separator=/ --key=7|grep -v -- -32bit-|grep -v -- -64bit-|grep -v -- '-x86-.*\.ia64\.rpm'))
+OLDRPMS=($(find "$OLDDIR" -name \*rpm -a ! -name \*src.rpm  -a ! -name \*.delta.rpm|sort|grep -v -- -32bit-|grep -v -- -64bit-|grep -v -- '-x86-.*\.ia64\.rpm'))
+NEWRPMS=($(find $NEWDIRS -name \*rpm -a ! -name \*src.rpm -a ! -name \*.delta.rpm|sort --field-separator=/ --key=7|grep -v -- -32bit-|grep -v -- -64bit-|grep -v -- '-x86-.*\.ia64\.rpm'))
 
 rpmqp='rpm -qp --qf %{NAME} --nodigest --nosignature '
 for opac in ${OLDRPMS[*]}; do
