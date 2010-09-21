@@ -24,10 +24,12 @@ Group:          Development/Tools/Building
 AutoReqProv:    on
 Summary:        Build Result Compare Script
 Version:        2009.10.14
-Release:        20
-Source:         same-build-result.sh
-Source1:        rpm-check.sh
-Source2:        COPYING
+Release:        21
+Source1:        COPYING
+Source2:        same-build-result.sh
+Source3:        rpm-check.sh
+Source4:	functions.sh
+Source5:	srpm-check.sh
 BuildRoot:      %{_tmppath}/%{name}-%{version}-build
 BuildArch:      noarch
 
@@ -45,8 +47,8 @@ mkdir $RPM_BUILD_DIR/%name-%version
 
 %install
 mkdir -p $RPM_BUILD_ROOT/usr/lib/build/ $RPM_BUILD_ROOT/%_defaultdocdir/%name
-install -m 0755 %SOURCE0 %SOURCE1 $RPM_BUILD_ROOT/usr/lib/build/
-install -m 0644 %SOURCE2 $RPM_BUILD_ROOT/%_defaultdocdir/%name/
+install -m 0755 %SOURCE2 %SOURCE3 %SOURCE4 %SOURCE5 $RPM_BUILD_ROOT/usr/lib/build/
+install -m 0644 %SOURCE1 $RPM_BUILD_ROOT/%_defaultdocdir/%name/
 
 %files
 %defattr(-,root,root)

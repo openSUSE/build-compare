@@ -1,6 +1,6 @@
 #!/bin/bash
 #
-# Copyright (c) 2009 SUSE Linux Product Gmbh, Germany.
+# Copyright (c) 2009, 2010 SUSE Linux Product Gmbh, Germany.
 # Licensed under GPL v2, see COPYING file for details.
 #
 # Written by Adrian Schroeter <adrian@suse.de>
@@ -11,6 +11,7 @@
 # /usr/lib/build/same-build-result.sh /.build.oldpackages /usr/src/packages/RPMS /usr/src/packages/SRPMS
 
 CMPSCRIPT=${0%/*}/rpm-check.sh
+SCMPSCRIPT=${0%/*}/srpm-check.sh
 
 OLDDIR="$1"
 shift
@@ -47,7 +48,7 @@ if test ! -f "$nsrpm"; then
 fi
 
 echo "compare $osrpm $nsrpm"
-bash $CMPSCRIPT "$osrpm" "$nsrpm" || exit 1
+bash $SCMPSCRIPT "$osrpm" "$nsrpm" || exit 1
 
 # technically we should not all exclude all -32bit but filter for different archs,
 # like done with -x86
@@ -80,4 +81,3 @@ fi
 
 echo compare validated built as identical !
 exit 0
-
