@@ -24,12 +24,12 @@ Group:          Development/Tools/Building
 AutoReqProv:    on
 Summary:        Build Result Compare Script
 Version:        2009.10.14
-Release:        21
+Release:        22
 Source1:        COPYING
 Source2:        same-build-result.sh
 Source3:        rpm-check.sh
-Source4:	functions.sh
-Source5:	srpm-check.sh
+Source4:        functions.sh
+Source5:        srpm-check.sh
 BuildRoot:      %{_tmppath}/%{name}-%{version}-build
 BuildArch:      noarch
 
