@@ -279,8 +279,7 @@ check_single_file()
 	 # deprecated-list is randomly ordered, sort it for comparison
 	 case $f in
 	   */deprecated-list.html)
-	     sort $f > ${f}.sort
-	     mv ${f}.sort $f
+	     sort -o $f $f 
 	     ;;
 	 esac
        done
@@ -294,8 +293,7 @@ check_single_file()
      */fonts.scale|*/fonts.dir|*/encodings.dir)
        for f in old/$file new/$file; do
          # sort files before comparing
-         sort $f > $f.tmp
-         mv $f.tmp $f
+         sort -o $f $f
        done
        ;;
      /var/adm/perl-modules/*)
@@ -335,20 +333,9 @@ check_single_file()
        done
        ;;
      /var/lib/texmf/web2c/*/*fmt)
-       # same of these are gzip compressed
-       for f in old/$file new/$file; do
-         fftype=`/usr/bin/file $f | cut -d: -f2-`
-         case $fftype in 
-         *gzip\ compressed\ data*)
-            gunzip -cd $f > $f.tmp
-            mv $f.tmp $f
-            ;;
-         *)
-            ;;
-         esac
-         # date is of variable length, e.g. 2009.7.21
-         sed -i -e 's|(format=[a-z]*tex 20..\.[0-9]*\.[0-9]*)|(format=luatex 2009.1.1)|' $f
-       done
+       # binary dump of latex formats, we can ignore them for good
+       echo "difference in $file ignored."
+       return 0
        ;;
      */libtool)
        for f in old/$file new/$file; do

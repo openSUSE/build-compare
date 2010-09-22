@@ -1,4 +1,9 @@
 -------------------------------------------------------------------
+Wed Sep 22 13:24:19 UTC 2010 - coolo@novell.com
+
+- ignore texlive's fmt files as discussed with werner
+
+-------------------------------------------------------------------
 Mon Sep 20 19:24:10 UTC 2010 - aj@suse.de
 
 - Handle man pages generated from docbook.
