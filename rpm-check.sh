@@ -103,6 +103,7 @@ case $RES in
      exit 0
      ;;
   1)
+     echo "RPM meta information is different"
      exit 1
      ;;
   2)
@@ -307,7 +308,7 @@ check_single_file()
          sed -i -e 's| 3 "20..-..-.." "perl v5....." "User Contributed Perl Documentation"$| 3 "2009-01-01" "perl v5.10.0" "User Contributed Perl Documentation"|' $f
        done
        ;;
-     /usr/share/man/man*/*)
+     /usr/share/man/man*/*|/usr/lib/texmf/doc/man/*/*)
 	 # Handles lines like:
 	 # .TH debhelper 7 "2010-02-27" "7.4.15" "Debhelper"
 	 # .TH DIRMNGR-CLIENT 1 2010-02-27 "Dirmngr 1.0.3" "GNU Privacy Guard"
@@ -337,8 +338,10 @@ check_single_file()
          sed -i -e 's|Compiled by abuild@.* on ... ... .. ..:..:.. 20..$|compiled by abuild@buildhost on Wed Jul 01 00:00:00 2009|' $f
        done
        ;;
-     /var/lib/texmf/web2c/*/*fmt)
-       # binary dump of latex formats, we can ignore them for good
+     /var/lib/texmf/web2c/*/*fmt |\
+     /var/lib/texmf/web2c/metafont/*.base|\
+     /var/lib/texmf/web2c/metapost/*.mem)
+       # binary dump of TeX and Metafont formats, we can ignore them for good
        echo "difference in $file ignored."
        return 0
        ;;

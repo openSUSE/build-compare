@@ -66,7 +66,7 @@ check_single_file()
        sed -i -e "s,Release:.*$release2,Release: @RELEASE@," new/$file
        if ! cmp -s old/$file new/$file; then
          echo "$file differs (spec file)"
-         diff -u old/$file new/$file | head -n 200
+         diff -u old/$file new/$file | head -n 20
          return 1
        fi
        return 0

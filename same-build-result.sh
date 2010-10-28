@@ -1,9 +1,10 @@
 #!/bin/bash
 #
-# Copyright (c) 2009, 2010 SUSE Linux Product Gmbh, Germany.
+# Copyright (c) 2009, 2010 SUSE Linux Product GmbH, Germany.
 # Licensed under GPL v2, see COPYING file for details.
 #
 # Written by Adrian Schroeter <adrian@suse.de>
+# Enhanced by Andreas Jaeger <aj@suse.de>
 #
 # The script decides if the new build differes from the former one,
 # using rpm-check.sh.
@@ -13,6 +14,7 @@
 CMPSCRIPT=${0%/*}/rpm-check.sh
 SCMPSCRIPT=${0%/*}/srpm-check.sh
 
+check_all=1
 OLDDIR="$1"
 shift
 NEWDIRS="$*"
@@ -60,6 +62,7 @@ bash $SCMPSCRIPT "$osrpm" "$nsrpm" || exit 1
 OLDRPMS=($(find "$OLDDIR" -name \*rpm -a ! -name \*src.rpm  -a ! -name \*.delta.rpm|sort|grep -v -- -32bit-|grep -v -- -64bit-|grep -v -- '-x86-.*\.ia64\.rpm'))
 NEWRPMS=($(find $NEWDIRS -name \*rpm -a ! -name \*src.rpm -a ! -name \*.delta.rpm|sort --field-separator=/ --key=7|grep -v -- -32bit-|grep -v -- -64bit-|grep -v -- '-x86-.*\.ia64\.rpm'))
 
+SUCCESS=1
 rpmqp='rpm -qp --qf %{NAME} --nodigest --nosignature '
 for opac in ${OLDRPMS[*]}; do
   npac=${NEWRPMS[0]}
@@ -71,7 +74,10 @@ for opac in ${OLDRPMS[*]}; do
      echo "names differ: $oname $nname"
      exit 1
   fi
-  bash $CMPSCRIPT "$opac" "$npac" || exit 1
+  bash $CMPSCRIPT "$opac" "$npac" || SUCCESS=0
+  if test $SUCCESS -eq 0 -a -z "$check_all"; then
+     exit 1
+  fi
 done
 
 if [ -n "${NEWRPMS[0]}" ]; then
@@ -79,5 +85,8 @@ if [ -n "${NEWRPMS[0]}" ]; then
   exit 1
 fi
 
-echo compare validated built as identical !
+if test $SUCCESS -eq 0; then
+  exit 1
+fi
+echo 'compare validated built as identical !'
 exit 0
