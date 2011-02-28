@@ -1,7 +1,7 @@
 #
-# spec file for package build-compare (Version 2009.10.14)
+# spec file for package build-compare
 #
-# Copyright (c) 2010 SUSE LINUX Products GmbH, Nuernberg, Germany.
+# Copyright (c) 2011 SUSE LINUX Products GmbH, Nuernberg, Germany.
 #
 # All modifications and additions to the file contributed by third parties
 # remain the property of their copyright owners, unless otherwise agreed
@@ -24,7 +24,7 @@ Group:          Development/Tools/Building
 AutoReqProv:    on
 Summary:        Build Result Compare Script
 Version:        2011.02.28
-Release:        26
+Release:        1
 Source1:        COPYING
 Source2:        same-build-result.sh
 Source3:        rpm-check.sh
