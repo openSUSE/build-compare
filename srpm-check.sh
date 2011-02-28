@@ -39,6 +39,7 @@ case $RES in
      exit 0
      ;;
   1)
+     echo "RPM meta information is different"
      exit 1
      ;;
   2)

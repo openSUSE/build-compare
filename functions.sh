@@ -1,6 +1,6 @@
 #! /bin/bash
 #
-# Copyright (c) 2009, 2010 SUSE Linux Product GmbH, Germany.
+# Copyright (c) 2009, 2010, 2011 SUSE Linux Product GmbH, Germany.
 # Licensed under GPL v2, see COPYING file for details.
 #
 # Written by Michael Matz and Stephan Coolo
@@ -89,6 +89,11 @@ function cmp_spec ()
     
     release1=`$RPM --qf "%{RELEASE}" "$oldrpm"`
     release2=`$RPM --qf "%{RELEASE}" "$newrpm"`
+    # This might happen with a forced rebuild of factory
+    if [ "${release1%.*}" != "${release2%.*}" ] ; then
+      echo "release prefix mismatch"
+      return 1
+    fi
     
     check_provides $oldrpm $release1 > $file1
     check_provides $newrpm $release2 > $file2

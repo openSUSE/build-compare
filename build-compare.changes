@@ -1,4 +1,15 @@
 -------------------------------------------------------------------
+Mon Feb 28 14:00:35 UTC 2011 - aj@suse.de
+
+- Increase version.
+
+-------------------------------------------------------------------
+Mon Feb 28 13:51:29 UTC 2011 - mls@suse.de
+
+- Check also the first part of the release to e.g. handle rebuild of complete
+  distribution (bnc#674991).
+
+-------------------------------------------------------------------
 Thu Oct 28 09:49:14 UTC 2010 - aj@suse.de
 
 - If source file is different, do not compare binaries with check-all.
