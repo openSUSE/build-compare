@@ -1,6 +1,6 @@
 #! /bin/bash
 #
-# Copyright (c) 2009, 2010 SUSE Linux Product GmbH, Germany.
+# Copyright (c) 2009, 2010, 2011 SUSE Linux Product GmbH, Germany.
 # Licensed under GPL v2, see COPYING file for details.
 #
 # Written by Michael Matz and Stephan Coolo
@@ -219,8 +219,8 @@ check_single_file()
        done
        return $ret;;
      *.pyc|*.pyo)
-        perl -E "open fh, '+<', 'old/$file'; seek fh, 3, SEEK_SET; print fh '0000';"
-        perl -E "open fh, '+<', 'new/$file'; seek fh, 3, SEEK_SET; print fh '0000';"
+        perl -e "open fh, '+<', 'old/$file'; seek fh, 3, SEEK_SET; print fh '0000';"
+        perl -e "open fh, '+<', 'new/$file'; seek fh, 3, SEEK_SET; print fh '0000';"
         ;;
      *.bz2)
         bunzip2 -c old/$file > old/${file/.bz2/}
