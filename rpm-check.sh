@@ -379,6 +379,18 @@ check_single_file()
           sed -i -e 's%<td>[A-Z][a-z][a-z] [A-Z][a-z][a-z] [0-9]\+ [0-9]\+:[0-9]\+:[0-9]\+ +0000 201[0-9]</td>%<td>Mon Sep 20 19:02:43 +0000 2010</td>%g' $f
        done
        ;;
+    */Linux*Env.Set.sh)
+       # LibreOffice files, contains:
+       # Generated on: Mon Apr 18 13:19:22 UTC 2011
+       for f in old/$file new/$file; do
+	 sed -i -e 's%^# Generated on:.*UTC 201[0-9] *$%# Generated on: Sometime%g' $f
+       done
+       ;;
+    /usr/lib/libreoffice/solver/inc/*/deliver.log)
+       # LibreOffice log file
+      echo "Ignore $file"
+      return 0
+      ;;
   esac
 
   ftype=`/usr/bin/file old/$file | cut -d: -f2-`

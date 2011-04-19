@@ -23,7 +23,7 @@ License:        GPLv2+
 Group:          Development/Tools/Building
 AutoReqProv:    on
 Summary:        Build Result Compare Script
-Version:        2011.02.28
+Version:        2011.04.19
 Release:        1
 Source1:        COPYING
 Source2:        same-build-result.sh
