@@ -150,7 +150,6 @@ check_single_file()
        return 0
        ;;
     *.a)
-       echo "$file is .a"
        flist=`ar t new/$file`
        pwd=$PWD
        fdir=`dirname $file`
