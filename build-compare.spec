@@ -24,7 +24,7 @@ Group:          Development/Tools/Building
 AutoReqProv:    on
 Summary:        Build Result Compare Script
 Version:        2011.04.19
-Release:        1
+Release:        2
 Source1:        COPYING
 Source2:        same-build-result.sh
 Source3:        rpm-check.sh
@@ -39,6 +39,7 @@ to a former build.
 
 
 
+%debug_package
 %prep
 mkdir $RPM_BUILD_DIR/%name-%version
 %setup -T 0 -D

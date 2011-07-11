@@ -1,4 +1,9 @@
 -------------------------------------------------------------------
+Mon Jul 11 13:58:52 CEST 2011 - dmueller@suse.de
+
+- also compare fileclass
+
+-------------------------------------------------------------------
 Fri May 20 18:29:57 UTC 2011 - aj@suse.de
 
 - Remove debug echo output.
