@@ -38,8 +38,6 @@ This package contains scripts to find out if the build result differs
 to a former build.
 
 
-
-%debug_package
 %prep
 mkdir $RPM_BUILD_DIR/%name-%version
 %setup -T 0 -D
