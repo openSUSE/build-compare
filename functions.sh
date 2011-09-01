@@ -110,9 +110,10 @@ function cmp_spec ()
     # differ, depending on which file system the package was built.  To not
     # have to filter out directories we simply ignore all sizes.
     # Also leave out FILEDEVICES, FILEINODES (depends on the build host),
-    # FILECOLORS, FILEDEPENDSX and FILEDEPENDSN.
+    # FILECOLORS, FILECLASS (normally useful but file output contains mtimes), 
+    # FILEDEPENDSX and FILEDEPENDSN. 
     # Also FILELANGS (or?)
-    QF="[%{FILENAMES} %{FILEFLAGS} %{FILESTATES} %{FILECLASS} %{FILEMODES:octal} %{FILEUSERNAME} %{FILEGROUPNAME} %{FILERDEVS} %{FILEVERIFYFLAGS} %{FILELINKTOS}\n]\\n"
+    QF="[%{FILENAMES} %{FILEFLAGS} %{FILESTATES} %{FILEMODES:octal} %{FILEUSERNAME} %{FILEGROUPNAME} %{FILERDEVS} %{FILEVERIFYFLAGS} %{FILELINKTOS}\n]\\n"
     # ??? what to do with FILEPROVIDE and FILEREQUIRE?
     
     check_header $oldrpm > $file1

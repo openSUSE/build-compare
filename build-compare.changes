@@ -1,4 +1,9 @@
 -------------------------------------------------------------------
+Wed Aug 31 14:11:39 UTC 2011 - coolo@suse.com
+
+- comparing fileclass was no good idea after all
+
+-------------------------------------------------------------------
 Mon Jul 11 13:58:52 CEST 2011 - dmueller@suse.de
 
 - also compare fileclass
