@@ -15,16 +15,14 @@
 # Please submit bugfixes or comments via http://bugs.opensuse.org/
 #
 
-# norootforbuild
 
 
 Name:           build-compare
 License:        GPLv2+
 Group:          Development/Tools/Building
-AutoReqProv:    on
 Summary:        Build Result Compare Script
 Version:        2011.04.19
-Release:        4
+Release:        6
 Source1:        COPYING
 Source2:        same-build-result.sh
 Source3:        rpm-check.sh

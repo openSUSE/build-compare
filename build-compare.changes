@@ -1,4 +1,9 @@
 -------------------------------------------------------------------
+Sat Sep 17 21:08:18 UTC 2011 - jengelh@medozas.de
+
+- Remove redundant tags/sections from specfile
+
+-------------------------------------------------------------------
 Wed Aug 31 14:11:39 UTC 2011 - coolo@suse.com
 
 - comparing fileclass was no good idea after all
