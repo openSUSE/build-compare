@@ -18,7 +18,7 @@
 
 
 Name:           build-compare
-License:        GPLv2+
+License:        GPL-2.0+
 Group:          Development/Tools/Building
 Summary:        Build Result Compare Script
 Version:        2011.04.19
