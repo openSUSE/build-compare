@@ -1,7 +1,7 @@
 #
 # spec file for package build-compare
 #
-# Copyright (c) 2011 SUSE LINUX Products GmbH, Nuernberg, Germany.
+# Copyright (c) 2012 SUSE LINUX Products GmbH, Nuernberg, Germany.
 #
 # All modifications and additions to the file contributed by third parties
 # remain the property of their copyright owners, unless otherwise agreed
@@ -21,7 +21,7 @@ Name:           build-compare
 License:        GPL-2.0+
 Group:          Development/Tools/Building
 Summary:        Build Result Compare Script
-Version:        2011.04.19
+Version:        2012.01.09
 Release:        6
 Source1:        COPYING
 Source2:        same-build-result.sh

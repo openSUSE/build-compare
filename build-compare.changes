@@ -1,4 +1,14 @@
 -------------------------------------------------------------------
+Thu Jan 12 12:59:31 UTC 2012 - aj@suse.de
+
+- Fix syntax in same-build-result.sh.
+
+-------------------------------------------------------------------
+Mon Jan  9 13:15:33 UTC 2012 - aj@suse.de
+
+- Compare rpmlint.log if it exists.
+
+-------------------------------------------------------------------
 Sat Sep 17 21:08:18 UTC 2011 - jengelh@medozas.de
 
 - Remove redundant tags/sections from specfile

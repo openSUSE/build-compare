@@ -1,6 +1,6 @@
 #!/bin/bash
 #
-# Copyright (c) 2009, 2010 SUSE Linux Product GmbH, Germany.
+# Copyright (c) 2009, 2010, 2012 SUSE Linux Product GmbH, Germany.
 # Licensed under GPL v2, see COPYING file for details.
 #
 # Written by Adrian Schroeter <adrian@suse.de>
@@ -83,6 +83,18 @@ done
 if [ -n "${NEWRPMS[0]}" ]; then
   echo additional new package
   exit 1
+fi
+
+# Compare rpmlint.log files
+RPMLINTDIR=/home/abuild/rpmbuild/OTHER
+
+if test -e $OLDDIR/rpmlint.log -a -e $RPMLINTDIR/rpmlint.log; then
+  echo "comparing $OLDDIR/rpmlint.log and $RPMLINTDIR/rpmlint.log"
+  if ! cmp -s $OLDDIR/rpmlint.log $RPMLINTDIR/rpmlint.log; then
+    echo "rpmlint.log files differ:"
+    diff -u $OLDDIR/rpmlint.log $RPMLINTDIR/rpmlint.log|head -n 20
+    exit 1
+  fi
 fi
 
 if test $SUCCESS -eq 0; then
