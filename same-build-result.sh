@@ -90,11 +90,16 @@ RPMLINTDIR=/home/abuild/rpmbuild/OTHER
 
 if test -e $OLDDIR/rpmlint.log -a -e $RPMLINTDIR/rpmlint.log; then
   echo "comparing $OLDDIR/rpmlint.log and $RPMLINTDIR/rpmlint.log"
-  if ! cmp -s $OLDDIR/rpmlint.log $RPMLINTDIR/rpmlint.log; then
+  # Sort the files first since the order of messages is not deterministic
+  sort -u $OLDDIR/rpmlint.log > $OLDDIR/rpmlint.log.sorted
+  sort -u $RPMLINTDIR/rpmlint.log > $RPMLINTDIR/rpmlint.log.sorted
+  if ! cmp -s $OLDDIR/rpmlint.log.sorted $RPMLINTDIR/rpmlint.log.sorted; then
     echo "rpmlint.log files differ:"
     diff -u $OLDDIR/rpmlint.log $RPMLINTDIR/rpmlint.log|head -n 20
+    rm $OLDDIR/rpmlint.log.sorted $RPMLINTDIR/rpmlint.log.sorted
     exit 1
   fi
+  rm $OLDDIR/rpmlint.log.sorted $RPMLINTDIR/rpmlint.log.sorted
 fi
 
 if test $SUCCESS -eq 0; then
