@@ -62,6 +62,10 @@ bash $SCMPSCRIPT "$osrpm" "$nsrpm" || exit 1
 OLDRPMS=($(find "$OLDDIR" -name \*rpm -a ! -name \*src.rpm  -a ! -name \*.delta.rpm|sort|grep -v -- -32bit-|grep -v -- -64bit-|grep -v -- '-x86-.*\.ia64\.rpm'))
 NEWRPMS=($(find $NEWDIRS -name \*rpm -a ! -name \*src.rpm -a ! -name \*.delta.rpm|sort --field-separator=/ --key=7|grep -v -- -32bit-|grep -v -- -64bit-|grep -v -- '-x86-.*\.ia64\.rpm'))
 
+# Get release from first RPM and keep for rpmlint check
+release1=`rpm -qp --nodigest --nosignature --qf "%{RELEASE}" "${OLDRPMS[1]}"`
+release2=`rpm -qp --nodigest --nosignature --qf "%{RELEASE}" "${NEWRPMS[1]}"`
+
 SUCCESS=1
 rpmqp='rpm -qp --qf %{NAME} --nodigest --nosignature '
 for opac in ${OLDRPMS[*]}; do
@@ -89,17 +93,19 @@ fi
 RPMLINTDIR=/home/abuild/rpmbuild/OTHER
 
 if test -e $OLDDIR/rpmlint.log -a -e $RPMLINTDIR/rpmlint.log; then
+  file1=`mktemp`
+  file2=`mktemp`
   echo "comparing $OLDDIR/rpmlint.log and $RPMLINTDIR/rpmlint.log"
   # Sort the files first since the order of messages is not deterministic
-  sort -u $OLDDIR/rpmlint.log > $OLDDIR/rpmlint.log.sorted
-  sort -u $RPMLINTDIR/rpmlint.log > $RPMLINTDIR/rpmlint.log.sorted
-  if ! cmp -s $OLDDIR/rpmlint.log.sorted $RPMLINTDIR/rpmlint.log.sorted; then
+  # Remove release from files
+  sort -u $OLDDIR/rpmlint.log|sed -e "s,$release1, @RELEASE@," > $file1
+  sort -u $RPMLINTDIR/rpmlint.log|sed -e "s,$release2, @RELEASE@," > $file2
+  if ! cmp -s $file1 $file2; then
     echo "rpmlint.log files differ:"
     diff -u $OLDDIR/rpmlint.log $RPMLINTDIR/rpmlint.log|head -n 20
-    rm $OLDDIR/rpmlint.log.sorted $RPMLINTDIR/rpmlint.log.sorted
-    exit 1
+    SUCCESS=0
   fi
-  rm $OLDDIR/rpmlint.log.sorted $RPMLINTDIR/rpmlint.log.sorted
+  rm $file1 $file2
 fi
 
 if test $SUCCESS -eq 0; then

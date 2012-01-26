@@ -1,4 +1,9 @@
 -------------------------------------------------------------------
+Thu Jan 26 10:01:55 UTC 2012 - aj@suse.de
+
+- Remove release from rpmlint.log before comparing.
+
+-------------------------------------------------------------------
 Fri Jan 20 08:49:39 UTC 2012 - aj@suse.de
 
 - Sort rpmlint.log files first since the order is non-deterministic.
