@@ -98,11 +98,14 @@ if test -e $OLDDIR/rpmlint.log -a -e $RPMLINTDIR/rpmlint.log; then
   echo "comparing $OLDDIR/rpmlint.log and $RPMLINTDIR/rpmlint.log"
   # Sort the files first since the order of messages is not deterministic
   # Remove release from files
-  sort -u $OLDDIR/rpmlint.log|sed -e "s,$release1, @RELEASE@," > $file1
-  sort -u $RPMLINTDIR/rpmlint.log|sed -e "s,$release2, @RELEASE@," > $file2
+  echo "Release1 is $release1, Release2 is $release2"
+  sort -u $OLDDIR/rpmlint.log|sed -e "s,$release1,@RELEASE@,g" -e "s|/tmp/rpmlint\..*spec|.spec|g" > $file1
+  sort -u $RPMLINTDIR/rpmlint.log|sed -e "s,$release2,@RELEASE@,g" -e "s|/tmp/rpmlint\..*spec|.spec|g"  > $file2
   if ! cmp -s $file1 $file2; then
     echo "rpmlint.log files differ:"
-    diff -u $OLDDIR/rpmlint.log $RPMLINTDIR/rpmlint.log|head -n 20
+    # File is sorted, so don't give context that will confuse readers
+    diff -u0 $file1 $file2 |head -n 20
+    #diff -u $OLDDIR/rpmlint.log $RPMLINTDIR/rpmlint.log|head -n 20
     SUCCESS=0
   fi
   rm $file1 $file2
