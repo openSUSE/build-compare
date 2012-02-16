@@ -90,16 +90,16 @@ if [ -n "${NEWRPMS[0]}" ]; then
 fi
 
 # Compare rpmlint.log files
-RPMLINTDIR=/home/abuild/rpmbuild/OTHER
+OTHERDIR=/home/abuild/rpmbuild/OTHER
 
-if test -e $OLDDIR/rpmlint.log -a -e $RPMLINTDIR/rpmlint.log; then
+if test -e $OLDDIR/rpmlint.log -a -e $OTHERDIR/rpmlint.log; then
   file1=`mktemp`
   file2=`mktemp`
-  echo "comparing $OLDDIR/rpmlint.log and $RPMLINTDIR/rpmlint.log"
+  echo "comparing $OLDDIR/rpmlint.log and $OTHERDIR/rpmlint.log"
   # Sort the files first since the order of messages is not deterministic
   # Remove release from files
   sort -u $OLDDIR/rpmlint.log|sed -e "s,$release1,@RELEASE@,g" -e "s|/tmp/rpmlint\..*spec|.spec|g" > $file1
-  sort -u $RPMLINTDIR/rpmlint.log|sed -e "s,$release2,@RELEASE@,g" -e "s|/tmp/rpmlint\..*spec|.spec|g"  > $file2
+  sort -u $OTHERDIR/rpmlint.log|sed -e "s,$release2,@RELEASE@,g" -e "s|/tmp/rpmlint\..*spec|.spec|g"  > $file2
   if ! cmp -s $file1 $file2; then
     echo "rpmlint.log files differ:"
     # File is sorted, so don't give context that will confuse readers
@@ -107,6 +107,23 @@ if test -e $OLDDIR/rpmlint.log -a -e $RPMLINTDIR/rpmlint.log; then
     SUCCESS=0
   fi
   rm $file1 $file2
+elif -e $OTHERDIR/rpmlint.log; then
+  echo "rpmlint.log is new"
+  SUCCESS=0
+fi
+
+# compare appstream data
+if test -e $OLDDIR/appdata.xml -a -e $OTHERDIR/appdata.xml; then
+  file1=$OLDDIR/appdata.xml
+  file2=$OTHERDIR/appdata.xml
+  if ! cmp -s $file1 $file2; then
+    echo "appdata.xml files differ:"
+    diff -u0 $file1 $file2 |head -n 20
+    SUCCESS=0
+  fi
+elif -e $OTHERDIR/appdata.xml; then
+  echo "appdata.xml is new"
+  SUCCESS=0
 fi
 
 if test $SUCCESS -eq 0; then

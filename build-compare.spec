@@ -16,13 +16,12 @@
 #
 
 
-
 Name:           build-compare
+Summary:        Build Result Compare Script
 License:        GPL-2.0+
 Group:          Development/Tools/Building
-Summary:        Build Result Compare Script
 Version:        2012.01.26
-Release:        6
+Release:        0
 Source1:        COPYING
 Source2:        same-build-result.sh
 Source3:        rpm-check.sh
