@@ -106,7 +106,7 @@ if test -e $OLDDIR/rpmlint.log -a -e $OTHERDIR/rpmlint.log; then
     SUCCESS=0
   fi
   rm $file1 $file2
-elif -e $OTHERDIR/rpmlint.log; then
+elif test -e $OTHERDIR/rpmlint.log; then
   echo "rpmlint.log is new"
   SUCCESS=0
 fi
@@ -120,7 +120,7 @@ if test -e $OLDDIR/appdata.xml -a -e $OTHERDIR/appdata.xml; then
     diff -u0 $file1 $file2 |head -n 20
     SUCCESS=0
   fi
-elif -e $OTHERDIR/appdata.xml; then
+elif test -e $OTHERDIR/appdata.xml; then
   echo "appdata.xml is new"
   SUCCESS=0
 fi
