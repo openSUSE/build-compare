@@ -1,4 +1,9 @@
 -------------------------------------------------------------------
+Sat Feb 18 18:27:40 UTC 2012 - aj@suse.de
+
+- Quote dot in release to not have false matches.
+
+-------------------------------------------------------------------
 Thu Feb 16 21:00:31 UTC 2012 - coolo@suse.com
 
 - fix missing test in shell script

@@ -87,8 +87,9 @@ function cmp_spec ()
       return 1
     fi
     
-    release1=`$RPM --qf "%{RELEASE}" "$oldrpm"`
-    release2=`$RPM --qf "%{RELEASE}" "$newrpm"`
+    # Remember to quote the . which is in release
+    release1=`$RPM --qf "%{RELEASE}" "$oldrpm"|sed -e 's/\./\\./g'`
+    release2=`$RPM --qf "%{RELEASE}" "$newrpm"|sed -e 's/\./\\./g'`
     # This might happen with a forced rebuild of factory
     if [ "${release1%.*}" != "${release2%.*}" ] ; then
       echo "release prefix mismatch"

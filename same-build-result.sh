@@ -63,8 +63,9 @@ OLDRPMS=($(find "$OLDDIR" -name \*rpm -a ! -name \*src.rpm  -a ! -name \*.delta.
 NEWRPMS=($(find $NEWDIRS -name \*rpm -a ! -name \*src.rpm -a ! -name \*.delta.rpm|sort --field-separator=/ --key=7|grep -v -- -32bit-|grep -v -- -64bit-|grep -v -- '-x86-.*\.ia64\.rpm'))
 
 # Get release from first RPM and keep for rpmlint check
-release1=`rpm -qp --nodigest --nosignature --qf "%{RELEASE}" "${OLDRPMS[0]}"`
-release2=`rpm -qp --nodigest --nosignature --qf "%{RELEASE}" "${NEWRPMS[0]}"`
+# Remember to quote the "." for future regexes
+release1=`rpm -qp --nodigest --nosignature --qf "%{RELEASE}" "${OLDRPMS[0]}"|sed -e 's/\./\\./g'`
+release2=`rpm -qp --nodigest --nosignature --qf "%{RELEASE}" "${NEWRPMS[0]}"|sed -e 's/\./\\./g'`
 
 SUCCESS=1
 rpmqp='rpm -qp --qf %{NAME} --nodigest --nosignature '

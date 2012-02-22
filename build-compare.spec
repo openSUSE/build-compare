@@ -16,6 +16,7 @@
 #
 
 
+
 Name:           build-compare
 Summary:        Build Result Compare Script
 License:        GPL-2.0+
