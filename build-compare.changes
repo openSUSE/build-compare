@@ -1,4 +1,9 @@
 -------------------------------------------------------------------
+Wed Feb 22 11:12:13 UTC 2012 - aj@suse.de
+
+- Remove release from pre/post scripts.
+
+-------------------------------------------------------------------
 Wed Feb 22 11:07:53 UTC 2012 - coolo@suse.com
 
 - I changed my mind, appdata.xml is too hard to get right. So 

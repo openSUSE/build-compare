@@ -1,6 +1,6 @@
 #! /bin/bash
 #
-# Copyright (c) 2009, 2010, 2011 SUSE Linux Product GmbH, Germany.
+# Copyright (c) 2009, 2010, 2011, 2012 SUSE Linux Product GmbH, Germany.
 # Licensed under GPL v2, see COPYING file for details.
 #
 # Written by Michael Matz and Stephan Coolo
@@ -62,8 +62,7 @@ function cmp_spec ()
     QF="$QF %{EXCLUSIVEOS} %{RPMVERSION} %{PLATFORM}\\n"
     QF="$QF %{PAYLOADFORMAT} %{PAYLOADCOMPRESSOR} %{PAYLOADFLAGS}\\n"
     
-    QF="$QF [%{PREINPROG} %{PREIN}\\n]\\n[%{POSTINPROG} %{POSTIN}\\n]\\n[%{PREUNPROG} %{PREUN}\\n]\\n[%{POSTUNPROG} %{POSTUN}\\n]\\n"
-    
+ 
     # XXX We also need to check the existence (but not the content (!))
     # of SIGGPG (and perhaps the other SIG*)
     
@@ -99,6 +98,16 @@ function cmp_spec ()
     check_provides $oldrpm $release1 > $file1
     check_provides $newrpm $release2 > $file2
     
+    if ! diff -au $file1 $file2; then
+      rm $file1 $file2
+      return 1
+    fi
+
+    # scripts, might contain release number
+    QF="[%{PREINPROG} %{PREIN}\\n]\\n[%{POSTINPROG} %{POSTIN}\\n]\\n[%{PREUNPROG} %{PREUN}\\n]\\n[%{POSTUNPROG} %{POSTUN}\\n]\\n"
+    check_header $oldrpm | sed -e "s,-$release1$,-@RELEASE@," > $file1
+    check_header $newrpm | sed -e "s,-$release2$,-@RELEASE@," > $file2
+
     if ! diff -au $file1 $file2; then
       rm $file1 $file2
       return 1
