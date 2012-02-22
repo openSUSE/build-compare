@@ -112,19 +112,22 @@ elif test -e $OTHERDIR/rpmlint.log; then
   SUCCESS=0
 fi
 
-# compare appstream data
-if test -e $OLDDIR/appdata.xml -a -e $OTHERDIR/appdata.xml; then
-  file1=$OLDDIR/appdata.xml
-  file2=$OTHERDIR/appdata.xml
-  if ! cmp -s $file1 $file2; then
-    echo "appdata.xml files differ:"
-    diff -u0 $file1 $file2 |head -n 20
+appdatas=`cd $OTHERDIR && find . -name *-appdata.xml`
+for xml in $appdatas; do
+  # compare appstream data
+  if test -e $OLDDIR/$xml -a -e $OTHERDIR/$xml; then
+    file1=$OLDDIR/$xml
+    file2=$OTHERDIR/$xml
+    if ! cmp -s $file1 $file2; then
+      echo "$xml files differ:"
+      diff -u0 $file1 $file2 |head -n 20
+      SUCCESS=0
+    fi
+  elif test -e $OTHERDIR/$xml; then
+    echo "$xml is new"
     SUCCESS=0
   fi
-elif test -e $OTHERDIR/appdata.xml; then
-  echo "appdata.xml is new"
-  SUCCESS=0
-fi
+done
 
 if test $SUCCESS -eq 0; then
   exit 1

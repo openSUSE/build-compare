@@ -1,4 +1,10 @@
 -------------------------------------------------------------------
+Wed Feb 22 11:07:53 UTC 2012 - coolo@suse.com
+
+- I changed my mind, appdata.xml is too hard to get right. So 
+  we need to support variable binary names for the appdata
+
+-------------------------------------------------------------------
 Sat Feb 18 18:27:40 UTC 2012 - aj@suse.de
 
 - Quote dot in release to not have false matches.
