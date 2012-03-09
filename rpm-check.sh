@@ -372,7 +372,8 @@ check_single_file()
 	  sed -i -e 's%name="id[0-9]*"\([> ]\)%name="id424242"\1%g' $f
 	  sed -i -e 's%name="[a-z]*\.id[0-9]*"%name="ftn.id111111"%g' $f
 	  sed -i -e 's%\.html#id[0-9]*">%.html#id424242">%g' $f
-	  sed -i -e 's%href="#\([a-z]*\.\)\?id[0-9]*">%href="#\1id0000000">%g' $f
+	  sed -i -e 's%href="#\([a-z]*\.\)\?id[0-9]*"\([> ]\)%href="#\1id0000000"\2%g' $f
+	  sed -i -e 's%id="\([a-z]*\.\)\?id[0-9]*"\([> ]\)%id="\1id0000000"\2%g' $f
        done
        ;;
     */created.rid)

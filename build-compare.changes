@@ -1,4 +1,9 @@
 -------------------------------------------------------------------
+Thu Mar  8 21:44:36 UTC 2012 - reddwarf@opensuse.org
+
+- Improve kde index.cache handling
+
+-------------------------------------------------------------------
 Wed Feb 22 11:12:13 UTC 2012 - aj@suse.de
 
 - Remove release from pre/post scripts.
