@@ -1,4 +1,9 @@
 -------------------------------------------------------------------
+Wed Apr  4 18:25:48 UTC 2012 - reddwarf@opensuse.org
+
+- Handle gtk-doc documentation
+
+-------------------------------------------------------------------
 Thu Mar  8 21:44:36 UTC 2012 - reddwarf@opensuse.org
 
 - Improve kde index.cache handling

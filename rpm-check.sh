@@ -366,12 +366,13 @@ check_single_file()
 	  sed -i -e 's|built by abuild@[a-z0-9]* on ... ... [0-9]* [0-9]*:[0-9][0-9]:[0-9][0-9] .* 20[0-9][0-9]|built by abuild@build42 on Thu May 6 11:21:17 UTC 2010|' $f
        done
        ;;
-     /usr/share/doc/kde/HTML/*/*/index.cache|/usr/share/doc/kde/HTML/*/*/*/index.cache)
-       # various kde packages
+     /usr/share/doc/kde/HTML/*/*/index.cache|/usr/share/doc/kde/HTML/*/*/*/index.cache|\
+     /usr/share/gtk-doc/html/*/*.html|/usr/share/gtk-doc/html/*/*.devhelp2)
+       # various kde and gtk packages
        for f in old/$file new/$file; do
 	  sed -i -e 's%name="id[0-9]*"\([> ]\)%name="id424242"\1%g' $f
 	  sed -i -e 's%name="[a-z]*\.id[0-9]*"%name="ftn.id111111"%g' $f
-	  sed -i -e 's%\.html#id[0-9]*">%.html#id424242">%g' $f
+	  sed -i -e 's%\.html#id[0-9]*"\(/\)\?>%.html#id424242"\1>%g' $f
 	  sed -i -e 's%href="#\([a-z]*\.\)\?id[0-9]*"\([> ]\)%href="#\1id0000000"\2%g' $f
 	  sed -i -e 's%id="\([a-z]*\.\)\?id[0-9]*"\([> ]\)%id="\1id0000000"\2%g' $f
        done
