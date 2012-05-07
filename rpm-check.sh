@@ -1,6 +1,6 @@
 #! /bin/bash
 #
-# Copyright (c) 2009, 2010, 2011 SUSE Linux Product GmbH, Germany.
+# Copyright (c) 2009, 2010, 2011, 2012 SUSE Linux Product GmbH, Germany.
 # Licensed under GPL v2, see COPYING file for details.
 #
 # Written by Michael Matz and Stephan Coolo
@@ -401,6 +401,14 @@ check_single_file()
        # LibreOffice log file
       echo "Ignore $file"
       return 0
+      ;;
+    *pdf)
+      # PDF files contain a unique ID, remove it
+      # Format of the ID is:
+      # /ID [<9ACE247A70CF9BEAFEE15E116259BD6D> <9ACE247A70CF9BEAFEE15E116259BD6D>]
+      for f in old/$file new/$file; do
+        sed -i -e 's/ID \[ \?<.*> <.*> \?\]/IDrandom/g' $f
+      done
       ;;
   esac
 

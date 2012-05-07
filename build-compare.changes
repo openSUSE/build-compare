@@ -1,4 +1,9 @@
 -------------------------------------------------------------------
+Mon May  7 11:30:28 UTC 2012 - aj@suse.de
+
+- Handle /ID in pdf files (bnc#760867).
+
+-------------------------------------------------------------------
 Wed Apr  4 18:25:48 UTC 2012 - reddwarf@opensuse.org
 
 - Handle gtk-doc documentation
