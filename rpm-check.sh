@@ -406,8 +406,13 @@ check_single_file()
       # PDF files contain a unique ID, remove it
       # Format of the ID is:
       # /ID [<9ACE247A70CF9BEAFEE15E116259BD6D> <9ACE247A70CF9BEAFEE15E116259BD6D>]
+      # pdftex creates also:
+      # /CreationDate (D:20120103083206Z)
+      # /ModDate (D:20120103083206Z)
       for f in old/$file new/$file; do
-        sed -i -e 's/ID \[ \?<.*> <.*> \?\]/IDrandom/g' $f
+        sed -i -e 's%/ID \?\[ \?<[^>]\+> <[^>]\+> \?\]%/IDrandom%g' $f
+	sed -i -e 's%/CreationDate (D:.*)%/CreationDate (D: XXX)%g' $f
+	sed -i -e 's%/ModDate (D:.*)%/ModDate (D: XXX)%g' $f
       done
       ;;
   esac
