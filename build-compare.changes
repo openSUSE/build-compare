@@ -1,4 +1,10 @@
 -------------------------------------------------------------------
+Tue May  8 12:35:21 UTC 2012 - aj@suse.de
+
+- Further handling of pdf files (bnc#760867), patch by
+  David Haller <david@dhaller.de>.
+
+-------------------------------------------------------------------
 Mon May  7 14:50:43 UTC 2012 - aj@suse.de
 
 - Further handling of pdf files (bnc#760867).
