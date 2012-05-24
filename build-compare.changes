@@ -1,4 +1,10 @@
 -------------------------------------------------------------------
+Thu May 24 10:17:15 UTC 2012 - aj@suse.de
+
+- Only handle files, not directories when searching for packages.
+  Patch by Matthieu Tanguay-Carel <mtanguay@thoughtworks.com>.
+
+-------------------------------------------------------------------
 Tue May  8 12:35:21 UTC 2012 - aj@suse.de
 
 - Further handling of pdf files (bnc#760867), patch by
