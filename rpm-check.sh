@@ -443,7 +443,7 @@ check_single_file()
          return 1
        fi
        ;;
-    *ELF*executable*|*ELF*LSB\ shared\ object*)
+    *ELF*executable*|*ELF*[LM]SB\ shared\ object*)
        objdump -d --no-show-raw-insn old/$file | filter_disasm > $file1
        if ! test -s $file1; then
          # objdump has no idea how to handle it
