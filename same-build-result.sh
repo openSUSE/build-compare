@@ -79,9 +79,13 @@ for opac in ${OLDRPMS[*]}; do
      echo "names differ: $oname $nname"
      exit 1
   fi
-  bash $CMPSCRIPT "$opac" "$npac" || SUCCESS=0
-  if test $SUCCESS -eq 0 -a -z "$check_all"; then
-     exit 1
+  if [ $(echo "$opac" | grep -e "debuginfo") ]; then
+     echo "skipping -debuginfo package"
+  else
+     bash $CMPSCRIPT "$opac" "$npac" || SUCCESS=0
+     if test $SUCCESS -eq 0 -a -z "$check_all"; then
+        exit 1
+     fi
   fi
 done
 

@@ -460,10 +460,14 @@ check_single_file()
           head -n 200 $dfile
           return 1
        fi
-       objdump -s old/$file > $file1
-       sed -i -e "s,old/,," $file1
-       objdump -s new/$file > $file2
-       sed -i -e "s,new/,," $file2
+       echo "" >$file1
+       echo "" >$file2
+       # Don't compare .build-id and .gnu_debuglink sections
+       for section in $(objdump -s new/$file | grep "Contents of section .*:" | sed -r "s,.* (\..*):,\1,g" | grep -v -e "\.build-id" -e "\.gnu_debuglink" | tr
+"\n" " "); do
+          objdump -s -j $section old/$file | sed "s,old/,," >> $file1
+          objdump -s -j $section new/$file | sed "s,new/,," >> $file2
+       done
        if ! diff -u $file1 $file2 > $dfile; then
           echo "$file differs in ELF sections"
           head -n 200 $dfile
