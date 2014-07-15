@@ -1,4 +1,9 @@
 -------------------------------------------------------------------
+Tue Jul 15 11:42:09 CEST 2014 - ohering@suse.de
+
+- Fix shell syntax error in rpm-check.sh
+
+-------------------------------------------------------------------
 Mon Jul  7 08:28:45 UTC 2014 - aj@suse.com
 
 - Fix last patch to not use non-existant file (bnc#877078).

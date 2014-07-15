@@ -463,8 +463,7 @@ check_single_file()
        echo "" >$file1
        echo "" >$file2
        # Don't compare .build-id and .gnu_debuglink sections
-       for section in $(objdump -s new/$file | grep "Contents of section .*:" | sed -r "s,.* (\..*):,\1,g" | grep -v -e "\.build-id" -e "\.gnu_debuglink" | tr
-"\n" " "); do
+       for section in $(objdump -s new/$file | grep "Contents of section .*:" | sed -r "s,.* (\..*):,\1,g" | grep -v -e "\.build-id" -e "\.gnu_debuglink" | tr "\n" " "); do
           objdump -s -j $section old/$file | sed "s,old/,," >> $file1
           objdump -s -j $section new/$file | sed "s,new/,," >> $file2
        done
