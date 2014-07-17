@@ -1,4 +1,12 @@
 -------------------------------------------------------------------
+Thu Jul 17 06:46:47 UTC 2014 - meissner@suse.com
+
+- Allow file list changes where the release number is encoded
+  in the filename.
+- compare post-update message and scripts (fixes fetchmsttfonts
+  constant republish) as they have the release number hardcoded.
+
+-------------------------------------------------------------------
 Tue Jul 15 11:42:09 CEST 2014 - ohering@suse.de
 
 - Fix shell syntax error in rpm-check.sh

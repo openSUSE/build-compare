@@ -402,6 +402,21 @@ check_single_file()
       echo "Ignore $file"
       return 0
       ;;
+    /var/adm/update-messages/*|/var/adm/update-scripts/*)
+      # encode version-release inside
+      oldfn=`echo "$file"|sed -e s/-$release2/-$release1/;`
+
+      # fetchmsttfonts embeds the release number in the update shell script.
+      echo sed -i -e "s/-$release1/-$release2/g;" "old/$oldfn"
+      sed -i -e "s/-$release1/-$release2/g;" "old/$oldfn"
+
+      if ! diff -u old/$oldfn new/$file; then
+           echo "$oldfn is not same as $file"
+           return 1
+      fi
+      echo "$file and $oldfn are same"
+      return 0
+      ;;
     *pdf)
       # PDF files contain a unique ID, remove it
       # Format of the ID is:

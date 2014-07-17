@@ -125,9 +125,9 @@ function cmp_spec ()
     # Also FILELANGS (or?)
     QF="[%{FILENAMES} %{FILEFLAGS} %{FILESTATES} %{FILEMODES:octal} %{FILEUSERNAME} %{FILEGROUPNAME} %{FILERDEVS} %{FILEVERIFYFLAGS} %{FILELINKTOS}\n]\\n"
     # ??? what to do with FILEPROVIDE and FILEREQUIRE?
-    
-    check_header $oldrpm > $file1
-    check_header $newrpm > $file2
+
+    check_header $oldrpm | sed -e "s,-$release1,-@RELEASE@," > $file1
+    check_header $newrpm | sed -e "s,-$release2,-@RELEASE@," > $file2
     
     if ! diff -au $file1 $file2; then
       rm $file1 $file2
@@ -136,9 +136,10 @@ function cmp_spec ()
     
     # now the md5sums. if they are different, we check more detailed
     # if there are different filenames, we will already have aborted before
-    QF="[%{FILENAMES} %{FILEMD5S}\n]\\n"
-    check_header $oldrpm > $file1
-    check_header $newrpm > $file2
+    # file flag 64 means "ghost", filter those out.
+    QF="[%{FILENAMES} %{FILEMD5S} %{FILEFLAGS}\n]\\n"
+    check_header $oldrpm |grep -v " 64$"> $file1
+    check_header $newrpm |grep -v " 64$"> $file2
     
     RES=2
     # done if the same
