@@ -486,7 +486,8 @@ check_single_file()
           echo "$file differs in ELF sections"
           head -n 200 $dfile
        else
-          echo "WARNING: no idea about $file"
+          echo "$file: only difference was in build-id or gnu_debuglink, GOOD."
+          return 0
        fi
        return 1
        ;;

@@ -1,4 +1,10 @@
 -------------------------------------------------------------------
+Tue Jul 22 06:45:25 UTC 2014 - meissner@suse.com
+
+- if all ELF sections except build-id and .gnu_debuglink compare equal,
+  this is the same binary.
+
+-------------------------------------------------------------------
 Thu Jul 17 06:46:47 UTC 2014 - meissner@suse.com
 
 - Allow file list changes where the release number is encoded
