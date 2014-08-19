@@ -1,4 +1,9 @@
 -------------------------------------------------------------------
+Tue Jul 29 15:07:04 UTC 2014 - johannesobermayr@gmx.de
+
+- Remove numbered anchors from all Docbook / HTML files (bnc#889629).
+
+-------------------------------------------------------------------
 Tue Jul 22 06:45:25 UTC 2014 - meissner@suse.com
 
 - if all ELF sections except build-id and .gnu_debuglink compare equal,

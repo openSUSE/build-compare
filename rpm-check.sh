@@ -136,8 +136,22 @@ diff_two_files()
   return 0
 }
 
+
+strip_numbered_anchors()
+{
+  # Remove numbered anchors on Docbook / HTML files.
+  # This should be save since we remove them from old and new files.
+  # A trailing </a> or </div> tag will stay also on both files.
+  for f in old/$file new/$file; do
+     sed -i -e 's%<[ ]*a[ ]\+name[^<]*[0-9]\+[^<]*%%g' \
+     -e 's%<[ ]*a[ ]\+href[^<]*#[^<]*[0-9]\+[^<]*%%g' \
+     -e 's%<[^<]*id="ftn\.[^<]*[0-9]\+[^<]*%%g' $f
+  done
+}
+
+
 check_single_file()
-{ 
+{
   local file="$1"
   case $file in
     *.spec)
@@ -267,9 +281,11 @@ check_single_file()
 	 # Generated on Sat Aug 14 2010 16:49:48 for libssh
 	 sed -i -e 's|Generated on ... ... [0-9]* 20[0-9][0-9] [0-9]*:[0-9][0-9]:[0-9][0-9] for |Generated on Mon May 10 20:45:00 2010 for |' $f
        done
+       strip_numbered_anchors
        ;;
      /usr/share/javadoc/*.html |\
      /usr/share/javadoc/*/*.html|/usr/share/javadoc/*/*/*.html)
+       strip_numbered_anchors
        # There are more timestamps in html, so far we handle only some primitive versions.
        for f in old/$file new/$file; do
          # Javadoc:
@@ -283,7 +299,7 @@ check_single_file()
 	 # deprecated-list is randomly ordered, sort it for comparison
 	 case $f in
 	   */deprecated-list.html)
-	     sort -o $f $f 
+	     sort -o $f $f
 	     ;;
 	 esac
        done
@@ -369,13 +385,7 @@ check_single_file()
      /usr/share/doc/kde/HTML/*/*/index.cache|/usr/share/doc/kde/HTML/*/*/*/index.cache|\
      /usr/share/gtk-doc/html/*/*.html|/usr/share/gtk-doc/html/*/*.devhelp2)
        # various kde and gtk packages
-       for f in old/$file new/$file; do
-	  sed -i -e 's%name="id[0-9]*"\([> ]\)%name="id424242"\1%g' $f
-	  sed -i -e 's%name="[a-z]*\.id[0-9]*"%name="ftn.id111111"%g' $f
-	  sed -i -e 's%\.html#id[0-9]*"\(/\)\?>%.html#id424242"\1>%g' $f
-	  sed -i -e 's%href="#\([a-z]*\.\)\?id[0-9]*"\([> ]\)%href="#\1id0000000"\2%g' $f
-	  sed -i -e 's%id="\([a-z]*\.\)\?id[0-9]*"\([> ]\)%id="\1id0000000"\2%g' $f
-       done
+       strip_numbered_anchors
        ;;
     */created.rid)
        # ruby documentation
@@ -389,6 +399,7 @@ check_single_file()
        for f in old/$file new/$file; do
           sed -i -e 's%<td>[A-Z][a-z][a-z] [A-Z][a-z][a-z] [0-9]\+ [0-9]\+:[0-9]\+:[0-9]\+ +0000 201[0-9]</td>%<td>Mon Sep 20 19:02:43 +0000 2010</td>%g' $f
        done
+       strip_numbered_anchors
        ;;
     */Linux*Env.Set.sh)
        # LibreOffice files, contains:
