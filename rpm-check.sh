@@ -104,7 +104,9 @@ case $RES in
      ;;
   1)
      echo "RPM meta information is different"
-     exit 1
+     if test -z "$check_all"; then
+        exit 1
+     fi
      ;;
   2)
      ;;
@@ -149,6 +151,45 @@ strip_numbered_anchors()
   done
 }
 
+
+check_gzip_file()
+{
+  local file=$1
+  local tmpdir=`mktemp -d`
+  local ftype
+  local ret=0
+  if test -n "$tmpdir"; then
+    mkdir $tmpdir/{old,new}
+    cp --parents --dereference old/$file $tmpdir/
+    cp --parents --dereference new/$file $tmpdir/
+    if pushd $tmpdir > /dev/null ; then
+      mv old/$file{,.gz}
+      mv new/$file{,.gz}
+      gunzip old/$file.gz
+      gunzip new/$file.gz
+      ftype=`/usr/bin/file old/$file | cut -d: -f2-`
+      case $ftype in
+        *POSIX\ tar\ archive)
+          echo "gzip content is: $ftype"
+          mv old/$file{,.tar}
+          mv new/$file{,.tar}
+          if ! check_single_file ${file}.tar; then
+            ret=1
+          fi
+          ;;
+        *)
+          echo "unhandled gzip content: $ftype"
+          if ! diff_two_files; then
+            ret=1
+          fi
+          ;;
+      esac
+      popd > /dev/null
+    fi
+    rm -rf "$tmpdir"
+  fi
+  return $ret
+}
 
 check_single_file()
 {
@@ -512,6 +553,12 @@ check_single_file()
      *directory)
        # tar might package directories - ignore them here
        return 0
+       ;;
+     *gzip\ compressed\ data*)
+       echo "gzipped file with odd filename: $file"
+       if ! check_gzip_file "$file"; then
+           return 1
+       fi
        ;;
      *)
        if ! diff_two_files; then

@@ -82,25 +82,31 @@ function cmp_spec ()
     # the DISTURL tag can be used as checkin ID
     #echo "$QF"
     if ! diff -au $file1 $file2; then
-      rm $file1 $file2
-      return 1
+      if test -z "$check_all"; then
+        rm $file1 $file2
+        return 1
+      fi
     fi
     
     # Remember to quote the . which is in release
-    release1=`$RPM --qf "%{RELEASE}" "$oldrpm"|sed -e 's/\./\\./g'`
-    release2=`$RPM --qf "%{RELEASE}" "$newrpm"|sed -e 's/\./\\./g'`
+    release1=`$RPM --qf "%{RELEASE}" "$oldrpm"|sed -e 's/\./\\\./g'`
+    release2=`$RPM --qf "%{RELEASE}" "$newrpm"|sed -e 's/\./\\\./g'`
     # This might happen with a forced rebuild of factory
     if [ "${release1%.*}" != "${release2%.*}" ] ; then
       echo "release prefix mismatch"
-      return 1
+      if test -z "$check_all"; then
+        return 1
+      fi
     fi
     
     check_provides $oldrpm $release1 > $file1
     check_provides $newrpm $release2 > $file2
     
     if ! diff -au $file1 $file2; then
-      rm $file1 $file2
-      return 1
+      if test -z "$check_all"; then
+        rm $file1 $file2
+        return 1
+      fi
     fi
 
     # scripts, might contain release number
@@ -109,8 +115,10 @@ function cmp_spec ()
     check_header $newrpm | sed -e "s,-$release2$,-@RELEASE@," > $file2
 
     if ! diff -au $file1 $file2; then
-      rm $file1 $file2
-      return 1
+      if test -z "$check_all"; then
+        rm $file1 $file2
+        return 1
+      fi
     fi
     
     # First check the file attributes and later the md5s
@@ -130,8 +138,10 @@ function cmp_spec ()
     check_header $newrpm | sed -e "s,-$release2,-@RELEASE@," > $file2
     
     if ! diff -au $file1 $file2; then
-      rm $file1 $file2
-      return 1
+      if test -z "$check_all"; then
+        rm $file1 $file2
+        return 1
+      fi
     fi
     
     # now the md5sums. if they are different, we check more detailed
