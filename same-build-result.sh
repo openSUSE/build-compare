@@ -64,8 +64,8 @@ NEWRPMS=($(find $NEWDIRS -type f -name \*rpm -a ! -name \*src.rpm -a ! -name \*.
 
 # Get release from first RPM and keep for rpmlint check
 # Remember to quote the "." for future regexes
-release1=`rpm -qp --nodigest --nosignature --qf "%{RELEASE}" "${OLDRPMS[0]}"|sed -e 's/\./\\./g'`
-release2=`rpm -qp --nodigest --nosignature --qf "%{RELEASE}" "${NEWRPMS[0]}"|sed -e 's/\./\\./g'`
+release1=$(rpm -qp --nodigest --nosignature --qf "%{RELEASE}" "${OLDRPMS[0]}"|sed -e 's/\./\\./g')
+release2=$(rpm -qp --nodigest --nosignature --qf "%{RELEASE}" "${NEWRPMS[0]}"|sed -e 's/\./\\./g')
 
 SUCCESS=1
 rpmqp='rpm -qp --qf %{NAME} --nodigest --nosignature '

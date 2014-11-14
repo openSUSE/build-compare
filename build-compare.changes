@@ -1,4 +1,9 @@
 -------------------------------------------------------------------
+Wed Nov 12 09:29:24 UTC 2014 - schwab@suse.de
+
+- Use $(...) instead of `...` to avoid losing backslash quoting
+
+-------------------------------------------------------------------
 Fri Nov  7 11:12:10 UTC 2014 - ohering@suse.de
 
 - Update check-all option to really keep going and check all files
