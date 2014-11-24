@@ -24,6 +24,7 @@ source $FUNCTIONS
 
 oldrpm=`readlink -f $1`
 newrpm=`readlink -f $2`
+rename_script=`mktemp`
 
 if test ! -f $oldrpm; then
     echo "can't open $oldrpm"
@@ -96,11 +97,13 @@ filter_disasm()
    sed -e 's/^ *[0-9a-f]\+://' -e 's/\$0x[0-9a-f]\+/$something/' -e 's/callq *[0-9a-f]\+/callq /' -e 's/# *[0-9a-f]\+/#  /' -e 's/\(0x\)\?[0-9a-f]\+(/offset(/' -e 's/[0-9a-f]\+ </</' -e 's/^<\(.*\)>:/\1:/' -e 's/<\(.*\)+0x[0-9a-f]\+>/<\1 + ofs>/' 
 }
 
-cmp_spec $1 $2
+cmp_spec $rename_script
 RES=$?
 case $RES in
   0)
-     exit 0
+     if test -z "$check_all"; then
+        exit 0
+     fi
      ;;
   1)
      echo "RPM meta information is different"
@@ -120,9 +123,11 @@ file1=`mktemp`
 file2=`mktemp`
 
 dir=`mktemp -d`
+echo "Extracting packages"
 unrpm $oldrpm $dir/old
 unrpm $newrpm $dir/new
 cd $dir
+bash $rename_script
 
 dfile=`mktemp`
 
@@ -177,6 +182,14 @@ check_gzip_file()
             ret=1
           fi
           ;;
+        *ASCII\ cpio\ archive\ *)
+          echo "gzip content is: $ftype"
+          mv old/$file{,.cpio}
+          mv new/$file{,.cpio}
+          if ! check_single_file ${file}.cpio; then
+            ret=1
+          fi
+          ;;
         *)
           echo "unhandled gzip content: $ftype"
           if ! diff_two_files; then
@@ -219,6 +232,26 @@ check_single_file()
           fi
        done
        return 0
+       ;;
+    *.cpio)
+       flist=`cpio --quiet --list --force-local < "new/$file"`
+       pwd=$PWD
+       fdir=`dirname $file`
+       cd old/$fdir
+       cpio --quiet --extract --force-local < "${file##*/}"
+       cd $pwd/new/$fdir
+       cpio --quiet --extract --force-local < "${file##*/}"
+       cd $pwd
+       local ret=0
+       for f in $flist; do
+         if ! check_single_file $fdir/$f; then
+           ret=1
+           if test -z "$check_all"; then
+             break
+           fi
+         fi
+       done
+       return $ret
        ;;
     *.tar|*.tar.bz2|*.tar.gz|*.tgz|*.tbz2)
        flist=`tar tf new/$file`
@@ -530,7 +563,8 @@ check_single_file()
        echo "" >$file1
        echo "" >$file2
        # Don't compare .build-id and .gnu_debuglink sections
-       for section in $(objdump -s new/$file | grep "Contents of section .*:" | sed -r "s,.* (\..*):,\1,g" | grep -v -e "\.build-id" -e "\.gnu_debuglink" | tr "\n" " "); do
+       sections="$(objdump -s new/$file | grep "Contents of section .*:" | sed -r "s,.* (.*):,\1,g" | grep -v -e "\.build-id" -e "\.gnu_debuglink" | tr "\n" " ")"
+       for section in $sections; do
           objdump -s -j $section old/$file | sed "s,old/,," >> $file1
           objdump -s -j $section new/$file | sed "s,new/,," >> $file2
        done
@@ -560,6 +594,14 @@ check_single_file()
            return 1
        fi
        ;;
+     *symbolic\ link\ to\ *)
+       readlink "old/$file" > $file1
+       readlink "new/$file" > $file2
+       if ! diff -u $file1 $file2; then
+         echo "symlink target for $file differs"
+         return 1
+       fi
+       ;;
      *)
        if ! diff_two_files; then
            return 1
@@ -578,7 +620,8 @@ if [ ! -d /proc/self/ ]; then
   PROC_MOUNTED=1
 fi
 
-ret=0
+# preserve cmp_spec result for check_all runs
+ret=$RES
 for file in $files; do
    if ! check_single_file $file; then
        ret=1
@@ -593,6 +636,6 @@ if [ "$PROC_MOUNTED" -eq "1" ]; then
   umount /proc
 fi
 
-rm $file1 $file2 $dfile
+rm $file1 $file2 $dfile $rename_script
 rm -r $dir
 exit $ret

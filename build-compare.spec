@@ -20,7 +20,7 @@ Name:           build-compare
 Summary:        Build Result Compare Script
 License:        GPL-2.0+
 Group:          Development/Tools/Building
-Version:        2014.07.15
+Version:        2014.11.15
 Release:        0
 Source1:        COPYING
 Source2:        same-build-result.sh
@@ -36,8 +36,7 @@ to a former build.
 
 
 %prep
-mkdir $RPM_BUILD_DIR/%name-%version
-%setup -T 0 -D
+%setup -q -c -T
 
 %build
 

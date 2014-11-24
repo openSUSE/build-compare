@@ -32,7 +32,7 @@ newrpm=`readlink -f $2`
 # if those are not the same, the source RPM has changed and therefore 
 # the resulting files are needed.
 
-cmp_spec $1 $2
+cmp_spec
 RES=$?
 case $RES in
   0)

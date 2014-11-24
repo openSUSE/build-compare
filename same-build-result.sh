@@ -79,14 +79,17 @@ for opac in ${OLDRPMS[*]}; do
      echo "names differ: $oname $nname"
      exit 1
   fi
-  if [ $(echo "$opac" | grep -e "debuginfo") ]; then
+  case "$opac" in
+    *debuginfo*)
      echo "skipping -debuginfo package"
-  else
+    ;;
+    *)
      bash $CMPSCRIPT "$opac" "$npac" || SUCCESS=0
      if test $SUCCESS -eq 0 -a -z "$check_all"; then
         exit 1
      fi
-  fi
+    ;;
+  esac
 done
 
 if [ -n "${NEWRPMS[0]}" ]; then
@@ -107,7 +110,7 @@ if test -e $OLDDIR/rpmlint.log -a -e $OTHERDIR/rpmlint.log; then
   sort -u $OTHERDIR/rpmlint.log|sed -e "s,$release2,@RELEASE@,g" -e "s|/tmp/rpmlint\..*spec|.spec|g"  > $file2
   if ! cmp -s $file1 $file2; then
     echo "rpmlint.log files differ:"
-    diff -u $OLDDIR/rpmlint.log $OTHERDIR/rpmlint.log |head -n 20
+    diff -u $file1 $file2 |head -n 20
     SUCCESS=0
   fi
   rm $file1 $file2
