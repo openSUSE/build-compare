@@ -1,4 +1,11 @@
 -------------------------------------------------------------------
+Wed Nov 26 08:58:45 UTC 2014 - ohering@suse.de
+
+- 2014.11.25
+- correctly handle cmp_spec return code if file checksum differs
+- handle also bz2 and xz compressed files with odd name
+
+-------------------------------------------------------------------
 Tue Nov 18 11:58:51 UTC 2014 - ohering@suse.de
 
 - 2014.11.15

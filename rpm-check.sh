@@ -101,6 +101,7 @@ cmp_spec $rename_script
 RES=$?
 case $RES in
   0)
+     echo "RPM meta information is identical"
      if test -z "$check_all"; then
         exit 0
      fi
@@ -112,6 +113,8 @@ case $RES in
      fi
      ;;
   2)
+     echo "RPM file checksum differs."
+     RES=0
      ;;
   *)
      echo "Wrong exit code!"
@@ -157,25 +160,43 @@ strip_numbered_anchors()
 }
 
 
-check_gzip_file()
+check_compressed_file()
 {
   local file=$1
+  local ext=$2
   local tmpdir=`mktemp -d`
   local ftype
   local ret=0
+  echo "$ext file with odd filename: $file"
   if test -n "$tmpdir"; then
     mkdir $tmpdir/{old,new}
     cp --parents --dereference old/$file $tmpdir/
     cp --parents --dereference new/$file $tmpdir/
     if pushd $tmpdir > /dev/null ; then
-      mv old/$file{,.gz}
-      mv new/$file{,.gz}
-      gunzip old/$file.gz
-      gunzip new/$file.gz
+      case "$ext" in
+        bz2)
+          mv old/$file{,.bz2}
+          mv new/$file{,.bz2}
+          bzip2 -d old/$file.bz2
+          bzip2 -d new/$file.bz2
+          ;;
+        gzip)
+          mv old/$file{,.gz}
+          mv new/$file{,.gz}
+          gzip -d old/$file.gz
+          gzip -d new/$file.gz
+          ;;
+        xz)
+          mv old/$file{,.xz}
+          mv new/$file{,.xz}
+          xz -d old/$file.xz
+          xz -d new/$file.xz
+          ;;
+      esac
       ftype=`/usr/bin/file old/$file | cut -d: -f2-`
       case $ftype in
         *POSIX\ tar\ archive)
-          echo "gzip content is: $ftype"
+          echo "$ext content is: $ftype"
           mv old/$file{,.tar}
           mv new/$file{,.tar}
           if ! check_single_file ${file}.tar; then
@@ -183,7 +204,7 @@ check_gzip_file()
           fi
           ;;
         *ASCII\ cpio\ archive\ *)
-          echo "gzip content is: $ftype"
+          echo "$ext content is: $ftype"
           mv old/$file{,.cpio}
           mv new/$file{,.cpio}
           if ! check_single_file ${file}.cpio; then
@@ -191,7 +212,7 @@ check_gzip_file()
           fi
           ;;
         *)
-          echo "unhandled gzip content: $ftype"
+          echo "unhandled $ext content: $ftype"
           if ! diff_two_files; then
             ret=1
           fi
@@ -588,9 +609,18 @@ check_single_file()
        # tar might package directories - ignore them here
        return 0
        ;;
+     *bzip2\ compressed\ data*)
+       if ! check_compressed_file "$file" "bz2"; then
+           return 1
+       fi
+       ;;
      *gzip\ compressed\ data*)
-       echo "gzipped file with odd filename: $file"
-       if ! check_gzip_file "$file"; then
+       if ! check_compressed_file "$file" "gzip"; then
+           return 1
+       fi
+       ;;
+     *XZ\ compressed\ data*)
+       if ! check_compressed_file "$file" "xz"; then
            return 1
        fi
        ;;
@@ -638,4 +668,7 @@ fi
 
 rm $file1 $file2 $dfile $rename_script
 rm -r $dir
+if test "$ret" = 0; then
+     echo "RPM content is identical"
+fi
 exit $ret

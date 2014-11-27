@@ -20,7 +20,7 @@ Name:           build-compare
 Summary:        Build Result Compare Script
 License:        GPL-2.0+
 Group:          Development/Tools/Building
-Version:        2014.11.15
+Version:        2014.11.25
 Release:        0
 Source1:        COPYING
 Source2:        same-build-result.sh
