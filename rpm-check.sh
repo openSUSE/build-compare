@@ -20,6 +20,8 @@ if test "$#" != 2; then
    exit 1
 fi
 
+self_script=$(cd $(dirname $0); echo $(pwd)/$(basename $0))
+
 source $FUNCTIONS
 
 oldpkg=`readlink -f $1`
@@ -96,6 +98,8 @@ filter_disasm()
 {
    sed -e 's/^ *[0-9a-f]\+://' -e 's/\$0x[0-9a-f]\+/$something/' -e 's/callq *[0-9a-f]\+/callq /' -e 's/# *[0-9a-f]\+/#  /' -e 's/\(0x\)\?[0-9a-f]\+(/offset(/' -e 's/[0-9a-f]\+ </</' -e 's/^<\(.*\)>:/\1:/' -e 's/<\(.*\)+0x[0-9a-f]\+>/<\1 + ofs>/' 
 }
+
+echo "Comparing `basename $oldpkg` to `basename $newpkg`"
 
 case $oldpkg in
   *.rpm)
@@ -400,6 +404,10 @@ check_single_file()
         gunzip -c old/$file > old/${file/.gz/}
         gunzip -c new/$file > new/${file/.gz/}
         check_single_file ${file/.gz/}
+        return $?
+        ;;
+     *.rpm)
+	$self_script -a old/$file new/$file
         return $?
         ;;
      *png)
