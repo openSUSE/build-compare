@@ -1,4 +1,14 @@
 -------------------------------------------------------------------
+Fri Jan  9 09:37:34 UTC 2015 - olaf@aepfle.de
+
+- 2015.01.14
+- Trim VERSION-RELEASE instead of RELEASE because the release number
+  will match other substrings.
+- Use regex instead  in sed /regex/ to match dots properly
+- Handle plain cpio archives from gfxboot
+- Add patterns for .TH header in man pages to handle all cases
+
+-------------------------------------------------------------------
 Wed Nov 26 08:58:45 UTC 2014 - ohering@suse.de
 
 - 2014.11.25
