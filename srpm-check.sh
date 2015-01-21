@@ -90,5 +90,5 @@ for file in $files; do
    fi
 done
 
-rm -r $dir
+rm -rf $dir
 exit $ret

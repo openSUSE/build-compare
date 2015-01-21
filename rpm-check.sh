@@ -193,9 +193,9 @@ check_compressed_file()
           xz -d new/$file.xz
           ;;
       esac
-      ftype=`/usr/bin/file old/$file | cut -d: -f2-`
+      ftype=`/usr/bin/file old/$file | sed 's@^[^:]\+:[[:blank:]]*@@'`
       case $ftype in
-        *POSIX\ tar\ archive)
+        POSIX\ tar\ archive)
           echo "$ext content is: $ftype"
           mv old/$file{,.tar}
           mv new/$file{,.tar}
@@ -203,7 +203,7 @@ check_compressed_file()
             ret=1
           fi
           ;;
-        *ASCII\ cpio\ archive\ *)
+        ASCII\ cpio\ archive\ *)
           echo "$ext content is: $ftype"
           mv old/$file{,.cpio}
           mv new/$file{,.cpio}
@@ -550,9 +550,9 @@ check_single_file()
       ;;
   esac
 
-  ftype=`/usr/bin/file old/$file | cut -d: -f2-`
+  ftype=`/usr/bin/file old/$file | sed 's@^[^:]\+:[[:blank:]]*@@'`
   case $ftype in
-     *PE32\ executable*Mono\/\.Net\ assembly*)
+     PE32\ executable*Mono\/\.Net\ assembly*)
        echo "PE32 Mono/.Net assembly: $file"
        if [ -x /usr/bin/monodis ] ; then
          monodis old/$file 2>/dev/null|sed -e 's/GUID = {.*}/GUID = { 42 }/;'> ${file1}
@@ -567,7 +567,7 @@ check_single_file()
          return 1
        fi
        ;;
-    *ELF*executable*|*ELF*[LM]SB\ shared\ object*)
+    ELF*executable*|ELF*[LM]SB\ shared\ object*)
        objdump -d --no-show-raw-insn old/$file | filter_disasm > $file1
        if ! test -s $file1; then
          # objdump has no idea how to handle it
@@ -608,33 +608,33 @@ check_single_file()
          return 1
        fi
        ;;
-     *directory)
+     directory)
        # tar might package directories - ignore them here
        return 0
        ;;
-     *bzip2\ compressed\ data*)
+     bzip2\ compressed\ data*)
        if ! check_compressed_file "$file" "bz2"; then
            return 1
        fi
        ;;
-     *gzip\ compressed\ data*)
+     gzip\ compressed\ data*)
        if ! check_compressed_file "$file" "gzip"; then
            return 1
        fi
        ;;
-     *XZ\ compressed\ data*)
+     XZ\ compressed\ data*)
        if ! check_compressed_file "$file" "xz"; then
            return 1
        fi
        ;;
-     \ cpio\ archive)
+     cpio\ archive)
           mv old/$file{,.cpio}
           mv new/$file{,.cpio}
           if ! check_single_file ${file}.cpio; then
             return 1
           fi
      ;;
-     *symbolic\ link\ to\ *)
+     symbolic\ link\ to\ *)
        readlink "old/$file" > $file1
        readlink "new/$file" > $file2
        if ! diff -u $file1 $file2; then
@@ -677,7 +677,7 @@ if [ "$PROC_MOUNTED" -eq "1" ]; then
 fi
 
 rm $file1 $file2 $dfile $rename_script
-rm -r $dir
+rm -rf $dir
 if test "$ret" = 0; then
      echo "RPM content is identical"
 fi

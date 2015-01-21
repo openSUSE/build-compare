@@ -1,4 +1,11 @@
 -------------------------------------------------------------------
+Wed Jan 21 08:34:32 UTC 2015 - olaf@aepfle.de
+
+- 2015.01.21
+- Remove leading spaces from file(1) output
+- Force removal of tmpdir to handle files marked as read-only
+
+-------------------------------------------------------------------
 Fri Jan  9 09:37:34 UTC 2015 - olaf@aepfle.de
 
 - 2015.01.14
