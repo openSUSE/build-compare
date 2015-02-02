@@ -62,10 +62,10 @@ bash $SCMPSCRIPT "$osrpm" "$nsrpm" || exit 1
 OLDRPMS=($(find "$OLDDIR" -type f -name \*rpm -a ! -name \*src.rpm  -a ! -name \*.delta.rpm|sort|grep -v -- -32bit-|grep -v -- -64bit-|grep -v -- '-x86-.*\.ia64\.rpm'))
 NEWRPMS=($(find $NEWDIRS -type f -name \*rpm -a ! -name \*src.rpm -a ! -name \*.delta.rpm|sort --field-separator=/ --key=7|grep -v -- -32bit-|grep -v -- -64bit-|grep -v -- '-x86-.*\.ia64\.rpm'))
 
-# Get release from first RPM and keep for rpmlint check
+# Get version-release from first RPM and keep for rpmlint check
 # Remember to quote the "." for future regexes
-release1=$(rpm -qp --nodigest --nosignature --qf "%{RELEASE}" "${OLDRPMS[0]}"|sed -e 's/\./\\./g')
-release2=$(rpm -qp --nodigest --nosignature --qf "%{RELEASE}" "${NEWRPMS[0]}"|sed -e 's/\./\\./g')
+ver_rel1=$(rpm -qp --nodigest --nosignature --qf "%{VERSION}-%{RELEASE}" "${OLDRPMS[0]}"|sed -e 's/\./\\./g')
+ver_rel2=$(rpm -qp --nodigest --nosignature --qf "%{VERSION}-%{RELEASE}" "${NEWRPMS[0]}"|sed -e 's/\./\\./g')
 
 SUCCESS=1
 rpmqp='rpm -qp --qf %{NAME} --nodigest --nosignature '
@@ -106,8 +106,8 @@ if test -e $OLDDIR/rpmlint.log -a -e $OTHERDIR/rpmlint.log; then
   echo "comparing $OLDDIR/rpmlint.log and $OTHERDIR/rpmlint.log"
   # Sort the files first since the order of messages is not deterministic
   # Remove release from files
-  sort -u $OLDDIR/rpmlint.log|sed -e "s,$release1,@RELEASE@,g" -e "s|/tmp/rpmlint\..*spec|.spec|g" > $file1
-  sort -u $OTHERDIR/rpmlint.log|sed -e "s,$release2,@RELEASE@,g" -e "s|/tmp/rpmlint\..*spec|.spec|g"  > $file2
+  sort -u $OLDDIR/rpmlint.log|sed -e "s,$ver_rel1,@VERSION@-@RELEASE@,g" -e "s|/tmp/rpmlint\..*spec|.spec|g" > $file1
+  sort -u $OTHERDIR/rpmlint.log|sed -e "s,$ver_rel2,@VERSION@-@RELEASE@,g" -e "s|/tmp/rpmlint\..*spec|.spec|g"  > $file2
   if ! cmp -s $file1 $file2; then
     echo "rpmlint.log files differ:"
     diff -u $file1 $file2 |head -n 20

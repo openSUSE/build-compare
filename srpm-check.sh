@@ -27,6 +27,10 @@ source $FUNCTIONS
 oldrpm=`readlink -f $1`
 newrpm=`readlink -f $2`
 
+# Get version-release from first RPM and keep for rpmlint check
+# Remember to quote the "." for future regexes
+ver_rel_old=$(rpm -qp --nodigest --nosignature --qf "%{RELEASE}" "${oldrpm}"|sed -e 's/\./\\./g')
+ver_rel_new=$(rpm -qp --nodigest --nosignature --qf "%{RELEASE}" "${newrpm}"|sed -e 's/\./\\./g')
 
 # For source RPMs, we can just check the metadata in the spec file
 # if those are not the same, the source RPM has changed and therefore 
@@ -36,6 +40,7 @@ cmp_spec
 RES=$?
 case $RES in
   0)
+     echo "RPM meta information is identical"
      exit 0
      ;;
   1)
@@ -63,8 +68,8 @@ check_single_file()
   local file=$1
   case $file in
     *.spec)
-       sed -i -e "s,Release:.*$release1,Release: @RELEASE@," old/$file
-       sed -i -e "s,Release:.*$release2,Release: @RELEASE@," new/$file
+       sed -i -e "s,Release:.*${ver_rel_old}$,Release: @RELEASE@," old/$file
+       sed -i -e "s,Release:.*${ver_rel_new}$,Release: @RELEASE@," new/$file
        if ! cmp -s old/$file new/$file; then
          echo "$file differs (spec file)"
          diff -u old/$file new/$file | head -n 20
