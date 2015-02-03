@@ -29,6 +29,7 @@ Source4:        functions.sh
 Source5:        srpm-check.sh
 BuildRoot:      %{_tmppath}/%{name}-%{version}-build
 BuildArch:      noarch
+#!BuildIgnore:  build-compare
 
 %description
 This package contains scripts to find out if the build result differs
