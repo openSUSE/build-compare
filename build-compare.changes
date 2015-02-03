@@ -4,6 +4,7 @@ Tue Feb  3 11:34:39 UTC 2015 - olaf@aepfle.de
 - 2015.02.03
 - Trim .TH also in perl man pages (bnc#915941)
 - Trim first line of man page to catch overly verbose tools
+- Use correct offset for patching mtime out of .pyc files
 
 -------------------------------------------------------------------
 Mon Feb  2 10:05:40 UTC 2015 - olaf@aepfle.de

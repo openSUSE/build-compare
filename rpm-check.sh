@@ -373,8 +373,8 @@ check_single_file()
        done
        return $ret;;
      *.pyc|*.pyo)
-        perl -e "open fh, '+<', 'old/$file'; seek fh, 3, SEEK_SET; print fh '0000';"
-        perl -e "open fh, '+<', 'new/$file'; seek fh, 3, SEEK_SET; print fh '0000';"
+        perl -e "open fh, '+<', 'old/$file'; seek fh, 4, SEEK_SET; print fh '0000';"
+        perl -e "open fh, '+<', 'new/$file'; seek fh, 4, SEEK_SET; print fh '0000';"
         ;;
      *.bz2)
         bunzip2 -c old/$file > old/${file/.bz2/}
