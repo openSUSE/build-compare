@@ -2,6 +2,7 @@
 Wed Feb  4 15:53:05 UTC 2015 - olaf@aepfle.de
 
 - Handle ruby gem files, they are tar archives (bnc#916047)
+- Remove Creator: and CreationDate: tags from .ps files (bnc#915952)
 
 -------------------------------------------------------------------
 Tue Feb  3 11:34:39 UTC 2015 - olaf@aepfle.de

@@ -547,6 +547,14 @@ check_single_file()
       echo "$file and $oldfn are same"
       return 0
       ;;
+    *.ps)
+      for f in "old/$file" "new/$file"; do
+        sed -i -e '
+	/^%%CreationDate:[[:blank:]]/d
+	/^%%Creator:[[:blank:]]groff[[:blank:]]version[[:blank:]]/d
+	' "$f"
+      done
+    ;;
     *pdf)
       # PDF files contain a unique ID, remove it
       # Format of the ID is:
