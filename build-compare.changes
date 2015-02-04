@@ -4,6 +4,7 @@ Wed Feb  4 15:53:05 UTC 2015 - olaf@aepfle.de
 - 2015.02.04
 - Handle ruby gem files, they are tar archives (bnc#916047)
 - Remove Creator: and CreationDate: tags from .ps files (bnc#915952)
+- Correct regex for hostname in libtool (bnc#916268)
 
 -------------------------------------------------------------------
 Tue Feb  3 11:34:39 UTC 2015 - olaf@aepfle.de

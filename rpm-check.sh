@@ -491,7 +491,7 @@ check_single_file()
        ;;
      */libtool)
        for f in old/$file new/$file; do
-	  sed -i -e 's|^# Libtool was configured on host [a-z0-9]*:$|Libtool was configured on host x42:|' $f
+	  sed -i -e 's|^# Libtool was configured on host [A-Za-z0-9]*:$|# Libtool was configured on host x42:|' $f
        done
        ;;
      /etc/mail/*cf|/etc/sendmail.cf)
