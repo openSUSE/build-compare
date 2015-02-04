@@ -733,3 +733,4 @@ if test "$ret" = 0; then
      echo "RPM content is identical"
 fi
 exit $ret
+# vim: tw=666 ts=2 et
