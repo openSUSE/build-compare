@@ -648,6 +648,13 @@ check_single_file()
            return 1
        fi
        ;;
+     POSIX\ tar\ archive)
+          mv old/$file{,.tar}
+          mv new/$file{,.tar}
+          if ! check_single_file ${file}.tar; then
+            return 1
+          fi
+       ;;
      cpio\ archive)
           mv old/$file{,.cpio}
           mv new/$file{,.cpio}
