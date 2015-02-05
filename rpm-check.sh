@@ -337,7 +337,7 @@ check_single_file()
        done
        return $ret
        ;;
-    *.zip|*.jar)
+    *.zip|*.jar|*.war)
        cd old
        unjar_l ./$file |sort > flist
        #  10-05-2010 14:39
