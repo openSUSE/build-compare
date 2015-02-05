@@ -97,3 +97,4 @@ done
 
 rm -rf $dir
 exit $ret
+# vim: tw=666 ts=2 et

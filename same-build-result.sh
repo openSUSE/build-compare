@@ -141,3 +141,4 @@ if test $SUCCESS -eq 0; then
 fi
 echo 'compare validated built as identical !'
 exit 0
+# vim: tw=666 ts=2 et
