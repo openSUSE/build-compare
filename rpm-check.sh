@@ -645,18 +645,18 @@ check_single_file()
            break
          fi
        fi       
+       elfdiff=
        sed -i -e "s,old/,," $file1
        objdump -d --no-show-raw-insn new/$file | filter_disasm > $file2
        sed -i -e "s,new/,," $file2
        if ! diff -u $file1 $file2 > $dfile; then
           echo "$file differs in assembler output"
           head -n 200 $dfile
-          return 1
+          elfdiff="1"
        fi
        echo "" >$file1
        echo "" >$file2
        # Don't compare .build-id and .gnu_debuglink sections
-       elfdiff=
        sections="$(objdump -s new/$file | grep "Contents of section .*:" | sed -r "s,.* (.*):,\1,g" | grep -v -e "\.build-id" -e "\.gnu_debuglink" | tr "\n" " ")"
        for section in $sections; do
           objdump -s -j $section old/$file | sed "s,old/,," > $file1
