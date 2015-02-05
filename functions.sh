@@ -57,19 +57,35 @@ function check_provides()
   check_header "$pkg"
 }
 
-#usage unrpm <file> $dir
-# Unpack rpm files in directory $dir
-# like /usr/bin/unrpm - just for one file and with no options
-function unrpm()
+#usage unpackage <file> $dir
+# Unpack files in directory $dir
+# like /usr/bin/unpackage - just for one file and with no options
+function unpackage()
 {
     local file
     local dir
     file=$1
     dir=$2
-    CPIO_OPTS="--extract --unconditional --preserve-modification-time --make-directories --quiet"
     mkdir -p $dir
     pushd $dir 1>/dev/null
-    rpm2cpio $file | cpio ${CPIO_OPTS}
+    case $file in
+        *.bz2)
+            bzip2 -d $file
+            ;;
+        *.gz)
+            gzip -d $file
+            ;;
+        *.xz)
+            xz -d $file
+            ;;
+        *.tar|*.tar.bz2|*.tar.gz|*.tgz|*.tbz2)
+            tar xf $file
+            ;;
+        *.rpm)
+            CPIO_OPTS="--extract --unconditional --preserve-modification-time --make-directories --quiet"
+            rpm2cpio $file | cpio ${CPIO_OPTS}
+            ;;
+    esac
     popd 1>/dev/null
 }
 
@@ -85,6 +101,8 @@ function cmp_spec ()
     local file1 file2
     local f
     local sh=$1
+    local oldrpm=$2
+    local newrpm=$3
 
     QF="%{NAME}"
     

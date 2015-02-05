@@ -22,16 +22,16 @@ fi
 
 source $FUNCTIONS
 
-oldrpm=`readlink -f $1`
-newrpm=`readlink -f $2`
+oldpkg=`readlink -f $1`
+newpkg=`readlink -f $2`
 rename_script=`mktemp`
 
-if test ! -f "$oldrpm"; then
+if test ! -f "$oldpkg"; then
     echo "can't open $1"
     exit 1
 fi
 
-if test ! -f "$newrpm"; then
+if test ! -f "$newpkg"; then
     echo "can't open $2"
     exit 1
 fi
@@ -97,28 +97,32 @@ filter_disasm()
    sed -e 's/^ *[0-9a-f]\+://' -e 's/\$0x[0-9a-f]\+/$something/' -e 's/callq *[0-9a-f]\+/callq /' -e 's/# *[0-9a-f]\+/#  /' -e 's/\(0x\)\?[0-9a-f]\+(/offset(/' -e 's/[0-9a-f]\+ </</' -e 's/^<\(.*\)>:/\1:/' -e 's/<\(.*\)+0x[0-9a-f]\+>/<\1 + ofs>/' 
 }
 
-cmp_spec $rename_script
-RES=$?
-case $RES in
-  0)
-     echo "RPM meta information is identical"
-     if test -z "$check_all"; then
-        exit 0
-     fi
-     ;;
-  1)
-     echo "RPM meta information is different"
-     if test -z "$check_all"; then
-        exit 1
-     fi
-     ;;
-  2)
-     echo "RPM file checksum differs."
-     RES=0
-     ;;
-  *)
-     echo "Wrong exit code!"
-     exit 1
+case $oldpkg in
+  *.rpm)
+     cmp_spec $rename_script $oldpkg $newpkg
+     RES=$?
+     case $RES in
+       0)
+          echo "RPM meta information is identical"
+          if test -z "$check_all"; then
+             exit 0
+          fi
+          ;;
+       1)
+          echo "RPM meta information is different"
+          if test -z "$check_all"; then
+             exit 1
+          fi
+          ;;
+       2)
+          echo "RPM file checksum differs."
+          RES=0
+          ;;
+       *)
+          echo "Wrong exit code!"
+          exit 1
+          ;;
+     esac
      ;;
 esac
 
@@ -127,8 +131,18 @@ file2=`mktemp`
 
 dir=`mktemp -d`
 echo "Extracting packages"
-unrpm $oldrpm $dir/old
-unrpm $newrpm $dir/new
+unpackage $oldpkg $dir/old
+unpackage $newpkg $dir/new
+
+# files is set in cmp_spec for rpms, so if RES is empty we should assume
+# it wasn't an rpm and pick all files for comparison.
+if [ -z $RES ]; then
+    oldfiles=`cd $dir/old; find . -type f`
+    newfiles=`cd $dir/new; find . -type f`
+
+    files=`echo -e "$oldfiles\n$newfiles" | sort -u`
+fi
+
 cd $dir
 bash $rename_script
 
@@ -736,7 +750,7 @@ fi
 rm $file1 $file2 $dfile $rename_script
 rm -rf $dir
 if test "$ret" = 0; then
-     echo "RPM content is identical"
+     echo "Package content is identical"
 fi
 exit $ret
 # vim: tw=666 ts=2 et
