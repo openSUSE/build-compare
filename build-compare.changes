@@ -3,6 +3,7 @@ Wed Feb  4 17:57:27 UTC 2015 - olaf@aepfle.de
 
 - Remove more javadoc references (bnc#916161)
 - Handle *.war files like *.jar files
+- Trim name-version-release string in update-scripts
 
 -------------------------------------------------------------------
 Wed Feb  4 15:53:05 UTC 2015 - olaf@aepfle.de

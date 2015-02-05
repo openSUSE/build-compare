@@ -19,13 +19,21 @@ check_header()
 # - it is used as direntry below certain paths
 # - it is assigned to some variable in scripts, at the end of a line
 # - it is used in PROVIDES, at the end of a line
+# Trim name-version-release string:
+# - it is used in update-scripts which are called by libzypp
 function trim_release_old()
 {
-  sed -e "/\(\/boot\|\/lib\/modules\|\/lib\/firmware\|\/usr\/src\|$version_release_old_regex_l\$\)/{s,$version_release_old_regex_l,@VERSION@-@RELEASE_LONG@,g;s,$version_release_old_regex_s,@VERSION@-@RELEASE_SHORT@,g}"
+  sed -e "
+  /\(\/boot\|\/lib\/modules\|\/lib\/firmware\|\/usr\/src\|$version_release_old_regex_l\$\)/{s,$version_release_old_regex_l,@VERSION@-@RELEASE_LONG@,g;s,$version_release_old_regex_s,@VERSION@-@RELEASE_SHORT@,g}
+  s/\(\/var\/adm\/update-scripts\/\)${name_ver_rel_old_regex_l}\([^[:blank:]]\+\)/\1@NAME_VER_REL@\2/g
+  "
 }
 function trim_release_new()
 {
-  sed -e "/\(\/boot\|\/lib\/modules\|\/lib\/firmware\|\/usr\/src\|$version_release_new_regex_l\$\)/{s,$version_release_new_regex_l,@VERSION@-@RELEASE_LONG@,g;s,$version_release_new_regex_s,@VERSION@-@RELEASE_SHORT@,g}"
+  sed -e "
+  /\(\/boot\|\/lib\/modules\|\/lib\/firmware\|\/usr\/src\|$version_release_new_regex_l\$\)/{s,$version_release_new_regex_l,@VERSION@-@RELEASE_LONG@,g;s,$version_release_new_regex_s,@VERSION@-@RELEASE_SHORT@,g}
+  s/\(\/var\/adm\/update-scripts\/\)${name_ver_rel_new_regex_l}\([^[:blank:]]\+\)/\1@NAME_VER_REL@\2/g
+  "
 }
 # Get single directory or filename with long or short release string
 function grep_release_old()
@@ -119,6 +127,8 @@ function cmp_spec ()
     # Remember to quote the . which is in release
     version_release_old=$($RPM --qf "%{VERSION}-%{RELEASE}" "$oldrpm")
     version_release_new=$($RPM --qf "%{VERSION}-%{RELEASE}" "$newrpm")
+    name_ver_rel_old=$($RPM --qf "%{NAME}-%{VERSION}-%{RELEASE}" "$oldrpm")
+    name_ver_rel_new=$($RPM --qf "%{NAME}-%{VERSION}-%{RELEASE}" "$newrpm")
     # Short version without B_CNT
     version_release_old_regex_s=${version_release_old%.*}
     version_release_old_regex_s=${version_release_old_regex_s//./\\.}
@@ -127,6 +137,8 @@ function cmp_spec ()
     # Long version with B_CNT
     version_release_old_regex_l=${version_release_old//./\\.}
     version_release_new_regex_l=${version_release_new//./\\.}
+    name_ver_rel_old_regex_l=${name_ver_rel_old//./\\.}
+    name_ver_rel_new_regex_l=${name_ver_rel_new//./\\.}
     # This might happen when?!
     echo "comparing RELEASE"
     if [ "${version_release_old%.*}" != "${version_release_new%.*}" ] ; then
