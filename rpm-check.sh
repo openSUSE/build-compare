@@ -26,13 +26,13 @@ oldrpm=`readlink -f $1`
 newrpm=`readlink -f $2`
 rename_script=`mktemp`
 
-if test ! -f $oldrpm; then
-    echo "can't open $oldrpm"
+if test ! -f "$oldrpm"; then
+    echo "can't open $1"
     exit 1
 fi
 
-if test ! -f $newrpm; then
-    echo "can't open $newrpm"
+if test ! -f "$newrpm"; then
+    echo "can't open $2"
     exit 1
 fi
 
