@@ -590,9 +590,9 @@ check_single_file()
     *.ps)
       for f in "old/$file" "new/$file"; do
         sed -i -e '
-	/^%%CreationDate:[[:blank:]]/d
-	/^%%Creator:[[:blank:]]groff[[:blank:]]version[[:blank:]]/d
-	' "$f"
+          /^%%CreationDate:[[:blank:]]/d
+          /^%%Creator:[[:blank:]]groff[[:blank:]]version[[:blank:]]/d
+        ' "$f"
       done
     ;;
     *pdf)
