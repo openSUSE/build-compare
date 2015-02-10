@@ -1,4 +1,9 @@
 -------------------------------------------------------------------
+Tue Feb 10 15:35:25 UTC 2015 - olaf@aepfle.de
+
+- Trim objdump output properly
+
+-------------------------------------------------------------------
 Tue Feb 10 15:33:32 UTC 2015 - randy.e.witt@linux.intel.com
 
 - Print section differences even if assembly has differences.
