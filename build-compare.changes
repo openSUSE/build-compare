@@ -1,4 +1,13 @@
 -------------------------------------------------------------------
+Tue Feb 10 15:33:32 UTC 2015 - randy.e.witt@linux.intel.com
+
+- Print section differences even if assembly has differences.
+- Add support for nested rpms.
+- Make rpm-check work for "packages" other than rpm.
+- Tell which section was different when doing ELF comparisons.
+- Error when one of the rpms is not found
+
+-------------------------------------------------------------------
 Fri Feb  6 10:35:56 UTC 2015 - olaf@aepfle.de
 
 - 2015.02.06
