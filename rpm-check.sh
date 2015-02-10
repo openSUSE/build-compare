@@ -592,6 +592,7 @@ check_single_file()
         sed -i -e '
           /^%%CreationDate:[[:blank:]]/d
           /^%%Creator:[[:blank:]]groff[[:blank:]]version[[:blank:]]/d
+          /^%DVIPSSource:[[:blank:]]/d
         ' "$f"
       done
     ;;
