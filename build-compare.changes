@@ -1,6 +1,7 @@
 -------------------------------------------------------------------
 Tue Feb 10 15:35:25 UTC 2015 - olaf@aepfle.de
 
+- 2015.02.10
 - Trim objdump output properly
 - Trim .TH also in localized man pages (bnc#915941)
 
