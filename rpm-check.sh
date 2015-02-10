@@ -506,7 +506,7 @@ check_single_file()
          trim_man_first_line $f
        done
        ;;
-     /usr/share/man/man*/*|/usr/lib/texmf/doc/man/*/*)
+     /usr/share/man/*/man*|/usr/share/man/man*|/usr/lib/texmf/doc/man/*/*)
 
        for f in old/$file new/$file; do
          trim_man_TH $f
