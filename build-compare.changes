@@ -1,4 +1,9 @@
 -------------------------------------------------------------------
+Thu Feb 12 10:41:45 UTC 2015 - olaf@aepfle.de
+
+- Handle also .o files as ELF relocatable objects
+
+-------------------------------------------------------------------
 Thu Feb 12 08:22:09 UTC 2015 - randy.e.witt@linux.intel.com
 
 - Rename rpm-check.sh to pkg-diff.sh
