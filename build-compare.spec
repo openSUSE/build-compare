@@ -25,7 +25,7 @@ Version:        2015.02.10
 Release:        0
 Source1:        COPYING
 Source2:        same-build-result.sh
-Source3:        rpm-check.sh
+Source3:        pkg-diff.sh
 Source4:        functions.sh
 Source5:        srpm-check.sh
 BuildRoot:      %{_tmppath}/%{name}-%{version}-build

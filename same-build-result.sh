@@ -7,11 +7,11 @@
 # Enhanced by Andreas Jaeger <aj@suse.de>
 #
 # The script decides if the new build differes from the former one,
-# using rpm-check.sh.
+# using pkg-diff.sh.
 # The script is called as part of the build process as:
 # /usr/lib/build/same-build-result.sh /.build.oldpackages /usr/src/packages/RPMS /usr/src/packages/SRPMS
 
-CMPSCRIPT=${0%/*}/rpm-check.sh
+CMPSCRIPT=${0%/*}/pkg-diff.sh
 SCMPSCRIPT=${0%/*}/srpm-check.sh
 
 check_all=1
