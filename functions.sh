@@ -255,4 +255,4 @@ function cmp_spec ()
     rm $file1 $file2
     return $RES
 }
-# vim: tw=666 ts=2 et
+# vim: tw=666 ts=2 shiftwidth=2 et

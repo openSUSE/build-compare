@@ -762,4 +762,4 @@ if test "$ret" = 0; then
      echo "Package content is identical"
 fi
 exit $ret
-# vim: tw=666 ts=2 et
+# vim: tw=666 ts=2 shiftwidth=2 et
