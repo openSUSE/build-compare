@@ -154,14 +154,24 @@ dfile=`mktemp`
 
 diff_two_files()
 {
-  if ! cmp -s old/$file new/$file; then
-     echo "$file differs ($ftype)"
-     hexdump -C old/$file > $file1
-     hexdump -C new/$file > $file2
-     diff -u $file1 $file2 | head -n 200
-     return 1
+  if test ! -e old/$file; then
+    echo "Missing in old package: $file"
+    return 1
   fi
-  return 0
+  if test ! -e new/$file; then
+    echo "Missing in new package: $file"
+    return 1
+  fi
+
+  if cmp -s old/$file new/$file; then
+    return 0
+  fi
+
+  echo "$file differs ($ftype)"
+  hexdump -C old/$file > $file1
+  hexdump -C new/$file > $file2
+  diff -u $file1 $file2 | head -n 200
+  return 1
 }
 
 trim_man_first_line()
