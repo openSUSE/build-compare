@@ -1,6 +1,7 @@
 -------------------------------------------------------------------
 Fri Mar 20 18:58:22 UTC 2015 - olaf@aepfle.de
 
+- 2015.03.20
 - Convert correct png file before comparison
 - Avoid name clashes when comparing png files
 - Handle filename changes gracefully when comparing unknown filetypes
