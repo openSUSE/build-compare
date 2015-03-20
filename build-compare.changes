@@ -1,4 +1,9 @@
 -------------------------------------------------------------------
+Fri Mar 20 18:58:22 UTC 2015 - olaf@aepfle.de
+
+- Convert correct png file before comparison
+
+-------------------------------------------------------------------
 Thu Feb 12 10:41:45 UTC 2015 - olaf@aepfle.de
 
 - Handle also .o files as ELF relocatable objects
