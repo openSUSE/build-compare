@@ -411,19 +411,19 @@ check_single_file()
         return $?
         ;;
      *png)
-	# Try to remove timestamps, only if convert from ImageMagick is installed
+        # Try to remove timestamps, only if convert from ImageMagick is installed
         if [[ $(type -p convert) ]]; then
-	  convert old/$file +set date:create +set date:modify old/${file/.png/_n.png}
-	  convert old/$file +set date:create +set date:modify new/${file/.png/_n.png}
-	  if ! cmp -s old/${file/.png/_n.png} new/${file/.png/_n.png}; then
-	      echo "$file differs ($ftype)"
-	      hexdump -C old/${file/.png/_n.png} > $file1
-	      hexdump -C new/${file/.png/_n.png} > $file2
-	      diff -u $file1 $file2 | head -n 20
-	      return 1
-	  fi
-	  return 0
-	fi
+          convert old/$file +set date:create +set date:modify old/${file/.png/_n.png}
+          convert old/$file +set date:create +set date:modify new/${file/.png/_n.png}
+          if ! cmp -s old/${file/.png/_n.png} new/${file/.png/_n.png}; then
+            echo "$file differs ($ftype)"
+            hexdump -C old/${file/.png/_n.png} > $file1
+            hexdump -C new/${file/.png/_n.png} > $file2
+            diff -u $file1 $file2 | head -n 20
+            return 1
+          fi
+          return 0
+        fi
         ;;
      /usr/share/locale/*/LC_MESSAGES/*.mo|/usr/share/locale-bundle/*/LC_MESSAGES/*.mo)
        for f in old/$file new/$file; do
