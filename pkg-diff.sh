@@ -413,12 +413,14 @@ check_single_file()
      *png)
         # Try to remove timestamps, only if convert from ImageMagick is installed
         if [[ $(type -p convert) ]]; then
-          convert old/$file +set date:create +set date:modify old/${file/.png/_n.png}
-          convert new/$file +set date:create +set date:modify new/${file/.png/_n.png}
-          if ! cmp -s old/${file/.png/_n.png} new/${file/.png/_n.png}; then
+          convert old/$file +set date:create +set date:modify old/${file}.$PPID.$$
+          convert new/$file +set date:create +set date:modify new/${file}.$PPID.$$
+          mv -f old/${file}.$PPID.$$ old/${file}
+          mv -f new/${file}.$PPID.$$ new/${file}
+          if ! cmp -s old/${file} new/${file}; then
             echo "$file differs ($ftype)"
-            hexdump -C old/${file/.png/_n.png} > $file1
-            hexdump -C new/${file/.png/_n.png} > $file2
+            hexdump -C old/${file} > $file1
+            hexdump -C new/${file} > $file2
             diff -u $file1 $file2 | head -n 20
             return 1
           fi
