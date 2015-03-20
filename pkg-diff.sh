@@ -427,11 +427,7 @@ check_single_file()
           convert new/$file +set date:create +set date:modify new/${file}.$PPID.$$
           mv -f old/${file}.$PPID.$$ old/${file}
           mv -f new/${file}.$PPID.$$ new/${file}
-          if ! cmp -s old/${file} new/${file}; then
-            echo "$file differs ($ftype)"
-            hexdump -C old/${file} > $file1
-            hexdump -C new/${file} > $file2
-            diff -u $file1 $file2 | head -n 20
+          if ! diff_two_files; then
             return 1
           fi
           return 0
