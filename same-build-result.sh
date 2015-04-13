@@ -76,18 +76,18 @@ for opac in ${OLDRPMS[*]}; do
   oname=`$rpmqp $opac`
   nname=`$rpmqp $npac`
   if test "$oname" != "$nname"; then
-     echo "names differ: $oname $nname"
-     exit 1
+    echo "names differ: $oname $nname"
+    exit 1
   fi
   case "$opac" in
     *debuginfo*)
-     echo "skipping -debuginfo package"
+      echo "skipping -debuginfo package"
     ;;
     *)
-     bash $CMPSCRIPT "$opac" "$npac" || SUCCESS=0
-     if test $SUCCESS -eq 0 -a -z "$check_all"; then
+      bash $CMPSCRIPT "$opac" "$npac" || SUCCESS=0
+      if test $SUCCESS -eq 0 -a -z "$check_all"; then
         exit 1
-     fi
+      fi
     ;;
   esac
 done
