@@ -101,7 +101,7 @@ fi
 # Compare rpmlint.log files
 if test -d /home/abuild/rpmbuild/OTHER; then
   OTHERDIR=/home/abuild/rpmbuild/OTHER
-elif test -d /usr/src/packages/OTHER
+elif test -d /usr/src/packages/OTHER; then
   OTHERDIR=/usr/src/packages/OTHER
 else
   echo "no OTHERDIR"
