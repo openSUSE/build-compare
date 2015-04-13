@@ -86,6 +86,7 @@ for opac in ${OLDRPMS[*]}; do
     *)
       bash $CMPSCRIPT "$opac" "$npac" || SUCCESS=0
       if test $SUCCESS -eq 0 -a -z "$check_all"; then
+        echo "differences between $opac and $npac"
         exit 1
       fi
     ;;
