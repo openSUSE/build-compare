@@ -1,4 +1,12 @@
 -------------------------------------------------------------------
+Mon Apr 13 08:55:39 UTC 2015 - olaf@aepfle.de
+
+- Show hint if pkg-diff.sh returns non-zero
+- Adjust intending in same-build-result.sh
+- Handle /usr/src/packages/OTHER
+- Handle "setuid directory"
+
+-------------------------------------------------------------------
 Fri Mar 20 18:58:22 UTC 2015 - olaf@aepfle.de
 
 - 2015.03.20
