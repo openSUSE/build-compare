@@ -1,6 +1,7 @@
 -------------------------------------------------------------------
 Mon Apr 13 08:55:39 UTC 2015 - olaf@aepfle.de
 
+- 2015.04.13
 - Show hint if pkg-diff.sh returns non-zero
 - Adjust intending in same-build-result.sh
 - Handle /usr/src/packages/OTHER
