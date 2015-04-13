@@ -689,7 +689,7 @@ check_single_file()
          return 1
        fi
        ;;
-     directory|setuid,\ directory|sticky,\ directory)
+     directory|setuid\ directory|setuid,\ directory|sticky,\ directory)
        # tar might package directories - ignore them here
        return 0
        ;;
