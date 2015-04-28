@@ -342,7 +342,7 @@ check_single_file()
        return 0
        ;;
     *.cpio)
-       flist=`cpio --quiet --list --force-local < "new/$file"`
+       flist=`cpio --quiet --list --force-local < "new/$file" | sort`
        pwd=$PWD
        fdir=$file.extract.$PPID.$$
        mkdir old/$fdir new/$fdir

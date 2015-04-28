@@ -1,6 +1,7 @@
 -------------------------------------------------------------------
 Tue Apr 28 11:52:12 UTC 2015 - olaf@aepfle.de
 
+- Sort cpio file list with files to compare
 - Extract old and new files in parallel
 - Ignore block device nodes
 - Ignore character device nodes
