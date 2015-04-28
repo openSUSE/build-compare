@@ -1,6 +1,7 @@
 -------------------------------------------------------------------
 Tue Apr 28 11:52:12 UTC 2015 - olaf@aepfle.de
 
+- 2015.04.28
 - Filter InitrdID in /linuxrc.config
 - Hexdump old and new file in parallel
 - Sort cpio file list with files to compare
