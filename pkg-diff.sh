@@ -770,6 +770,8 @@ check_single_file()
          return 1
        fi
        ;;
+     character\ special\ *)
+     ;;
      *)
        if ! diff_two_files; then
            return 1
