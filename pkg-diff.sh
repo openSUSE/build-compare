@@ -345,6 +345,23 @@ check_single_file()
        rm -rf old/$fdir new/$fdir
        return $ret
        ;;
+    *.squashfs)
+       flist=`unsquashfs -no-progress -ls -dest '' "new/$file" | grep -Ev '^(Parallel unsquashfs:|[0-9]+ inodes )' | sort`
+       fdir=$file.extract.$PPID.$$
+       unsquashfs -no-progress -dest old/$fdir "old/$file"
+       unsquashfs -no-progress -dest new/$fdir "new/$file"
+       local ret=0
+       for f in $flist; do
+         if ! check_single_file $fdir/$f; then
+           ret=1
+           if test -z "$check_all"; then
+             break
+           fi
+         fi
+       done
+       rm -rf old/$fdir new/$fdir
+       return $ret
+       ;;
     *.tar|*.tar.bz2|*.tar.gz|*.tgz|*.tbz2)
        flist=`tar tf new/$file`
        pwd=$PWD
@@ -721,6 +738,14 @@ check_single_file()
           if ! check_single_file ${file}.cpio; then
             return 1
           fi
+     ;;
+     Squashfs\ filesystem,*)
+        echo "$file ($ftype)"
+        mv old/$file{,.squashfs}
+        mv new/$file{,.squashfs}
+        if ! check_single_file ${file}.squashfs; then
+          return 1
+        fi
      ;;
      symbolic\ link\ to\ *)
        readlink "old/$file" > $file1
