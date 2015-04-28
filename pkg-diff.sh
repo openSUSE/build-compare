@@ -183,8 +183,9 @@ diff_two_files()
   fi
 
   echo "$file differs ($ftype)"
-  hexdump -C old/$file > $file1
-  hexdump -C new/$file > $file2
+  hexdump -C old/$file > $file1 &
+  hexdump -C new/$file > $file2 &
+  wait
   diff -u $file1 $file2 | head -n 200
   return 1
 }
