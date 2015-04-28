@@ -662,6 +662,11 @@ check_single_file()
             }' "$f"
       done
       ;;
+      */linuxrc.config)
+        echo "${file}"
+        sed -i '/^InitrdID:/s@^.*@InitrdID: something@' "old/$file"
+        sed -i '/^InitrdID:/s@^.*@InitrdID: something@' "new/$file"
+      ;;
   esac
 
   ftype=`/usr/bin/file old/$file | sed 's@^[^:]\+:[[:blank:]]*@@'`
