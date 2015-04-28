@@ -770,6 +770,8 @@ check_single_file()
          return 1
        fi
        ;;
+     block\ special\ *)
+     ;;
      character\ special\ *)
      ;;
      *)
