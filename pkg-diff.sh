@@ -20,6 +20,21 @@ if test "$#" != 2; then
    exit 1
 fi
 
+# Always clean up on exit
+local_tmpdir=`mktemp -d`
+if test -z "${local_tmpdir}"
+then
+  exit 1
+fi
+function _exit()
+{
+  chmod -R u+w "${local_tmpdir}"
+  rm -rf "${local_tmpdir}"
+}
+trap _exit EXIT
+# Let further mktemp refer to private tmpdir
+export TMPDIR=$local_tmpdir
+
 self_script=$(cd $(dirname $0); echo $(pwd)/$(basename $0))
 
 source $FUNCTIONS

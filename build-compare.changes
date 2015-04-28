@@ -1,6 +1,7 @@
 -------------------------------------------------------------------
 Tue Apr 28 11:52:12 UTC 2015 - olaf@aepfle.de
 
+- Always clean tmpdir on exit in pkg-diff.sh
 - Handle squashfs files
 
 -------------------------------------------------------------------
