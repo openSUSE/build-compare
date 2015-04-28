@@ -261,20 +261,23 @@ check_compressed_file()
         bz2)
           mv old/$file{,.bz2}
           mv new/$file{,.bz2}
-          bzip2 -d old/$file.bz2
-          bzip2 -d new/$file.bz2
+          bzip2 -d old/$file.bz2 &
+          bzip2 -d new/$file.bz2 &
+          wait
           ;;
         gzip)
           mv old/$file{,.gz}
           mv new/$file{,.gz}
-          gzip -d old/$file.gz
-          gzip -d new/$file.gz
+          gzip -d old/$file.gz &
+          gzip -d new/$file.gz &
+          wait
           ;;
         xz)
           mv old/$file{,.xz}
           mv new/$file{,.xz}
-          xz -d old/$file.xz
-          xz -d new/$file.xz
+          xz -d old/$file.xz &
+          xz -d new/$file.xz &
+          wait
           ;;
       esac
       ftype=`/usr/bin/file old/$file | sed 's@^[^:]\+:[[:blank:]]*@@'`
