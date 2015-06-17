@@ -1,6 +1,7 @@
 -------------------------------------------------------------------
 Wed Jun 17 14:25:06 UTC 2015 - olaf@aepfle.de
 
+- 2015.06.17
 - Fix regex to handle /lib/(modules|firmware)/version-release-any properly
 
 -------------------------------------------------------------------
