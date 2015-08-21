@@ -1,4 +1,10 @@
 -------------------------------------------------------------------
+Fri Aug 21 12:57:57 UTC 2015 - seife+obs@b1-systems.com
+
+- avoid -kmp packages with "filename-too-long-for-joliet"
+  triggering constant republishing
+
+-------------------------------------------------------------------
 Wed Jul 15 09:50:58 UTC 2015 - olaf@aepfle.de
 
 - 2015.07.15
