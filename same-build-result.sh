@@ -125,8 +125,8 @@ if test -n "$OTHERDIR"; then
     sed -i -e "/W: filename-too-long-for-joliet/s,\(^.*-kmp-.*-kmp-\).*$,\1," $file1
     sed -i -e "/W: filename-too-long-for-joliet/s,\(^.*-kmp-.*-kmp-\).*$,\1," $file2
     # Remove durations from progress reports
-    sed -i -e "/I: filelist-initialization /s| [0-9]\+\.[0-9] s| x.x s|" $file2
-    sed -i -e "/I: check-completed /s| [0-9]\+\.[0-9] s| y.y s|" $file2
+    sed -i -e "/I: \(filelist-initialization\|check-completed\) /s| [0-9]\+\.[0-9] s| x.x s|" $file1
+    sed -i -e "/I: \(filelist-initialization\|check-completed\) /s| [0-9]\+\.[0-9] s| x.x s|" $file2
     if ! cmp -s $file1 $file2; then
       echo "rpmlint.log files differ:"
       diff -u $file1 $file2 |head -n 20
