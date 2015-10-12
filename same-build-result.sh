@@ -124,6 +124,9 @@ if test -n "$OTHERDIR"; then
     # +virtualbox-guest-kmp-default.x86_64: W: filename-too-long-for-joliet virtualbox-guest-kmp-default-5.0.2_k3.16.7_24-178.d_l_ocaml.1.x86_64.rpm
     sed -i -e "/W: filename-too-long-for-joliet/s,\(^.*-kmp-.*-kmp-\).*$,\1," $file1
     sed -i -e "/W: filename-too-long-for-joliet/s,\(^.*-kmp-.*-kmp-\).*$,\1," $file2
+    # Remove durations from progress reports
+    sed -i -e "/I: \(filelist-initialization\|check-completed\) /s| [0-9]\+\.[0-9] s| x.x s|" $file1
+    sed -i -e "/I: \(filelist-initialization\|check-completed\) /s| [0-9]\+\.[0-9] s| x.x s|" $file2
     if ! cmp -s $file1 $file2; then
       echo "rpmlint.log files differ:"
       diff -u $file1 $file2 |head -n 20
