@@ -117,16 +117,12 @@ if test -n "$OTHERDIR"; then
     # Remove release from files
     sort -u $OLDDIR/rpmlint.log|sed -e "s,$ver_rel1,@VERSION@-@RELEASE@,g" -e "s|/tmp/rpmlint\..*spec|.spec|g" > $file1
     sort -u $OTHERDIR/rpmlint.log|sed -e "s,$ver_rel2,@VERSION@-@RELEASE@,g" -e "s|/tmp/rpmlint\..*spec|.spec|g"  > $file2
-    ### kmp's are strange:
-    # the correct way would be to find the versions of -kmp- packages and ignore them, but this will do, too.
-    # example: this one leads to constant republishing of virtualbox for every build.
-    # -virtualbox-guest-kmp-default.x86_64: W: filename-too-long-for-joliet virtualbox-guest-kmp-default-5.0.2_k3.16.7_24-177.d_l_ocaml.2.x86_64.rpm
-    # +virtualbox-guest-kmp-default.x86_64: W: filename-too-long-for-joliet virtualbox-guest-kmp-default-5.0.2_k3.16.7_24-178.d_l_ocaml.1.x86_64.rpm
-    sed -i -e "/W: filename-too-long-for-joliet/s,\(^.*-kmp-.*-kmp-\).*$,\1," $file1
-    sed -i -e "/W: filename-too-long-for-joliet/s,\(^.*-kmp-.*-kmp-\).*$,\1," $file2
+    # Remove odd warning about filenames, they contain VERSION-RELEASE
     # Remove durations from progress reports
-    sed -i -e "/I: \(filelist-initialization\|check-completed\) /s| [0-9]\+\.[0-9] s| x.x s|" $file1
-    sed -i -e "/I: \(filelist-initialization\|check-completed\) /s| [0-9]\+\.[0-9] s| x.x s|" $file2
+    sed -i -e "
+    /: W: filename-too-long-for-joliet /d
+    /: I: \(filelist-initialization\|check-completed\) /s| [0-9]\+\.[0-9] s| x.x s|
+    " $file1 $file2
     if ! cmp -s $file1 $file2; then
       echo "rpmlint.log files differ:"
       diff -u $file1 $file2 |head -n 20

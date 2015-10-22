@@ -1,4 +1,9 @@
 -------------------------------------------------------------------
+Thu Oct 22 06:29:44 UTC 2015 - olaf@aepfle.de
+
+- Remove filename-too-long-for-joliet from rpmlint.log
+
+-------------------------------------------------------------------
 Fri Oct  2 09:00:52 UTC 2015 - olaf@aepfle.de
 
 - Handle texi2html 5.0 timestamps
