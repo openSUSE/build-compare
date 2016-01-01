@@ -1,4 +1,9 @@
 -------------------------------------------------------------------
+Fri Jan  1 10:11:14 UTC 2016 - schwab@suse.de
+
+- Fix quoting in find expression
+
+-------------------------------------------------------------------
 Thu Oct 22 06:29:44 UTC 2015 - olaf@aepfle.de
 
 - Remove filename-too-long-for-joliet from rpmlint.log

@@ -134,7 +134,7 @@ if test -n "$OTHERDIR"; then
     SUCCESS=0
   fi
 
-  appdatas=`cd $OTHERDIR && find . -name *-appdata.xml`
+  appdatas=$(cd $OTHERDIR && find . -name "*-appdata.xml")
   for xml in $appdatas; do
     # compare appstream data
     if test -e $OLDDIR/$xml -a -e $OTHERDIR/$xml; then
