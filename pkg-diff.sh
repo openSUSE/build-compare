@@ -20,6 +20,8 @@ if test "$#" != 2; then
    exit 1
 fi
 
+test -z $OBJDUMP && OBJDUMP=objdump
+
 # Always clean up on exit
 local_tmpdir=`mktemp -d`
 if test -z "${local_tmpdir}"
@@ -715,17 +717,17 @@ check_single_file()
        fi
        ;;
     ELF*executable*|ELF*[LM]SB\ relocatable*|ELF*[LM]SB\ shared\ object*)
-       objdump -d --no-show-raw-insn old/$file | filter_disasm > $file1
+       $OBJDUMP -d --no-show-raw-insn old/$file | filter_disasm > $file1
        if ! test -s $file1; then
          # objdump has no idea how to handle it
          if ! diff_two_files; then
            ret=1
            break
          fi
-       fi       
+       fi
        elfdiff=
        sed -i -e "s,old/,," $file1
-       objdump -d --no-show-raw-insn new/$file | filter_disasm > $file2
+       $OBJDUMP -d --no-show-raw-insn new/$file | filter_disasm > $file2
        sed -i -e "s,new/,," $file2
        if ! diff -u $file1 $file2 > $dfile; then
           echo "$file differs in assembler output"
@@ -735,10 +737,10 @@ check_single_file()
        echo "" >$file1
        echo "" >$file2
        # Don't compare .build-id and .gnu_debuglink sections
-       sections="$(objdump -s new/$file | grep "Contents of section .*:" | sed -r "s,.* (.*):,\1,g" | grep -v -e "\.build-id" -e "\.gnu_debuglink" | tr "\n" " ")"
+       sections="$($OBJDUMP -s new/$file | grep "Contents of section .*:" | sed -r "s,.* (.*):,\1,g" | grep -v -e "\.build-id" -e "\.gnu_debuglink" | tr "\n" " ")"
        for section in $sections; do
-          objdump -s -j $section old/$file | sed "s,^old/,," > $file1
-          objdump -s -j $section new/$file | sed "s,^new/,," > $file2
+          $OBJDUMP -s -j $section old/$file | sed "s,^old/,," > $file1
+          $OBJDUMP -s -j $section new/$file | sed "s,^new/,," > $file2
           if ! diff -u $file1 $file2 > $dfile; then
              echo "$file differs in ELF section $section"
              head -n 200 $dfile
