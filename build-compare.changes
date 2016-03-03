@@ -3,6 +3,7 @@ Thu Mar  3 12:44:04 UTC 2016 - olaf@aepfle.de
 
 - Handle timestamp in dvi files
 - Handle Last-modified HTML META tag
+- Handle yet another variant of javadoc timestamps
 
 -------------------------------------------------------------------
 Fri Jan  1 10:11:14 UTC 2016 - schwab@suse.de
