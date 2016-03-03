@@ -1,4 +1,9 @@
 -------------------------------------------------------------------
+Thu Mar  3 12:44:04 UTC 2016 - olaf@aepfle.de
+
+- Handle timestamp in dvi files
+
+-------------------------------------------------------------------
 Fri Jan  1 10:11:14 UTC 2016 - schwab@suse.de
 
 - Fix quoting in find expression

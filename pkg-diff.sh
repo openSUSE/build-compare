@@ -440,6 +440,31 @@ check_single_file()
         perl -e "open fh, '+<', 'old/$file'; seek fh, 4, SEEK_SET; print fh '0000';"
         perl -e "open fh, '+<', 'new/$file'; seek fh, 4, SEEK_SET; print fh '0000';"
         ;;
+      *.dvi)
+      # Opcodes 247: pre; i[1], num[4], den[4], mag[4], k[1], x[k]
+        perl -e "
+        my \$rec;
+        open fh, '+<', 'old/$file';
+        my \$dummy = read fh, \$rec, 15;
+        (\$pre, \$i, \$num, \$den, \$mag, \$k) = unpack('C2 N3 C', \$rec);
+        seek fh, 15, SEEK_SET;
+        while (\$k > 0) {
+          print fh '0';
+          \$k--;
+        }
+        "
+        perl -e "
+        my \$rec;
+        open fh, '+<', 'new/$file';
+        my \$dummy = read fh, \$rec, 15;
+        (\$pre, \$i, \$num, \$den, \$mag, \$k) = unpack('C2 N3 C', \$rec);
+        seek fh, 15, SEEK_SET;
+        while (\$k > 0) {
+          print fh '0';
+          \$k--;
+        }
+        "
+      ;;
      *.bz2)
         bunzip2 -c old/$file > old/${file/.bz2/}
         bunzip2 -c new/$file > new/${file/.bz2/}
