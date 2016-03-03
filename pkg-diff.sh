@@ -505,6 +505,7 @@ check_single_file()
      /usr/share/doc/kde/HTML/*/*/*.html)
        for f in old/$file new/$file; do
         sed -i -e '
+        s|META NAME="Last-modified" CONTENT="[^"]\+"|META NAME="Last-modified" CONTENT="Thu Mar  3 10:32:44 2016"|
         s|<!-- Created on [^,]\+, [0-9]\+ [0-9]\+ by texi2html [0-9\.]\+ -->|<!-- Created on July, 14 2015 by texi2html 1.78 -->|
         s|<!-- Created on [^,]\+, [0-9]\+ by texi2html [0-9\.]\+$|<!-- Created on October 1, 2015 by texi2html 5.0|
         s|^<!-- Created on .*, 20.. by texi2html .\...|<!-- Created on August 7, 2009 by texi2html 1.82|
