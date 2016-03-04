@@ -597,7 +597,12 @@ check_single_file()
      *.elc)
        # emacs lisp files
        for f in old/$file new/$file; do
-         sed -i -e 's|Compiled by abuild@.* on ... ... .. ..:..:.. 20..$|compiled by abuild@buildhost on Wed Jul 01 00:00:00 2009|' $f
+         sed -i -e '
+          s|^;;; .ompiled by abuild@.* on ... ... .. ..:..:.. ....|;;; compiled by abuild@buildhost on Wed Jul 01 00:00:00 2009|
+          s|^;;; from file .*\.el|;;; from file /home/abuild/rpmbuild/BUILD/anthy-9100h/src-util/elc.8411/anthy-azik.el|
+          s|^;;; emacs version .*|;;; emacs version 21.5  (beta34) "kale" XEmacs Lucid.|
+          s|^;;; bytecomp version .*|;;; bytecomp version 2.28 XEmacs; 2009-08-09.|
+          ' $f
        done
        ;;
      /var/lib/texmf/web2c/*/*fmt |\

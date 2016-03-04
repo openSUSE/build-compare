@@ -1,4 +1,9 @@
 -------------------------------------------------------------------
+Fri Mar  4 18:50:32 UTC 2016 - olaf@aepfle.de
+
+- Handle yet another variant of elc timestamps
+
+-------------------------------------------------------------------
 Thu Mar  3 12:44:04 UTC 2016 - olaf@aepfle.de
 
 - Handle timestamp in dvi files
