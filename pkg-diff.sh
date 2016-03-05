@@ -518,8 +518,7 @@ check_single_file()
        done
        strip_numbered_anchors
        ;;
-     /usr/share/javadoc/*.html |\
-     /usr/share/javadoc/*/*.html|/usr/share/javadoc/*/*/*.html)
+      /usr/*/javadoc/*.html)
        strip_numbered_anchors
        # There are more timestamps in html, so far we handle only some primitive versions.
        for f in old/$file new/$file; do
