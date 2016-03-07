@@ -507,6 +507,11 @@ check_single_file()
       done
       strip_numbered_anchors
     ;;
+    /usr/share/doc/kde/HTML/*/*/index.cache|/usr/share/doc/kde/HTML/*/*/*/index.cache|\
+    /usr/share/gtk-doc/html/*/*.html|/usr/share/gtk-doc/html/*/*.devhelp2)
+      # various kde and gtk packages
+      strip_numbered_anchors
+    ;;
      /usr/share/doc/packages/*/*.html|\
      /usr/share/doc/packages/*/*/*.html|\
      /usr/share/doc/*/html/*.html|\
@@ -630,11 +635,6 @@ check_single_file()
 	  # - ##### built by abuild@build33 on Thu May 6 11:21:17 UTC 2010
 	  sed -i -e 's|built by abuild@[a-z0-9]* on ... ... [0-9]* [0-9]*:[0-9][0-9]:[0-9][0-9] .* 20[0-9][0-9]|built by abuild@build42 on Thu May 6 11:21:17 UTC 2010|' $f
        done
-       ;;
-     /usr/share/doc/kde/HTML/*/*/index.cache|/usr/share/doc/kde/HTML/*/*/*/index.cache|\
-     /usr/share/gtk-doc/html/*/*.html|/usr/share/gtk-doc/html/*/*.devhelp2)
-       # various kde and gtk packages
-       strip_numbered_anchors
        ;;
     */created.rid)
        # ruby documentation
