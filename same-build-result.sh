@@ -14,6 +14,13 @@
 CMPSCRIPT=${0%/*}/pkg-diff.sh
 SCMPSCRIPT=${0%/*}/srpm-check.sh
 
+file1=`mktemp`
+file2=`mktemp`
+_x() {
+  rm -f ${file1} ${file2}
+}
+trap _x EXIT
+#
 check_all=1
 OLDDIR="$1"
 shift
@@ -110,8 +117,6 @@ fi
 
 if test -n "$OTHERDIR"; then
   if test -e $OLDDIR/rpmlint.log -a -e $OTHERDIR/rpmlint.log; then
-    file1=`mktemp`
-    file2=`mktemp`
     echo "comparing $OLDDIR/rpmlint.log and $OTHERDIR/rpmlint.log"
     # Sort the files first since the order of messages is not deterministic
     # Remove release from files
