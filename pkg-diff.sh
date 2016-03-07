@@ -499,6 +499,14 @@ check_single_file()
          sed -i -e "s,POT-Creation-Date: ....-..-.. ..:..+....,POT-Creation-Date: 1970-01-01 00:00+0000," $f
        done
        ;;
+    */rdoc/files/*.html)
+      # ruby documentation
+      # <td>Mon Sep 20 19:02:43 +0000 2010</td>
+      for f in old/$file new/$file; do
+        sed -i -e 's%<td>[A-Z][a-z][a-z] [A-Z][a-z][a-z] [0-9]\+ [0-9]\+:[0-9]\+:[0-9]\+ +0000 201[0-9]</td>%<td>Mon Sep 20 19:02:43 +0000 2010</td>%g' $f
+      done
+      strip_numbered_anchors
+    ;;
      /usr/share/doc/packages/*/*.html|\
      /usr/share/doc/packages/*/*/*.html|\
      /usr/share/doc/*/html/*.html|\
@@ -633,14 +641,6 @@ check_single_file()
        # file just contains a timestamp and nothing else, so ignore it
        echo "Ignore $file"
        return 0
-       ;;
-    */rdoc/files/*.html)
-       # ruby documentation
-       # <td>Mon Sep 20 19:02:43 +0000 2010</td>
-       for f in old/$file new/$file; do
-          sed -i -e 's%<td>[A-Z][a-z][a-z] [A-Z][a-z][a-z] [0-9]\+ [0-9]\+:[0-9]\+:[0-9]\+ +0000 201[0-9]</td>%<td>Mon Sep 20 19:02:43 +0000 2010</td>%g' $f
-       done
-       strip_numbered_anchors
        ;;
     */Linux*Env.Set.sh)
        # LibreOffice files, contains:
