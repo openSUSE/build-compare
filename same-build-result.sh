@@ -21,7 +21,12 @@ _x() {
 }
 trap _x EXIT
 #
-check_all=1
+if test "$1" = "-a"
+then
+  check_all="-a"
+  shift
+fi
+#
 OLDDIR="$1"
 shift
 NEWDIRS="$*"
@@ -107,11 +112,7 @@ for opac in ${OLDRPMS[*]}; do
       echo "skipping -debuginfo package"
     ;;
     *)
-      bash $CMPSCRIPT "$opac" "$npac" || SUCCESS=0
-      if test $SUCCESS -eq 0 -a -z "$check_all"; then
-        echo "differences between $opac and $npac"
-        exit 1
-      fi
+      bash $CMPSCRIPT "$check_all" "$opac" "$npac" || SUCCESS=0
     ;;
   esac
 done
