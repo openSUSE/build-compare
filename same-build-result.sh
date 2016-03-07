@@ -68,8 +68,22 @@ bash $SCMPSCRIPT "$osrpm" "$nsrpm" || exit 1
 # problem: a package can contain both noarch and arch subpackages, so we have to 
 # take care of proper sorting of NEWRPMS, e.g. noarch/x.rpm and x86_64/w.rpm since OLDRPMS 
 # has all the packages in a single directory and would sort this as w.rpm, x.rpm.
-OLDRPMS=($(find "$OLDDIR" -type f -name \*rpm -a ! -name \*src.rpm  -a ! -name \*.delta.rpm|sort|grep -v -- -32bit-|grep -v -- -64bit-|grep -v -- '-x86-.*\.ia64\.rpm'))
-NEWRPMS=($(find $NEWDIRS -type f -name \*rpm -a ! -name \*src.rpm -a ! -name \*.delta.rpm|sort --field-separator=/ --key=7|grep -v -- -32bit-|grep -v -- -64bit-|grep -v -- '-x86-.*\.ia64\.rpm'))
+find "$OLDDIR"  -type f -name '*.rpm' \
+  -a ! -name '*src.rpm' \
+  -a ! -name '*.delta.rpm' \
+  -a ! -name '*-32bit-*' \
+  -a ! -name '*-64bit-*' \
+  -a ! -name '*-x86-*.ia64.rpm' \
+  > ${file1}
+find "$NEWDIRS" -type f -name '*.rpm' \
+  -a ! -name '*src.rpm' \
+  -a ! -name '*.delta.rpm' \
+  -a ! -name '*-32bit-*' \
+  -a ! -name '*-64bit-*' \
+  -a ! -name '*-x86-*.ia64.rpm' \
+  > ${file2}
+OLDRPMS=($( sort --field-separator=/ --key=` sed -n '1s@[^/]@@gp' ${file1} | wc -c ` ${file1} ))
+NEWRPMS=($( sort --field-separator=/ --key=` sed -n '1s@[^/]@@gp' ${file2} | wc -c ` ${file2} ))
 
 # Get version-release from first RPM and keep for rpmlint check
 # Remember to quote the "." for future regexes
