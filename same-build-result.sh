@@ -39,7 +39,9 @@ fi
 
 if test `find $NEWDIRS -name '*.rpm' -and ! -name '*.delta.rpm' | wc -l` != `find $OLDDIR -name '*.rpm' -and ! -name '*.delta.rpm' | wc -l`; then
    echo "different number of subpackages"
-   find $OLDDIR $NEWDIRS -name '*.rpm' -and ! -name '*.delta.rpm'
+   find $OLDDIR  -name '*.rpm' -and ! -name '*.delta.rpm' -print0 | xargs -0 rpm -qp --qf '%{NAME}\n' | sort > ${file1}
+   find $NEWDIRS -name '*.rpm' -and ! -name '*.delta.rpm' -print0 | xargs -0 rpm -qp --qf '%{NAME}\n' | sort > ${file2}
+   diff -u ${file1} ${file2}
    exit 1
 fi
 
