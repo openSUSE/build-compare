@@ -572,12 +572,12 @@ check_single_file()
         esac
       done
     ;;
-     /usr/share/javadoc/gjdoc.properties |\
-     /usr/share/javadoc/*/gjdoc.properties)
-       for f in old/$file new/$file; do
-	 sed -i -e 's|^#[A-Z][a-z]\{2\} [A-Z][a-z]\{2\} [0-9]\{2\} ..:..:.. GMT 20..$|#Fri Jan 01 11:27:36 GMT 2009|' $f
-       done
-       ;;
+    /usr/share/javadoc/gjdoc.properties |\
+    /usr/share/javadoc/*/gjdoc.properties)
+      for f in old/$file new/$file; do
+        sed -i -e 's|^#[A-Z][a-z]\{2\} [A-Z][a-z]\{2\} [0-9]\{2\} ..:..:.. GMT 20..$|#Fri Jan 01 11:27:36 GMT 2009|' $f
+      done
+    ;;
      */fonts.scale|*/fonts.dir|*/encodings.dir)
        for f in old/$file new/$file; do
          # sort files before comparing
