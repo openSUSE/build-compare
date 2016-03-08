@@ -655,19 +655,9 @@ check_single_file()
       return 0
       ;;
     /var/adm/update-messages/*|/var/adm/update-scripts/*)
-      # encode version-release inside
-      oldfn=`echo "$file"|sed -e s/-$release2/-$release1/;`
-
       # fetchmsttfonts embeds the release number in the update shell script.
-      echo sed -i -e "s/-$release1/-$release2/g;" "old/$oldfn"
-      sed -i -e "s/-$release1/-$release2/g;" "old/$oldfn"
-
-      if ! diff -u old/$oldfn new/$file; then
-           echo "$oldfn is not same as $file"
-           return 1
-      fi
-      echo "$file and $oldfn are same"
-      return 0
+      sed -i "s/${name_ver_rel_old_regex_l}/@NAME_VER_REL@/" old/$file
+      sed -i "s/${name_ver_rel_new_regex_l}/@NAME_VER_REL@/" new/$file
       ;;
     *.ps)
       for f in "old/$file" "new/$file"; do

@@ -1,4 +1,9 @@
 -------------------------------------------------------------------
+Tue Mar  8 18:00:40 UTC 2016 - olaf@aepfle.de
+
+- Remove hacks from /var/adm/update-scripts|messages case
+
+-------------------------------------------------------------------
 Tue Mar  8 16:48:48 UTC 2016 - olaf@aepfle.de
 
 - Handle /var/adm/update-messages in scripts and filelist

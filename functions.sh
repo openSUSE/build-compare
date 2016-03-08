@@ -40,11 +40,11 @@ function trim_release_new()
 # Get single directory or filename with long or short release string
 function grep_release_old()
 {
-  grep -E "(/boot|/lib/modules|/lib/firmware|/usr/src)/[^/]*(${version_release_old_regex_l}(\$|[^/]+\$)|${version_release_old_regex_s}(\$|[^/]+\$))"
+  grep -E "(/boot|/lib/modules|/lib/firmware|/usr/src|/var/adm/update-scripts)/[^/]*(${version_release_old_regex_l}(\$|[^/]+\$)|${version_release_old_regex_s}(\$|[^/]+\$))"
 }
 function grep_release_new()
 {
-  grep -E "(/boot|/lib/modules|/lib/firmware|/usr/src)/[^/]*(${version_release_new_regex_l}(\$|[^/]+\$)|${version_release_new_regex_s}(\$|[^/]+\$))"
+  grep -E "(/boot|/lib/modules|/lib/firmware|/usr/src|/var/adm/update-scripts)/[^/]*(${version_release_new_regex_l}(\$|[^/]+\$)|${version_release_new_regex_s}(\$|[^/]+\$))"
 }
 
 function check_provides()
