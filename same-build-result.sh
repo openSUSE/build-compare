@@ -73,14 +73,14 @@ bash $SCMPSCRIPT "$osrpm" "$nsrpm" || exit 1
 # problem: a package can contain both noarch and arch subpackages, so we have to 
 # take care of proper sorting of NEWRPMS, e.g. noarch/x.rpm and x86_64/w.rpm since OLDRPMS 
 # has all the packages in a single directory and would sort this as w.rpm, x.rpm.
-find "$OLDDIR"  -type f -name '*.rpm' \
+find $OLDDIR  -type f -name '*.rpm' \
   -a ! -name '*src.rpm' \
   -a ! -name '*.delta.rpm' \
   -a ! -name '*-32bit-*' \
   -a ! -name '*-64bit-*' \
   -a ! -name '*-x86-*.ia64.rpm' \
   > ${file1}
-find "$NEWDIRS" -type f -name '*.rpm' \
+find $NEWDIRS -type f -name '*.rpm' \
   -a ! -name '*src.rpm' \
   -a ! -name '*.delta.rpm' \
   -a ! -name '*-32bit-*' \
