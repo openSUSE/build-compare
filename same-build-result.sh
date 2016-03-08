@@ -21,6 +21,7 @@ _x() {
 }
 trap _x EXIT
 #
+check_all=
 if test "$1" = "-a"
 then
   check_all="-a"
@@ -112,7 +113,7 @@ for opac in ${OLDRPMS[*]}; do
       echo "skipping -debuginfo package"
     ;;
     *)
-      bash $CMPSCRIPT "$check_all" "$opac" "$npac" || SUCCESS=0
+      bash $CMPSCRIPT $check_all "$opac" "$npac" || SUCCESS=0
     ;;
   esac
 done
