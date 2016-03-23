@@ -1,9 +1,4 @@
 -------------------------------------------------------------------
-Wed Mar 23 07:31:09 UTC 2016 - olaf@aepfle.de
-
-- Ignore checksums in ruby checksums.yaml (bnc#916047)
-
--------------------------------------------------------------------
 Tue Mar  8 18:00:40 UTC 2016 - olaf@aepfle.de
 
 - Remove hacks from /var/adm/update-scripts|messages case
