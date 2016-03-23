@@ -695,6 +695,17 @@ check_single_file()
         sed -i '/^InitrdID:/s@^.*@InitrdID: something@' "old/$file"
         sed -i '/^InitrdID:/s@^.*@InitrdID: something@' "new/$file"
       ;;
+      /usr/lib*/ruby/gems/*/cache/checksums.yaml)
+        for f in "old/$file" "new/$file"
+        do
+          sed -i '
+          s/^\(  metadata.gz:\) \([a-z0-9]\{40\}\)$/\1 metadata_sha1_sum/
+          s/^\(  data.tar.gz:\) \([a-z0-9]\{40\}\)$/\1 data.tar_sha1_sum/
+          s/^\(  metadata.gz:\) \([a-z0-9]\{128\}\)$/\1 metadata_sha512_sum/
+          s/^\(  data.tar.gz:\) \([a-z0-9]\{128\}\)$/\1 data.tar_sha512_sum/
+          ' "$f"
+        done
+      ;;
   esac
 
   ftype=`/usr/bin/file old/$file | sed 's@^[^:]\+:[[:blank:]]*@@'`
