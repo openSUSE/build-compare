@@ -28,7 +28,7 @@ Source2:        same-build-result.sh
 Source3:        pkg-diff.sh
 Source4:        functions.sh
 Source5:        srpm-check.sh
-%if 0%{suse_version}
+%if 0%{?suse_version}
 Requires:       bash
 Requires:       coreutils
 Requires:       diffutils
