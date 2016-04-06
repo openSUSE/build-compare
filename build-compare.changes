@@ -1,7 +1,7 @@
 -------------------------------------------------------------------
 Wed Apr  6 07:06:58 UTC 2016 - olaf@aepfle.de
 
-- the buildroot lost awk, add used utilities to Requires
+- add used utilities to Requires
 
 -------------------------------------------------------------------
 Tue Mar  8 18:00:40 UTC 2016 - olaf@aepfle.de
