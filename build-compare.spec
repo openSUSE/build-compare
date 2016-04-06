@@ -28,6 +28,16 @@ Source2:        same-build-result.sh
 Source3:        pkg-diff.sh
 Source4:        functions.sh
 Source5:        srpm-check.sh
+%if 0%{suse_version}
+Requires:       bash
+Requires:       coreutils
+Requires:       diffutils
+Requires:       file
+Requires:       gawk
+Requires:       grep
+Requires:       rpm
+Requires:       sed
+%endif
 BuildRoot:      %{_tmppath}/%{name}-%{version}-build
 BuildArch:      noarch
 #!BuildIgnore:  build-compare
