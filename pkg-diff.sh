@@ -318,6 +318,13 @@ check_compressed_file()
 check_single_file()
 {
   local file="$1"
+
+  # If the two files are the same, return at once.
+  if [ -f old/$file -a -f new/$file ]; then
+    if cmp -s old/$file new/$file; then
+      return 0
+    fi
+  fi
   case $file in
     *.spec)
        sed -i -e "s,Release:.*$release1,Release: @RELEASE@," old/$file
