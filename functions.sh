@@ -78,7 +78,7 @@ check_header()
 function trim_release_old()
 {
   sed -e "
-  /\(\/boot\|\/lib\/modules\|\/lib\/firmware\|\/usr\/src\|$version_release_old_regex_l\$\)/{s,$version_release_old_regex_l,@VERSION@-@RELEASE_LONG@,g;s,$version_release_old_regex_s,@VERSION@-@RELEASE_SHORT@,g}
+  /\(\/boot\|\/lib\/modules\|\/lib\/firmware\|\/usr\/src\|$version_release_old_regex_l\$\|$version_release_old_regex_l)\)/{s,$version_release_old_regex_l,@VERSION@-@RELEASE_LONG@,g;s,$version_release_old_regex_s,@VERSION@-@RELEASE_SHORT@,g}
   s/\(\/var\/adm\/update-scripts\/\)${name_ver_rel_old_regex_l}\([^[:blank:]]\+\)/\1@NAME_VER_REL@\2/g
   s/\(\/var\/adm\/update-messages\/\)${name_ver_rel_old_regex_l}\([^[:blank:]]\+\)/\1@NAME_VER_REL@\2/g
   "
@@ -86,7 +86,7 @@ function trim_release_old()
 function trim_release_new()
 {
   sed -e "
-  /\(\/boot\|\/lib\/modules\|\/lib\/firmware\|\/usr\/src\|$version_release_new_regex_l\$\)/{s,$version_release_new_regex_l,@VERSION@-@RELEASE_LONG@,g;s,$version_release_new_regex_s,@VERSION@-@RELEASE_SHORT@,g}
+  /\(\/boot\|\/lib\/modules\|\/lib\/firmware\|\/usr\/src\|$version_release_new_regex_l\$\|$version_release_new_regex_l)\)/{s,$version_release_new_regex_l,@VERSION@-@RELEASE_LONG@,g;s,$version_release_new_regex_s,@VERSION@-@RELEASE_SHORT@,g}
   s/\(\/var\/adm\/update-scripts\/\)${name_ver_rel_new_regex_l}\([^[:blank:]]\+\)/\1@NAME_VER_REL@\2/g
   s/\(\/var\/adm\/update-messages\/\)${name_ver_rel_new_regex_l}\([^[:blank:]]\+\)/\1@NAME_VER_REL@\2/g
   "
@@ -133,8 +133,8 @@ function unpackage()
             ar x $file
             tar xf control.tar.gz
             rm control.tar.gz
-            tar xf data.tar.gz
-            rm data.tar.gz
+            tar xf data.tar.[xg]z
+            rm data.tar.[xg]z
             ;;
     esac
     popd 1>/dev/null
@@ -163,6 +163,22 @@ function comp_file()
 function get_value()
 {
     sed -n -e "/^___${1}___/,/^___${1}___/p" $2 | sed -e "/^___${1}___/d"
+}
+
+# Set version_release_old_regex_s, version_release_old_regex_l and
+# name_ver_rel_old_regex_l, also the new ones.
+function set_regex() {
+    # Remember to quote the . which is in release
+    # Short version without B_CNT
+    version_release_old_regex_s=${version_release_old%.*}
+    version_release_old_regex_s=${version_release_old_regex_s//./\\.}
+    version_release_new_regex_s=${version_release_new%.*}
+    version_release_new_regex_s=${version_release_new_regex_s//./\\.}
+    # Long version with B_CNT
+    version_release_old_regex_l=${version_release_old//./\\.}
+    version_release_new_regex_l=${version_release_new//./\\.}
+    name_ver_rel_old_regex_l=${name_ver_rel_old//./\\.}
+    name_ver_rel_new_regex_l=${name_ver_rel_new//./\\.}
 }
 
 # Compare just the rpm meta data of two rpms
@@ -195,17 +211,7 @@ function cmp_spec ()
     version_release_old="$(get_value QF_VER_REL $spec_old)"
     name_ver_rel_old="$(get_value QF_NAME_VER_REL $spec_old)"
 
-    # Remember to quote the . which is in release
-    # Short version without B_CNT
-    version_release_old_regex_s=${version_release_old%.*}
-    version_release_old_regex_s=${version_release_old_regex_s//./\\.}
-    version_release_new_regex_s=${version_release_new%.*}
-    version_release_new_regex_s=${version_release_new_regex_s//./\\.}
-    # Long version with B_CNT
-    version_release_old_regex_l=${version_release_old//./\\.}
-    version_release_new_regex_l=${version_release_new//./\\.}
-    name_ver_rel_old_regex_l=${name_ver_rel_old//./\\.}
-    name_ver_rel_new_regex_l=${name_ver_rel_new//./\\.}
+    set_regex
 
     # Check the whole spec file at first, return 0 immediately if the
     # are the same.
@@ -286,9 +292,14 @@ function cmp_spec ()
 }
 
 function adjust_controlfile() {
-    cat $1/control | sed '/^Version: /d' > $1/control.fixed
+    version_release_old="`sed -ne 's/^Version: \(.*\)/\1/p' $1/control`"
+    name_ver_rel_old="`sed -n -e 's/^Package: \(.*\)/\1/p' $1/control`-`sed -n -e 's/^Version: \(.*\)/\1/p' $1/control`"
+    version_release_new="`sed -ne 's/^Version: \(.*\)/\1/p' $2/control`"
+    name_ver_rel_new="`sed -n -e 's/^Package: \(.*\)/\1/p' $2/control`-`sed -n -e 's/^Version: \(.*\)/\1/p' $2/control`"
+    set_regex
+    cat $1/control | trim_release_old > $1/control.fixed
     mv $1/control.fixed $1/control
-    cat $2/control | sed '/^Version: /d' > $2/control.fixed
+    cat $2/control | trim_release_new > $2/control.fixed
     mv $2/control.fixed $2/control
 }
 
