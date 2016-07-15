@@ -301,6 +301,13 @@ check_compressed_file()
             ret=1
           fi
           ;;
+        fifo*pipe*)
+          ftype_new="`/usr/bin/file new/$file | sed -e 's@^[^:]\+:[[:blank:]]*@@' -e 's@[[:blank:]]*$@@'`"
+          if [ "$ftype_new" = "$ftype"  ]; then
+            return 0
+          fi
+          return 1
+          ;;
         *)
           echo "unhandled $ext content: $ftype"
           if ! diff_two_files; then
