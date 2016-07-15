@@ -706,7 +706,7 @@ check_single_file()
       ;;
   esac
 
-  ftype=`/usr/bin/file old/$file | sed 's@^[^:]\+:[[:blank:]]*@@'`
+  ftype=`/usr/bin/file old/$file | sed -e 's@^[^:]\+:[[:blank:]]*@@' -e 's@[[:blank:]]*$@@'`
   case $ftype in
      PE32\ executable*Mono\/\.Net\ assembly*)
        echo "PE32 Mono/.Net assembly: $file"
