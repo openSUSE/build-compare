@@ -155,6 +155,12 @@ echo "Extracting packages"
 unpackage $oldpkg $dir/old
 unpackage $newpkg $dir/new
 
+case $oldpkg in
+  *.deb|*.ipk)
+     adjust_controlfile $dir/old $dir/new
+  ;;
+esac
+
 # files is set in cmp_spec for rpms, so if RES is empty we should assume
 # it wasn't an rpm and pick all files for comparison.
 if [ -z $RES ]; then

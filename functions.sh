@@ -129,6 +129,13 @@ function unpackage()
             CPIO_OPTS="--extract --unconditional --preserve-modification-time --make-directories --quiet"
             rpm2cpio $file | cpio ${CPIO_OPTS}
             ;;
+        *.ipk|*.deb)
+            ar x $file
+            tar xf control.tar.gz
+            rm control.tar.gz
+            tar xf data.tar.gz
+            rm data.tar.gz
+            ;;
     esac
     popd 1>/dev/null
 }
@@ -277,4 +284,13 @@ function cmp_spec ()
     rm $file1 $file2
     return $RES
 }
+
+function adjust_controlfile() {
+    cat $1/control | sed '/^Version: /d' > $1/control.fixed
+    mv $1/control.fixed $1/control
+    cat $2/control | sed '/^Version: /d' > $2/control.fixed
+    mv $2/control.fixed $2/control
+}
+
+
 # vim: tw=666 ts=2 shiftwidth=2 et
