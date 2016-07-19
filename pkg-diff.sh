@@ -155,6 +155,12 @@ echo "Extracting packages"
 unpackage $oldpkg $dir/old
 unpackage $newpkg $dir/new
 
+case $oldpkg in
+  *.deb|*.ipk)
+     adjust_controlfile $dir/old $dir/new
+  ;;
+esac
+
 # files is set in cmp_spec for rpms, so if RES is empty we should assume
 # it wasn't an rpm and pick all files for comparison.
 if [ -z $RES ]; then
@@ -301,6 +307,13 @@ check_compressed_file()
             ret=1
           fi
           ;;
+        fifo*pipe*)
+          ftype_new="`/usr/bin/file new/$file | sed -e 's@^[^:]\+:[[:blank:]]*@@' -e 's@[[:blank:]]*$@@'`"
+          if [ "$ftype_new" = "$ftype"  ]; then
+            return 0
+          fi
+          return 1
+          ;;
         *)
           echo "unhandled $ext content: $ftype"
           if ! diff_two_files; then
@@ -318,6 +331,13 @@ check_compressed_file()
 check_single_file()
 {
   local file="$1"
+
+  # If the two files are the same, return at once.
+  if [ -f old/$file -a -f new/$file ]; then
+    if cmp -s old/$file new/$file; then
+      return 0
+    fi
+  fi
   case $file in
     *.spec)
        sed -i -e "s,Release:.*$release1,Release: @RELEASE@," old/$file
@@ -699,7 +719,7 @@ check_single_file()
       ;;
   esac
 
-  ftype=`/usr/bin/file old/$file | sed 's@^[^:]\+:[[:blank:]]*@@'`
+  ftype=`/usr/bin/file old/$file | sed -e 's@^[^:]\+:[[:blank:]]*@@' -e 's@[[:blank:]]*$@@'`
   case $ftype in
      PE32\ executable*Mono\/\.Net\ assembly*)
        echo "PE32 Mono/.Net assembly: $file"
