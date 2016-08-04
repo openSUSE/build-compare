@@ -113,7 +113,8 @@ function unjar_l()
 
 filter_disasm()
 {
-   sed -e 's/^ *[0-9a-f]\+://' -e 's/\$0x[0-9a-f]\+/$something/' -e 's/callq *[0-9a-f]\+/callq /' -e 's/# *[0-9a-f]\+/#  /' -e 's/\(0x\)\?[0-9a-f]\+(/offset(/' -e 's/[0-9a-f]\+ </</' -e 's/^<\(.*\)>:/\1:/' -e 's/<\(.*\)+0x[0-9a-f]\+>/<\1 + ofs>/' 
+   local file=$1
+   sed -i -e 's/^ *[0-9a-f]\+://' -e 's/\$0x[0-9a-f]\+/$something/' -e 's/callq *[0-9a-f]\+/callq /' -e 's/# *[0-9a-f]\+/#  /' -e 's/\(0x\)\?[0-9a-f]\+(/offset(/' -e 's/[0-9a-f]\+ </</' -e 's/^<\(.*\)>:/\1:/' -e 's/<\(.*\)+0x[0-9a-f]\+>/<\1 + ofs>/' ${file}
 }
 
 echo "Comparing `basename $oldpkg` to `basename $newpkg`"
@@ -717,18 +718,20 @@ check_single_file()
        fi
        ;;
     ELF*executable*|ELF*[LM]SB\ relocatable*|ELF*[LM]SB\ shared\ object*)
-       $OBJDUMP -d --no-show-raw-insn old/$file | filter_disasm > $file1
-       if ! test -s $file1; then
+       $OBJDUMP -d --no-show-raw-insn old/$file > $file1
+       ret=$?
+       $OBJDUMP -d --no-show-raw-insn new/$file > $file2
+       if test ${ret}$? != 00 ; then
          # objdump has no idea how to handle it
          if ! diff_two_files; then
-           ret=1
-           break
+           return 1
          fi
        fi
-       elfdiff=
+       filter_disasm $file1
+       filter_disasm $file2
        sed -i -e "s,old/,," $file1
-       $OBJDUMP -d --no-show-raw-insn new/$file | filter_disasm > $file2
        sed -i -e "s,new/,," $file2
+       elfdiff=
        if ! diff -u $file1 $file2 > $dfile; then
           echo "$file differs in assembler output"
           head -n 200 $dfile
