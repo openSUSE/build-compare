@@ -726,6 +726,7 @@ check_single_file()
          if ! diff_two_files; then
            return 1
          fi
+         return 0
        fi
        filter_disasm $file1
        filter_disasm $file2
