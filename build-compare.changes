@@ -1,4 +1,9 @@
 -------------------------------------------------------------------
+Fri Aug  5 13:44:51 UTC 2016 - olaf@aepfle.de
+
+- Handle unknown ELF files as different.
+
+-------------------------------------------------------------------
 Wed Apr  6 07:06:58 UTC 2016 - olaf@aepfle.de
 
 - add used utilities to Requires
