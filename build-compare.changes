@@ -1,4 +1,14 @@
 -------------------------------------------------------------------
+Wed Aug 24 13:22:12 UTC 2016 - olaf@aepfle.de
+
+- functions.sh: improve deb and ipk checking
+- Add support for deb and ipk packaging
+- pkg-diff.sh: check for fifo (named fifo)
+- pkg-diff.sh: remove space in the end for ftype
+- pkg-diff.sh: check_single_file(): return at once when same
+- functions.sh: run rpm once to make it faster
+
+-------------------------------------------------------------------
 Fri Aug  5 13:44:51 UTC 2016 - olaf@aepfle.de
 
 - Handle unknown ELF files as different.
