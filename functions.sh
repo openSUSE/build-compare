@@ -10,9 +10,63 @@
 
 RPM="rpm -qp --nodigest --nosignature"
 
-check_header() 
+# Name, Version, Release
+QF_NAME="%{NAME}"
+QF_VER_REL="%{VERSION}-%{RELEASE}"
+QF_NAME_VER_REL="%{NAME}-%{VERSION}-%{RELEASE}"
+
+# provides destroy this because at least the self-provide includes the
+# -buildnumber :-(
+QF_PROVIDES="[%{PROVIDENAME} %{PROVIDEFLAGS} %{PROVIDEVERSION}\\n]\\n"
+QF_PROVIDES="${QF_PROVIDES}[%{REQUIRENAME} %{REQUIREFLAGS} %{REQUIREVERSION}\\n]\\n"
+QF_PROVIDES="${QF_PROVIDES}[%{CONFLICTNAME} %{CONFLICTFLAGS} %{CONFLICTVERSION}\\n]\\n"
+QF_PROVIDES="${QF_PROVIDES}[%{OBSOLETENAME} %{OBSOLETEFLAGS} %{OBSOLETEVERSION}\\n]\\n"
+
+# don't look at RELEASE, it contains our build number
+QF_TAGS="%{NAME} %{VERSION} %{EPOCH}\\n"
+QF_TAGS="${QF_TAGS}%{SUMMARY}\\n%{DESCRIPTION}\\n"
+# the DISTURL tag can be used as checkin ID
+QF_TAGS="${QF_TAGS}%{VENDOR} %{DISTRIBUTION} %{DISTURL}\\n"
+QF_TAGS="${QF_TAGS}%{LICENSE}\\n"
+QF_TAGS="${QF_TAGS}%{GROUP} %{URL} %{EXCLUDEARCH} %{EXCLUDEOS} %{EXCLUSIVEARCH}\\n"
+QF_TAGS="${QF_TAGS}%{EXCLUSIVEOS} %{RPMVERSION} %{PLATFORM}\\n"
+QF_TAGS="${QF_TAGS}%{PAYLOADFORMAT} %{PAYLOADCOMPRESSOR} %{PAYLOADFLAGS}\\n"
+
+# XXX We also need to check the existence (but not the content (!))
+# of SIGGPG (and perhaps the other SIG*)
+# XXX We don't look at triggers
+QF_TAGS="${QF_TAGS}[%{VERIFYSCRIPTPROG} %{VERIFYSCRIPT}]\\n"
+# Only the first ChangeLog entry; should be enough
+QF_TAGS="${QF_TAGS}%{CHANGELOGTIME} %{CHANGELOGNAME} %{CHANGELOGTEXT}\\n"
+
+# scripts, might contain release number
+QF_SCRIPT="[%{PREINPROG} %{PREIN}\\n]\\n[%{POSTINPROG} %{POSTIN}\\n]\\n[%{PREUNPROG} %{PREUN}\\n]\\n[%{POSTUNPROG} %{POSTUN}\\n]\\n"
+
+# Now the files. We leave out mtime and size.  For normal files
+# the size will influence the MD5 anyway.  For directories the sizes can
+# differ, depending on which file system the package was built.  To not
+# have to filter out directories we simply ignore all sizes.
+# Also leave out FILEDEVICES, FILEINODES (depends on the build host),
+# FILECOLORS, FILECLASS (normally useful but file output contains mtimes),
+# FILEDEPENDSX and FILEDEPENDSN.
+# Also FILELANGS (or?)
+QF_FILELIST="[%{FILENAMES} %{FILEFLAGS} %{FILESTATES} %{FILEMODES:octal} %{FILEUSERNAME} %{FILEGROUPNAME} %{FILERDEVS} %{FILEVERIFYFLAGS} %{FILELINKTOS}\n]\\n"
+# ??? what to do with FILEPROVIDE and FILEREQUIRE?
+
+QF_CHECKSUM="[%{FILENAMES} %{FILEMD5S} %{FILEFLAGS}\n]\\n"
+
+QF_ALL="\n___QF_NAME___\n${QF_NAME}\n___QF_NAME___\n"
+QF_ALL="$QF_ALL\n___QF_TAGS___\n${QF_TAGS}\n___QF_TAGS___\n"
+QF_ALL="$QF_ALL\n___QF_VER_REL___\n${QF_VER_REL}\n___QF_VER_REL___\n"
+QF_ALL="$QF_ALL\n___QF_NAME_VER_REL___\n${QF_NAME_VER_REL}\n___QF_NAME_VER_REL___\n"
+QF_ALL="$QF_ALL\n___QF_PROVIDES___\n${QF_PROVIDES}\n___QF_PROVIDES___\n"
+QF_ALL="$QF_ALL\n___QF_SCRIPT___\n${QF_SCRIPT}\n___QF_SCRIPT___\n"
+QF_ALL="$QF_ALL\n___QF_FILELIST___\n${QF_FILELIST}\n___QF_FILELIST___\n"
+QF_ALL="$QF_ALL\n___QF_CHECKSUM___\n${QF_CHECKSUM}\n___QF_CHECKSUM___\n"
+
+check_header()
 {
-   $RPM --qf "$QF" "$1"
+   $RPM --qf "$1" "$2"
 }
 
 # Trim version-release string:
@@ -24,7 +78,7 @@ check_header()
 function trim_release_old()
 {
   sed -e "
-  /\(\/boot\|\/lib\/modules\|\/lib\/firmware\|\/usr\/src\|$version_release_old_regex_l\$\)/{s,$version_release_old_regex_l,@VERSION@-@RELEASE_LONG@,g;s,$version_release_old_regex_s,@VERSION@-@RELEASE_SHORT@,g}
+  /\(\/boot\|\/lib\/modules\|\/lib\/firmware\|\/usr\/src\|$version_release_old_regex_l\$\|$version_release_old_regex_l)\)/{s,$version_release_old_regex_l,@VERSION@-@RELEASE_LONG@,g;s,$version_release_old_regex_s,@VERSION@-@RELEASE_SHORT@,g}
   s/\(\/var\/adm\/update-scripts\/\)${name_ver_rel_old_regex_l}\([^[:blank:]]\+\)/\1@NAME_VER_REL@\2/g
   s/\(\/var\/adm\/update-messages\/\)${name_ver_rel_old_regex_l}\([^[:blank:]]\+\)/\1@NAME_VER_REL@\2/g
   "
@@ -32,7 +86,7 @@ function trim_release_old()
 function trim_release_new()
 {
   sed -e "
-  /\(\/boot\|\/lib\/modules\|\/lib\/firmware\|\/usr\/src\|$version_release_new_regex_l\$\)/{s,$version_release_new_regex_l,@VERSION@-@RELEASE_LONG@,g;s,$version_release_new_regex_s,@VERSION@-@RELEASE_SHORT@,g}
+  /\(\/boot\|\/lib\/modules\|\/lib\/firmware\|\/usr\/src\|$version_release_new_regex_l\$\|$version_release_new_regex_l)\)/{s,$version_release_new_regex_l,@VERSION@-@RELEASE_LONG@,g;s,$version_release_new_regex_s,@VERSION@-@RELEASE_SHORT@,g}
   s/\(\/var\/adm\/update-scripts\/\)${name_ver_rel_new_regex_l}\([^[:blank:]]\+\)/\1@NAME_VER_REL@\2/g
   s/\(\/var\/adm\/update-messages\/\)${name_ver_rel_new_regex_l}\([^[:blank:]]\+\)/\1@NAME_VER_REL@\2/g
   "
@@ -45,18 +99,6 @@ function grep_release_old()
 function grep_release_new()
 {
   grep -E "(/boot|/lib/modules|/lib/firmware|/usr/src|/var/adm/update-scripts)/[^/]*(${version_release_new_regex_l}(\$|[^/]+\$)|${version_release_new_regex_s}(\$|[^/]+\$))"
-}
-
-function check_provides()
-{
-  local pkg=$1
-  # provides destroy this because at least the self-provide includes the
-  # -buildnumber :-(
-  QF="[%{PROVIDENAME} %{PROVIDEFLAGS} %{PROVIDEVERSION}\\n]\\n"
-  QF="$QF [%{REQUIRENAME} %{REQUIREFLAGS} %{REQUIREVERSION}\\n]\\n"
-  QF="$QF [%{CONFLICTNAME} %{CONFLICTFLAGS} %{CONFLICTVERSION}\\n]\\n"
-  QF="$QF [%{OBSOLETENAME} %{OBSOLETEFLAGS} %{OBSOLETEVERSION}\\n]\\n"
-  check_header "$pkg"
 }
 
 #usage unpackage <file> $dir
@@ -87,8 +129,56 @@ function unpackage()
             CPIO_OPTS="--extract --unconditional --preserve-modification-time --make-directories --quiet"
             rpm2cpio $file | cpio ${CPIO_OPTS}
             ;;
+        *.ipk|*.deb)
+            ar x $file
+            tar xf control.tar.gz
+            rm control.tar.gz
+            tar xf data.tar.[xg]z
+            rm data.tar.[xg]z
+            ;;
     esac
     popd 1>/dev/null
+}
+
+# Run diff command on the files
+# $1: printed info
+# $2: file1
+# $3: file2
+# $4, $5: spec_old and spec_new, for cleanup.
+function comp_file()
+{
+    echo "comparing $1"
+    if ! diff -au $2 $3; then
+      if test -z "$check_all"; then
+        rm $2 $3 $4 $5
+        return 1
+      fi
+    fi
+    return 0
+}
+
+# Get var's value from specfile.
+# $1: var name
+# $2: specfile
+function get_value()
+{
+    sed -n -e "/^___${1}___/,/^___${1}___/p" $2 | sed -e "/^___${1}___/d"
+}
+
+# Set version_release_old_regex_s, version_release_old_regex_l and
+# name_ver_rel_old_regex_l, also the new ones.
+function set_regex() {
+    # Remember to quote the . which is in release
+    # Short version without B_CNT
+    version_release_old_regex_s=${version_release_old%.*}
+    version_release_old_regex_s=${version_release_old_regex_s//./\\.}
+    version_release_new_regex_s=${version_release_new%.*}
+    version_release_new_regex_s=${version_release_new_regex_s//./\\.}
+    # Long version with B_CNT
+    version_release_old_regex_l=${version_release_old//./\\.}
+    version_release_new_regex_l=${version_release_new//./\\.}
+    name_ver_rel_old_regex_l=${name_ver_rel_old//./\\.}
+    name_ver_rel_new_regex_l=${name_ver_rel_new//./\\.}
 }
 
 # Compare just the rpm meta data of two rpms
@@ -106,63 +196,43 @@ function cmp_spec ()
     local oldrpm=$2
     local newrpm=$3
 
-    QF="%{NAME}"
-    
-    # don't look at RELEASE, it contains our build number
-    QF="$QF %{VERSION} %{EPOCH}\\n"
-    QF="$QF %{SUMMARY}\\n%{DESCRIPTION}\\n"
-    QF="$QF %{VENDOR} %{DISTRIBUTION} %{DISTURL}"
-    QF="$QF %{LICENSE} %{LICENSE}\\n"
-    QF="$QF %{GROUP} %{URL} %{EXCLUDEARCH} %{EXCLUDEOS} %{EXCLUSIVEARCH}\\n"
-    QF="$QF %{EXCLUSIVEOS} %{RPMVERSION} %{PLATFORM}\\n"
-    QF="$QF %{PAYLOADFORMAT} %{PAYLOADCOMPRESSOR} %{PAYLOADFLAGS}\\n"
-    
- 
-    # XXX We also need to check the existence (but not the content (!))
-    # of SIGGPG (and perhaps the other SIG*)
-    
-    # XXX We don't look at triggers
-    
-    QF="$QF [%{VERIFYSCRIPTPROG} %{VERIFYSCRIPT}]\\n"
-    
-    # Only the first ChangeLog entry; should be enough
-    QF="$QF %{CHANGELOGTIME} %{CHANGELOGNAME} %{CHANGELOGTEXT}\\n"
-    
     file1=`mktemp`
     file2=`mktemp`
-    
-    check_header $oldrpm > $file1
-    check_header $newrpm > $file2
-    
-    # the DISTURL tag can be used as checkin ID
-    #echo "$QF"
-    echo "comparing rpmtags"
-    if ! diff -au $file1 $file2; then
+    spec_old=`mktemp`
+    spec_new=`mktemp`
+
+    check_header "$QF_ALL" $oldrpm > $spec_old
+    check_header "$QF_ALL" $newrpm > $spec_new
+
+    name_new="$(get_value QF_NAME $spec_new)"
+    version_release_new="$(get_value QF_VER_REL $spec_new)"
+    name_ver_rel_new="$(get_value QF_NAME_VER_REL $spec_new)"
+
+    version_release_old="$(get_value QF_VER_REL $spec_old)"
+    name_ver_rel_old="$(get_value QF_NAME_VER_REL $spec_old)"
+
+    set_regex
+
+    # Check the whole spec file at first, return 0 immediately if the
+    # are the same.
+    cat $spec_old | trim_release_old > $file1
+    cat $spec_new | trim_release_new > $file2
+    echo "comparing the whole specfile"
+    if diff -au $spec_old $spec_new; then
       if test -z "$check_all"; then
-        rm $file1 $file2
-        return 1
+        rm $file1 $file2 $spec_old $spec_new
+        return 0
       fi
     fi
-    
-    # Remember to quote the . which is in release
-    version_release_old=$($RPM --qf "%{VERSION}-%{RELEASE}" "$oldrpm")
-    version_release_new=$($RPM --qf "%{VERSION}-%{RELEASE}" "$newrpm")
-    name_ver_rel_old=$($RPM --qf "%{NAME}-%{VERSION}-%{RELEASE}" "$oldrpm")
-    name_ver_rel_new=$($RPM --qf "%{NAME}-%{VERSION}-%{RELEASE}" "$newrpm")
-    # Short version without B_CNT
-    version_release_old_regex_s=${version_release_old%.*}
-    version_release_old_regex_s=${version_release_old_regex_s//./\\.}
-    version_release_new_regex_s=${version_release_new%.*}
-    version_release_new_regex_s=${version_release_new_regex_s//./\\.}
-    # Long version with B_CNT
-    version_release_old_regex_l=${version_release_old//./\\.}
-    version_release_new_regex_l=${version_release_new//./\\.}
-    name_ver_rel_old_regex_l=${name_ver_rel_old//./\\.}
-    name_ver_rel_new_regex_l=${name_ver_rel_new//./\\.}
+
+    get_value QF_TAGS $spec_old > $file1
+    get_value QF_TAGS $spec_new > $file2
+    comp_file rpmtags $file1 $file2 $spec_old $spec_new || return 1
+
     # This might happen when?!
     echo "comparing RELEASE"
     if [ "${version_release_old%.*}" != "${version_release_new%.*}" ] ; then
-      case $($RPM --qf '%{NAME}' "$newrpm") in
+      case $name_new in
         kernel-*)
           # Make sure all kernel packages have the same %RELEASE
           echo "release prefix mismatch"
@@ -174,69 +244,32 @@ function cmp_spec ()
         *) ;;
       esac
     fi
-    
-    check_provides $oldrpm | trim_release_old | sort > $file1
-    check_provides $newrpm | trim_release_new | sort > $file2
-    
-    echo "comparing PROVIDES"
-    if ! diff -au $file1 $file2; then
-      if test -z "$check_all"; then
-        rm $file1 $file2
-        return 1
-      fi
-    fi
 
-    # scripts, might contain release number
-    QF="[%{PREINPROG} %{PREIN}\\n]\\n[%{POSTINPROG} %{POSTIN}\\n]\\n[%{PREUNPROG} %{PREUN}\\n]\\n[%{POSTUNPROG} %{POSTUN}\\n]\\n"
-    check_header $oldrpm | trim_release_old > $file1
-    check_header $newrpm | trim_release_new > $file2
+    get_value QF_PROVIDES $spec_old | trim_release_old | sort > $file1
+    get_value QF_PROVIDES $spec_new | trim_release_new | sort > $file2
+    comp_file PROVIDES $file1 $file2 $spec_old $spec_new || return 1
 
-    echo "comparing scripts"
-    if ! diff -au $file1 $file2; then
-      if test -z "$check_all"; then
-        rm $file1 $file2
-        return 1
-      fi
-    fi
-    
+    get_value QF_SCRIPT $spec_old | trim_release_old > $file1
+    get_value QF_SCRIPT $spec_new | trim_release_new > $file2
+    comp_file scripts $file1 $file2 $spec_old $spec_new || return 1
+
     # First check the file attributes and later the md5s
-    
-    # Now the files.  We leave out mtime and size.  For normal files
-    # the size will influence the MD5 anyway.  For directories the sizes can
-    # differ, depending on which file system the package was built.  To not
-    # have to filter out directories we simply ignore all sizes.
-    # Also leave out FILEDEVICES, FILEINODES (depends on the build host),
-    # FILECOLORS, FILECLASS (normally useful but file output contains mtimes), 
-    # FILEDEPENDSX and FILEDEPENDSN. 
-    # Also FILELANGS (or?)
-    QF="[%{FILENAMES} %{FILEFLAGS} %{FILESTATES} %{FILEMODES:octal} %{FILEUSERNAME} %{FILEGROUPNAME} %{FILERDEVS} %{FILEVERIFYFLAGS} %{FILELINKTOS}\n]\\n"
-    # ??? what to do with FILEPROVIDE and FILEREQUIRE?
+    get_value QF_FILELIST $spec_old | trim_release_old > $file1
+    get_value QF_FILELIST $spec_new | trim_release_new > $file2
+    comp_file filelist $file1 $file2 $spec_old $spec_new || return 1
 
-    check_header $oldrpm | trim_release_old > $file1
-    check_header $newrpm | trim_release_new > $file2
-    
-    echo "comparing filelist"
-    if ! diff -au $file1 $file2; then
-      if test -z "$check_all"; then
-        rm $file1 $file2
-        return 1
-      fi
-    fi
-    
     # now the md5sums. if they are different, we check more detailed
     # if there are different filenames, we will already have aborted before
     # file flag 64 means "ghost", filter those out.
-    QF="[%{FILENAMES} %{FILEMD5S} %{FILEFLAGS}\n]\\n"
-    check_header $oldrpm |grep -v " 64$"| trim_release_old > $file1
-    check_header $newrpm |grep -v " 64$"| trim_release_new > $file2
-    
+    get_value QF_CHECKSUM $spec_old | grep -v " 64$" | trim_release_old > $file1
+    get_value QF_CHECKSUM $spec_new | grep -v " 64$" | trim_release_new > $file2
     RES=2
     # done if the same
     echo "comparing file checksum"
     if cmp -s $file1 $file2; then
       RES=0
     fi
-    
+
     # Get only files with different MD5sums
     files=`diff -U0 $file1 $file2 | fgrep -v +++ | grep ^+ | cut -b2- | awk '{print $1}'`
 
@@ -257,4 +290,18 @@ function cmp_spec ()
     rm $file1 $file2
     return $RES
 }
+
+function adjust_controlfile() {
+    version_release_old="`sed -ne 's/^Version: \(.*\)/\1/p' $1/control`"
+    name_ver_rel_old="`sed -n -e 's/^Package: \(.*\)/\1/p' $1/control`-`sed -n -e 's/^Version: \(.*\)/\1/p' $1/control`"
+    version_release_new="`sed -ne 's/^Version: \(.*\)/\1/p' $2/control`"
+    name_ver_rel_new="`sed -n -e 's/^Package: \(.*\)/\1/p' $2/control`-`sed -n -e 's/^Version: \(.*\)/\1/p' $2/control`"
+    set_regex
+    cat $1/control | trim_release_old > $1/control.fixed
+    mv $1/control.fixed $1/control
+    cat $2/control | trim_release_new > $2/control.fixed
+    mv $2/control.fixed $2/control
+}
+
+
 # vim: tw=666 ts=2 shiftwidth=2 et
