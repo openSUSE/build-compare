@@ -249,19 +249,19 @@ strip_numbered_anchors()
   # <a href="#ftn.id32751" class="footnote" id="id32751">
   # <a href="#id32751" class="para">
   # <a href="#tex">1 TeX</a>
+  # <a id="id479058">
   # <div id="ftn.id43927" class="footnote">
+  # <div class="section" id="id46">
 
   for f in old/$file new/$file; do
     sed -ie '
       1 {
       : N
         $ {
-          s@\(<a[[:blank:]]\+id=\n\?"\)\(id[a-z][0-9]\+\)\("[^>]* name=\n\?"\)\(id[a-z][0-9]\+\)\("[^>]*>\)@\1id_idN\3name_idN\5@g
-          s@\(<a[[:blank:]]\+id="\)\(id[a-z][0-9]\+\)\("[^>]*>\)@\1idN\3@g
-          s@\(<a[[:blank:]]\+name="\)\(id[a-z][0-9]\+\)\("[^>]*>\)@\1nameN\3@g
-          s@\(<a[[:blank:]]\+href="#\)\([^"]\+\)\("[^>]\+id="\)\(id[a-z0-9]\+\)\("[^>]*>\)@\1href_anchor\3id_idN\5@g
-          s@\(<a[[:blank:]]\+href="#\)\([^"]\+\)\("[^>]*>\)@\1href_anchor\3@g
-          s@\(<div[[:blank:]]\+id="\)\(ftn\.[a-z]\+[0-9]\+\)\("[^>]*>\)@\1ftn.N\3@g
+          s@\(<a[^>]\+id=\n\?"\)\(id[a-z0-9]\+\)\("[^>]*>\)@\1a_idN\3@g
+          s@\(<a[^>]\+name=\n\?"\)\(id[a-z0-9]\+\)\("[^>]*>\)@\1a_nameN\3@g
+          s@\(<a[^>]\+href="#\)\([^"]\+\)\("[^>]*>\)@\1href_anchor\3@g
+          s@\(<div[^>]\+id="\)\([a-z0-9]\+\)\("[^>]*>\)@\1div_idN\3@g
         }
       N
       b N
