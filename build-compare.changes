@@ -1,4 +1,9 @@
 -------------------------------------------------------------------
+Thu Aug 25 14:27:34 UTC 2016 - olaf@aepfle.de
+
+- Update strip_numbered_anchors to catch more random identifiers
+
+-------------------------------------------------------------------
 Wed Aug 24 13:22:12 UTC 2016 - liezhi.yang@windriver.com
 
 - functions.sh: improve deb and ipk checking

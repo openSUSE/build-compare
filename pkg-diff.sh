@@ -244,13 +244,30 @@ trim_man_TH()
 strip_numbered_anchors()
 {
   # Remove numbered anchors on Docbook / HTML files.
-  # This should be save since we remove them from old and new files.
-  # A trailing </a> or </div> tag will stay also on both files.
+  #  <a id="idp270624" name=
+  #  "idp270624"></a>
+  # <a href="#ftn.id32751" class="footnote" id="id32751">
+  # <a href="#id32751" class="para">
+  # <a href="#tex">1 TeX</a>
+  # <div id="ftn.id43927" class="footnote">
+
   for f in old/$file new/$file; do
-     sed -i -e 's%<[ ]*a[ ]\+name[^<]*[0-9]\+[^<]*%%g' \
-     -e 's%<[ ]*a[ ]\+href[^<]*#[^<]*[0-9]\+[^<]*%%g' \
-     -e 's%<[^<]*id="ftn\.[^<]*[0-9]\+[^<]*%%g' $f
+    sed -ie '
+      1 {
+      : N
+        $ {
+          s@\(<a[[:blank:]]\+id=\n\?"\)\(id[a-z][0-9]\+\)\("[^>]* name=\n\?"\)\(id[a-z][0-9]\+\)\("[^>]*>\)@\1id_idN\3name_idN\5@g
+          s@\(<a[[:blank:]]\+id="\)\(id[a-z][0-9]\+\)\("[^>]*>\)@\1idN\3@g
+          s@\(<a[[:blank:]]\+name="\)\(id[a-z][0-9]\+\)\("[^>]*>\)@\1nameN\3@g
+          s@\(<a[[:blank:]]\+href="#\)\([^"]\+\)\("[^>]\+id="\)\(id[a-z0-9]\+\)\("[^>]*>\)@\1href_anchor\3id_idN\5@g
+          s@\(<a[[:blank:]]\+href="#\)\([^"]\+\)\("[^>]*>\)@\1href_anchor\3@g
+          s@\(<div[[:blank:]]\+id="\)\(ftn\.[a-z]\+[0-9]\+\)\("[^>]*>\)@\1ftn.N\3@g
+        }
+      N
+      b N
+      }' $f &
   done
+  wait
 }
 
 
