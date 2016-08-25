@@ -217,7 +217,7 @@ function cmp_spec ()
     # are the same.
     cat $spec_old | trim_release_old > $file1
     cat $spec_new | trim_release_new > $file2
-    echo "comparing the whole specfile"
+    echo "comparing the rpm tags of $name_new"
     if diff -au $file1 $file2; then
       if test -z "$check_all"; then
         rm $file1 $file2 $spec_old $spec_new
