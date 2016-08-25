@@ -218,7 +218,7 @@ function cmp_spec ()
     cat $spec_old | trim_release_old > $file1
     cat $spec_new | trim_release_new > $file2
     echo "comparing the whole specfile"
-    if diff -au $spec_old $spec_new; then
+    if diff -au $file1 $file2; then
       if test -z "$check_all"; then
         rm $file1 $file2 $spec_old $spec_new
         return 0
