@@ -842,7 +842,7 @@ check_single_file()
           return 1
         fi
      ;;
-     symbolic\ link\ to\ *)
+     broken\ symbolic\ link\ to\ *|symbolic\ link\ to\ *)
        readlink "old/$file" > $file1
        readlink "new/$file" > $file2
        if ! diff -u $file1 $file2; then

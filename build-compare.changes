@@ -1,4 +1,9 @@
 -------------------------------------------------------------------
+Wed Sep 21 07:18:37 UTC 2016 - olaf@aepfle.de
+
+- Handle broken symlinks
+
+-------------------------------------------------------------------
 Thu Aug 25 14:27:34 UTC 2016 - olaf@aepfle.de
 
 - Update strip_numbered_anchors to catch more random identifiers
