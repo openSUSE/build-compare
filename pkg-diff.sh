@@ -746,7 +746,7 @@ check_single_file()
          monodis new/$file 2>/dev/null|sed -e 's/GUID = {.*}/GUID = { 42 }/;'> ${file2}
          if ! cmp -s ${file1} ${file2}; then
            echo "$file differs ($ftype)"
-           diff -u ${file1} ${file2}
+           diff --speed-large-files -u ${file1} ${file2}
            return 1
          fi
        else
@@ -770,7 +770,7 @@ check_single_file()
        sed -i -e "s,old/,," $file1
        sed -i -e "s,new/,," $file2
        elfdiff=
-       if ! diff -u $file1 $file2 > $dfile; then
+       if ! diff --speed-large-files -u $file1 $file2 > $dfile; then
           echo "$file differs in assembler output"
           head -n 200 $dfile
           elfdiff="1"
