@@ -1,4 +1,10 @@
 -------------------------------------------------------------------
+Wed Oct 12 16:40:24 CEST 2016 - ro@suse.de
+
+- pkg-diff.sh: use option --speed-large-files for diffing
+  disassembler output (bsc#1003528)
+
+-------------------------------------------------------------------
 Wed Sep 21 07:18:37 UTC 2016 - olaf@aepfle.de
 
 - Handle broken symlinks
