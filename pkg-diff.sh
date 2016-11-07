@@ -777,8 +777,8 @@ check_single_file()
        fi
        echo "" >$file1
        echo "" >$file2
-       # Don't compare .build-id and .gnu_debuglink sections
-       sections="$($OBJDUMP -s new/$file | grep "Contents of section .*:" | sed -r "s,.* (.*):,\1,g" | grep -v -e "\.build-id" -e "\.gnu_debuglink" | tr "\n" " ")"
+       # Don't compare .build-id, .gnu_debuglink and .gnu_debugdata sections
+       sections="$($OBJDUMP -s new/$file | grep "Contents of section .*:" | sed -r "s,.* (.*):,\1,g" | grep -v -e "\.build-id" -e "\.gnu_debuglink" -e "\.gnu_debugdata" | tr "\n" " ")"
        for section in $sections; do
           $OBJDUMP -s -j $section old/$file | sed "s,^old/,," > $file1
           $OBJDUMP -s -j $section new/$file | sed "s,^new/,," > $file2
@@ -789,7 +789,7 @@ check_single_file()
           fi
        done
        if test -z "$elfdiff"; then
-          echo "$file: only difference was in build-id or gnu_debuglink, GOOD."
+          echo "$file: only difference was in build-id, gnu_debuglink or gnu_debugdata, GOOD."
           return 0
        fi
        return 1
