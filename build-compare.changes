@@ -1,4 +1,9 @@
 -------------------------------------------------------------------
+Mon Nov  7 03:54:00 UTC 2016 - ol@infoserver.lv
+
+- Ignore .gnu_debugdata section when comparing ELF files.
+
+-------------------------------------------------------------------
 Wed Oct 12 16:40:24 CEST 2016 - ro@suse.de
 
 - pkg-diff.sh: use option --speed-large-files for diffing
