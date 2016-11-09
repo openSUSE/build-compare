@@ -735,7 +735,7 @@ check_single_file()
         sed -i '/^InitrdID:/s@^.*@InitrdID: something@' "old/$file"
         sed -i '/^InitrdID:/s@^.*@InitrdID: something@' "new/$file"
       ;;
-      */ld.so.cache)
+      */ld.so.cache|*/etc/machine-id)
         # packaged by libguestfs
         return 0
       ;;
