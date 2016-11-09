@@ -735,6 +735,10 @@ check_single_file()
         sed -i '/^InitrdID:/s@^.*@InitrdID: something@' "old/$file"
         sed -i '/^InitrdID:/s@^.*@InitrdID: something@' "new/$file"
       ;;
+      */ld.so.cache)
+        # packaged by libguestfs
+        return 0
+      ;;
       */etc/hosts)
         # packaged by libguestfs
         sed -i 's/^127.0.0.1[[:blank:]].*/127.0.0.1 hst/' "old/$file"
