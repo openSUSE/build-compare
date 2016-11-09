@@ -737,8 +737,8 @@ check_single_file()
       ;;
       */etc/hosts)
         # packaged by libguestfs
-        sed -i '/^127.0.0.1[[:blank:]].*/127.0.0.1 hst/' "old/$file"
-        sed -i '/^127.0.0.1[[:blank:]].*/127.0.0.1 hst/' "new/$file"
+        sed -i 's/^127.0.0.1[[:blank:]].*/127.0.0.1 hst/' "old/$file"
+        sed -i 's/^127.0.0.1[[:blank:]].*/127.0.0.1 hst/' "new/$file"
       ;;
   esac
 
