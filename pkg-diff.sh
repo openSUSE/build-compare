@@ -249,6 +249,7 @@ strip_numbered_anchors()
   # <a href="#ftn.id32751" class="footnote" id="id32751">
   # <a href="#id32751" class="para">
   # <a href="#tex">1 TeX</a>
+  # <a href="dh-manual.html#id599116">
   # <a id="id479058">
   # <div id="ftn.id43927" class="footnote">
   # <div class="section" id="id46">
@@ -261,6 +262,7 @@ strip_numbered_anchors()
           s@\(<a[^>]\+id=\n\?"\)\(id[a-z0-9]\+\)\("[^>]*>\)@\1a_idN\3@g
           s@\(<a[^>]\+name=\n\?"\)\(id[a-z0-9]\+\)\("[^>]*>\)@\1a_nameN\3@g
           s@\(<a[^>]\+href="#\)\([^"]\+\)\("[^>]*>\)@\1href_anchor\3@g
+          s@\(<a[^>]\+href="[^#]\+#\)\([^"]\+\)\("[^>]*>\)@\1href_anchor\3@g
           s@\(<div[^>]\+id="\)\([a-z0-9]\+\)\("[^>]*>\)@\1div_idN\3@g
         }
       N
