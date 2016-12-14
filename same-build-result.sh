@@ -140,9 +140,11 @@ if test -n "$OTHERDIR"; then
     # Remove release from files
     sort -u $OLDDIR/rpmlint.log|sed -e "s,$ver_rel1,@VERSION@-@RELEASE@,g" -e "s|/tmp/rpmlint\..*spec|.spec|g" > $file1
     sort -u $OTHERDIR/rpmlint.log|sed -e "s,$ver_rel2,@VERSION@-@RELEASE@,g" -e "s|/tmp/rpmlint\..*spec|.spec|g"  > $file2
+    # Remove warning about python mtime mismatch, a republish will not help
     # Remove odd warning about filenames, they contain VERSION-RELEASE
     # Remove durations from progress reports
     sed -i -e "
+    /: W: python-bytecode-inconsistent-mtime /d
     /: W: filename-too-long-for-joliet /d
     /: I: \(filelist-initialization\|check-completed\) /s| [0-9]\+\.[0-9] s| x.x s|
     " $file1 $file2

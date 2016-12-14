@@ -1,4 +1,9 @@
 -------------------------------------------------------------------
+Wed Dec 14 08:44:11 UTC 2016 - olaf@aepfle.de
+
+- Remove warning about python mtime mismatch, a republish will not help
+
+-------------------------------------------------------------------
 Wed Nov  9 06:48:22 UTC 2016 - olaf@aepfle.de
 
 - Ignore /etc/ld.so.cache
