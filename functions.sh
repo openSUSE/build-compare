@@ -168,17 +168,36 @@ function get_value()
 # Set version_release_old_regex_s, version_release_old_regex_l and
 # name_ver_rel_old_regex_l, also the new ones.
 function set_regex() {
-    # Remember to quote the . which is in release
-    # Short version without B_CNT
+  local rel_old=${version_release_old##*-}
+  local rel_new=${version_release_new##*-}
+
+  # Short version without B_CNT
+  # release may not contain a dot
+  case "${rel_old}" in
+    *.*)
     version_release_old_regex_s=${version_release_old%.*}
-    version_release_old_regex_s=${version_release_old_regex_s//./\\.}
+    ;;
+    *)
+    version_release_old_regex_s=${version_release_old}
+    ;;
+  esac
+  # Remember to quote the . which is in release
+  version_release_old_regex_s=${version_release_old_regex_s//./\\.}
+  # Long version with B_CNT
+  version_release_old_regex_l=${version_release_old//./\\.}
+  name_ver_rel_old_regex_l=${name_ver_rel_old//./\\.}
+
+  case "${rel_new}" in
+    *.*)
     version_release_new_regex_s=${version_release_new%.*}
-    version_release_new_regex_s=${version_release_new_regex_s//./\\.}
-    # Long version with B_CNT
-    version_release_old_regex_l=${version_release_old//./\\.}
-    version_release_new_regex_l=${version_release_new//./\\.}
-    name_ver_rel_old_regex_l=${name_ver_rel_old//./\\.}
-    name_ver_rel_new_regex_l=${name_ver_rel_new//./\\.}
+    ;;
+    *)
+    version_release_new_regex_s=${version_release_new}
+    ;;
+  esac
+  version_release_new_regex_s=${version_release_new_regex_s//./\\.}
+  version_release_new_regex_l=${version_release_new//./\\.}
+  name_ver_rel_new_regex_l=${name_ver_rel_new//./\\.}
 }
 
 # Compare just the rpm meta data of two rpms
