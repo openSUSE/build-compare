@@ -4,15 +4,15 @@ Sun Feb 12 08:41:01 UTC 2017 - olaf@aepfle.de
 - Remove warning file-contains-date-and-time from rpmlint.log
 
 -------------------------------------------------------------------
+Thu Jan  5 11:01:53 UTC 2017 - olaf@aepfle.de
+
+- Fix name-version-release regex for release without dots
+
+-------------------------------------------------------------------
 Wed Dec 14 08:44:11 UTC 2016 - olaf@aepfle.de
 
 - Remove warning about python mtime mismatch, a republish will not help
 - Handle yet another variant of numbered anchor in html file
-
--------------------------------------------------------------------
-Thu Jan  5 11:01:53 UTC 2017 - olaf@aepfle.de
-
-- Fix name-version-release regex for release without dots
 
 -------------------------------------------------------------------
 Wed Nov  9 06:48:22 UTC 2016 - olaf@aepfle.de
