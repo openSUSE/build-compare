@@ -536,7 +536,7 @@ check_single_file()
           return 0
         fi
         ;;
-     /usr/share/locale/*/LC_MESSAGES/*.mo|/usr/share/locale-bundle/*/LC_MESSAGES/*.mo)
+     /usr/share/locale/*/LC_MESSAGES/*.mo|/usr/share/locale-bundle/*/LC_MESSAGES/*.mo|/usr/share/vdr/locale/*/LC_MESSAGES/*.mo)
        for f in old/$file new/$file; do
          sed -i -e "s,POT-Creation-Date: ....-..-.. ..:..+....,POT-Creation-Date: 1970-01-01 00:00+0000," $f
        done

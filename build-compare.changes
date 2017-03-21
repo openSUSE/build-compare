@@ -1,4 +1,9 @@
 -------------------------------------------------------------------
+Tue Mar 21 11:17:26 UTC 2017 - olaf@aepfle.de
+
+- Handle /usr/share/vdr/locale/
+
+-------------------------------------------------------------------
 Sun Feb 12 08:41:01 UTC 2017 - olaf@aepfle.de
 
 - Remove warning file-contains-date-and-time from rpmlint.log
