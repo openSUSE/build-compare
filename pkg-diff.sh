@@ -549,6 +549,7 @@ check_single_file()
       done
       strip_numbered_anchors
     ;;
+    /usr/share/doc/HTML/*/*/index.cache|/usr/share/doc//HTML/*/*/*/index.cache|\
     /usr/share/doc/kde/HTML/*/*/index.cache|/usr/share/doc/kde/HTML/*/*/*/index.cache|\
     /usr/share/gtk-doc/html/*/*.html|/usr/share/gtk-doc/html/*/*.devhelp2)
       # various kde and gtk packages

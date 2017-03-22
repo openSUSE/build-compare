@@ -1,4 +1,9 @@
 -------------------------------------------------------------------
+Wed Mar 22 19:05:36 UTC 2017 - olaf@aepfle.de
+
+- Handle _kf5_htmldir, it HAD to be different...
+
+-------------------------------------------------------------------
 Tue Mar 21 11:17:26 UTC 2017 - olaf@aepfle.de
 
 - Handle /usr/share/vdr/locale/
