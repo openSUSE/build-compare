@@ -478,6 +478,11 @@ check_single_file()
          fi
        done
        return $ret;;
+     */xen*.efi)
+        # PE32+ executable (EFI application) x86-64 (stripped to external PDB), for MS Windows
+        perl -e "open fh, '+<', 'old/$file'; seek fh, 0x80 + 0x08, SEEK_SET; print fh 'time'; seek fh, 0x80 + 0x58, SEEK_SET; print fh 'chck';"
+        perl -e "open fh, '+<', 'new/$file'; seek fh, 0x80 + 0x08, SEEK_SET; print fh 'time'; seek fh, 0x80 + 0x58, SEEK_SET; print fh 'chck';"
+        ;;
      *.pyc|*.pyo)
         perl -e "open fh, '+<', 'old/$file'; seek fh, 4, SEEK_SET; print fh '0000';"
         perl -e "open fh, '+<', 'new/$file'; seek fh, 4, SEEK_SET; print fh '0000';"
