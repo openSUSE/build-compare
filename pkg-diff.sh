@@ -120,6 +120,17 @@ filter_disasm()
    sed -i -e 's/^ *[0-9a-f]\+://' -e 's/\$0x[0-9a-f]\+/$something/' -e 's/callq *[0-9a-f]\+/callq /' -e 's/# *[0-9a-f]\+/#  /' -e 's/\(0x\)\?[0-9a-f]\+(/offset(/' -e 's/[0-9a-f]\+ </</' -e 's/^<\(.*\)>:/\1:/' -e 's/<\(.*\)+0x[0-9a-f]\+>/<\1 + ofs>/' ${file}
 }
 
+filter_zip_flist()
+{
+   local file=$1
+   [[ $nofilter ]] && return
+   #  10-05-2010 14:39
+   sed -i -e "s, [0-9][0-9]-[0-9][0-9]-[0-9]\+ [0-9][0-9]:[0-9][0-9] , date ," $file
+   # 2012-02-03 07:59
+   sed -i -e "s, 20[0-9][0-9]-[0-9][0-9]-[0-9][0-9] [0-9][0-9]:[0-9][0-9] , date ," $file
+}
+
+
 echo "Comparing `basename $oldpkg` to `basename $newpkg`"
 
 case $oldpkg in
@@ -452,14 +463,10 @@ check_single_file()
     *.zip|*.jar|*.war)
        cd old
        unjar_l ./$file |sort > flist
-       #  10-05-2010 14:39
-       sed -i -e "s, [0-9][0-9]-[0-9][0-9]-[0-9]\+ [0-9][0-9]:[0-9][0-9] , date ," flist
-       # 2012-02-03 07:59
-       sed -i -e "s, 20[0-9][0-9]-[0-9][0-9]-[0-9][0-9] [0-9][0-9]:[0-9][0-9] , date ," flist
+       filter_zip_flist flist
        cd ../new
-       unjar_l ./$file |sort> flist
-       sed -i -e "s, [0-9][0-9]-[0-9][0-9]-[0-9]\+ [0-9][0-9]:[0-9][0-9] , date ,; " flist
-       sed -i -e "s, 20[0-9][0-9]-[0-9][0-9]-[0-9][0-9] [0-9][0-9]:[0-9][0-9] , date ," flist
+       unjar_l ./$file |sort > flist
+       filter_zip_flist flist
        cd ..
        if ! cmp -s old/flist new/flist; then
           echo "$file has different file list"
