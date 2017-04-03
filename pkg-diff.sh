@@ -132,6 +132,92 @@ filter_zip_flist()
    sed -i -e "s, 20[0-9][0-9]-[0-9][0-9]-[0-9][0-9] [0-9][0-9]:[0-9][0-9] , date ," $file
 }
 
+filter_xenefi() {
+   # PE32+ executable (EFI application) x86-64 (stripped to external PDB), for MS Windows
+   perl -e "open fh, '+<', '$f'; seek fh, 0x80 + 0x08, SEEK_SET; print fh 'time'; seek fh, 0x80 + 0x58, SEEK_SET; print fh 'chck';"
+}
+
+filter_pyc() {
+   perl -e "open fh, '+<', '$f'; seek fh, 4, SEEK_SET; print fh '0000';"
+}
+
+filter_dvi() {
+   # Opcodes 247: pre; i[1], num[4], den[4], mag[4], k[1], x[k]
+   perl -e "
+   my \$rec;
+   open fh, '+<', '$f';
+   my \$dummy = read fh, \$rec, 15;
+   (\$pre, \$i, \$num, \$den, \$mag, \$k) = unpack('C2 N3 C', \$rec);
+   seek fh, 15, SEEK_SET;
+   while (\$k > 0) {
+     print fh '0';
+     \$k--;
+   }
+   "
+}
+
+filter_png() {
+   convert "$f" +set date:create +set date:modify "${f}.$PPID.$$"
+   mv -f "${f}.$PPID.$$" "${f}"
+}
+
+filter_emacs_lisp() {
+   sed -i -e '
+    s|^;;; .ompiled by abuild@.* on ... ... .. ..:..:.. ....|;;; compiled by abuild@buildhost on Wed Jul 01 00:00:00 2009|
+    s|^;;; from file .*\.el|;;; from file /home/abuild/rpmbuild/BUILD/anthy-9100h/src-util/elc.8411/anthy-azik.el|
+    s|^;;; emacs version .*|;;; emacs version 21.5  (beta34) "kale" XEmacs Lucid.|
+    s|^;;; bytecomp version .*|;;; bytecomp version 2.28 XEmacs; 2009-08-09.|
+    ' "$f"
+}
+
+filter_pdf() {
+   # PDF files contain a unique ID, remove it
+   # Format of the ID is:
+   # /ID [<9ACE247A70CF9BEAFEE15E116259BD6D> <9ACE247A70CF9BEAFEE15E116259BD6D>]
+   # with optional spaces. pdftex creates also:
+   # /CreationDate (D:20120103083206Z)
+   # /ModDate (D:20120103083206Z)
+   # and possibly XML metadata as well
+   sed -i \
+        '/obj/,/endobj/{
+           s%/ID \?\[ \?<[^>]\+> \?<[^>]\+> \?\]%/IDrandom%g;
+           s%/CreationDate \?(D:[^)]*)%/CreationDate (D: XXX)%g;
+           s%/ModDate \?(D:[^)]*)%/ModDate (D: XXX)%g;
+           s%<pdf:CreationDate>[^<]*</pdf:CreationDate>%<pdf:CreationDate>XXX</pdf:CreationDate>%g;
+           s%<pdf:ModDate>[^<]*</pdf:ModDate>%<pdf:ModDate>XXX</pdf:ModDate>%g;
+           s%<xap:CreateDate>[^<]*</xap:CreateDate>%<xap:CreateDate>XXX</xap:CreateDate>%g;
+           s%<xap:ModifyDate>[^<]*</xap:ModifyDate>%<xap:ModifyDate>XXX</xap:ModifyDate>%g;
+           s%<xap:MetadataDate>[^<]*</xap:MetadataDate>%<xap:MetadataDate>XXX</xap:MetadataDate>%g;
+        }' "$f"
+}
+
+filter_ps() {
+   sed -i -e '
+    /^%%CreationDate:[[:blank:]]/d
+    /^%%Creator:[[:blank:]]groff[[:blank:]]version[[:blank:]]/d
+    /^%DVIPSSource:[[:blank:]]/d
+   ' "$f"
+}
+
+filter_mo() {
+   sed -i -e "s,POT-Creation-Date: ....-..-.. ..:..+....,POT-Creation-Date: 1970-01-01 00:00+0000," "$f"
+}
+
+filter_linuxrc_config() {
+   sed -i '/^InitrdID:/s@^.*@InitrdID: something@' "$f"
+}
+
+# call specified filter on old and new file
+filter_generic()
+{
+   filtertype=$1
+   [[ $nofilter ]] && return
+   local f
+   for f in "old/$file" "new/$file" ; do
+      eval "filter_$filtertype $f"
+   done
+}
+
 
 echo "Comparing `basename $oldpkg` to `basename $newpkg`"
 
@@ -494,38 +580,13 @@ check_single_file()
        done
        return $ret;;
      */xen*.efi)
-        # PE32+ executable (EFI application) x86-64 (stripped to external PDB), for MS Windows
-        perl -e "open fh, '+<', 'old/$file'; seek fh, 0x80 + 0x08, SEEK_SET; print fh 'time'; seek fh, 0x80 + 0x58, SEEK_SET; print fh 'chck';"
-        perl -e "open fh, '+<', 'new/$file'; seek fh, 0x80 + 0x08, SEEK_SET; print fh 'time'; seek fh, 0x80 + 0x58, SEEK_SET; print fh 'chck';"
+        filter_generic xenefi
         ;;
      *.pyc|*.pyo)
-        perl -e "open fh, '+<', 'old/$file'; seek fh, 4, SEEK_SET; print fh '0000';"
-        perl -e "open fh, '+<', 'new/$file'; seek fh, 4, SEEK_SET; print fh '0000';"
+        filter_generic pyc
         ;;
       *.dvi)
-      # Opcodes 247: pre; i[1], num[4], den[4], mag[4], k[1], x[k]
-        perl -e "
-        my \$rec;
-        open fh, '+<', 'old/$file';
-        my \$dummy = read fh, \$rec, 15;
-        (\$pre, \$i, \$num, \$den, \$mag, \$k) = unpack('C2 N3 C', \$rec);
-        seek fh, 15, SEEK_SET;
-        while (\$k > 0) {
-          print fh '0';
-          \$k--;
-        }
-        "
-        perl -e "
-        my \$rec;
-        open fh, '+<', 'new/$file';
-        my \$dummy = read fh, \$rec, 15;
-        (\$pre, \$i, \$num, \$den, \$mag, \$k) = unpack('C2 N3 C', \$rec);
-        seek fh, 15, SEEK_SET;
-        while (\$k > 0) {
-          print fh '0';
-          \$k--;
-        }
-        "
+        filter_generic dvi
       ;;
      *.bz2)
         bunzip2 -c old/$file > old/${file/.bz2/}
@@ -546,10 +607,7 @@ check_single_file()
      *png)
         # Try to remove timestamps, only if convert from ImageMagick is installed
         if [[ $(type -p convert) ]]; then
-          convert old/$file +set date:create +set date:modify old/${file}.$PPID.$$
-          convert new/$file +set date:create +set date:modify new/${file}.$PPID.$$
-          mv -f old/${file}.$PPID.$$ old/${file}
-          mv -f new/${file}.$PPID.$$ new/${file}
+          filter_generic png
           if ! diff_two_files; then
             return 1
           fi
@@ -557,9 +615,7 @@ check_single_file()
         fi
         ;;
      /usr/share/locale/*/LC_MESSAGES/*.mo|/usr/share/locale-bundle/*/LC_MESSAGES/*.mo|/usr/share/vdr/locale/*/LC_MESSAGES/*.mo)
-       for f in old/$file new/$file; do
-         sed -i -e "s,POT-Creation-Date: ....-..-.. ..:..+....,POT-Creation-Date: 1970-01-01 00:00+0000," $f
-       done
+       filter_generic mo
        ;;
     */rdoc/files/*.html)
       # ruby documentation
@@ -670,15 +726,7 @@ check_single_file()
        done
        ;;
      *.elc)
-       # emacs lisp files
-       for f in old/$file new/$file; do
-         sed -i -e '
-          s|^;;; .ompiled by abuild@.* on ... ... .. ..:..:.. ....|;;; compiled by abuild@buildhost on Wed Jul 01 00:00:00 2009|
-          s|^;;; from file .*\.el|;;; from file /home/abuild/rpmbuild/BUILD/anthy-9100h/src-util/elc.8411/anthy-azik.el|
-          s|^;;; emacs version .*|;;; emacs version 21.5  (beta34) "kale" XEmacs Lucid.|
-          s|^;;; bytecomp version .*|;;; bytecomp version 2.28 XEmacs; 2009-08-09.|
-          ' $f
-       done
+       filter_generic emacs_lisp
        ;;
      /var/lib/texmf/web2c/*/*fmt |\
      /var/lib/texmf/web2c/metafont/*.base|\
@@ -723,40 +771,14 @@ check_single_file()
       sed -i "s/${name_ver_rel_new_regex_l}/@NAME_VER_REL@/" new/$file
       ;;
     *.ps)
-      for f in "old/$file" "new/$file"; do
-        sed -i -e '
-          /^%%CreationDate:[[:blank:]]/d
-          /^%%Creator:[[:blank:]]groff[[:blank:]]version[[:blank:]]/d
-          /^%DVIPSSource:[[:blank:]]/d
-        ' "$f"
-      done
-    ;;
+      filter_generic ps
+      ;;
     *pdf)
-      # PDF files contain a unique ID, remove it
-      # Format of the ID is:
-      # /ID [<9ACE247A70CF9BEAFEE15E116259BD6D> <9ACE247A70CF9BEAFEE15E116259BD6D>]
-      # with optional spaces. pdftex creates also:
-      # /CreationDate (D:20120103083206Z)
-      # /ModDate (D:20120103083206Z)
-      # and possibly XML metadata as well
-      for f in "old/$file" "new/$file"; do
-        sed -i \
-            '/obj/,/endobj/{
-               s%/ID \?\[ \?<[^>]\+> \?<[^>]\+> \?\]%/IDrandom%g;
-               s%/CreationDate \?(D:[^)]*)%/CreationDate (D: XXX)%g;
-               s%/ModDate \?(D:[^)]*)%/ModDate (D: XXX)%g;
-               s%<pdf:CreationDate>[^<]*</pdf:CreationDate>%<pdf:CreationDate>XXX</pdf:CreationDate>%g;
-               s%<pdf:ModDate>[^<]*</pdf:ModDate>%<pdf:ModDate>XXX</pdf:ModDate>%g;
-               s%<xap:CreateDate>[^<]*</xap:CreateDate>%<xap:CreateDate>XXX</xap:CreateDate>%g;
-               s%<xap:ModifyDate>[^<]*</xap:ModifyDate>%<xap:ModifyDate>XXX</xap:ModifyDate>%g;
-               s%<xap:MetadataDate>[^<]*</xap:MetadataDate>%<xap:MetadataDate>XXX</xap:MetadataDate>%g;
-            }' "$f"
-      done
+      filter_generic pdf
       ;;
       */linuxrc.config)
         echo "${file}"
-        sed -i '/^InitrdID:/s@^.*@InitrdID: something@' "old/$file"
-        sed -i '/^InitrdID:/s@^.*@InitrdID: something@' "new/$file"
+        filter_generic linuxrc_config
       ;;
       */ld.so.cache|*/etc/machine-id)
         # packaged by libguestfs
