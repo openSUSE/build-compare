@@ -7,6 +7,7 @@
 # Enhanced by Andreas Jaeger
 
 FUNCTIONS=${0%/*}/functions.sh
+: ${buildcompare_head:="head -n 200"}
 
 check_all=
 case $1 in
@@ -195,7 +196,7 @@ diff_two_files()
   hexdump -C old/$file > $file1 &
   hexdump -C new/$file > $file2 &
   wait
-  diff -u $file1 $file2 | head -n 200
+  diff -u $file1 $file2 | $buildcompare_head
   return 1
 }
 
@@ -789,7 +790,7 @@ check_single_file()
        elfdiff=
        if ! diff --speed-large-files -u $file1 $file2 > $dfile; then
           echo "$file differs in assembler output"
-          head -n 200 $dfile
+          $buildcompare_head $dfile
           elfdiff="1"
        fi
        echo "" >$file1
@@ -801,7 +802,7 @@ check_single_file()
           $OBJDUMP -s -j $section new/$file | sed "s,^new/,," > $file2
           if ! diff -u $file1 $file2 > $dfile; then
              echo "$file differs in ELF section $section"
-             head -n 200 $dfile
+             $buildcompare_head $dfile
              elfdiff="1"
           fi
        done
@@ -814,7 +815,7 @@ check_single_file()
      *ASCII*|*text*)
        if ! cmp -s old/$file new/$file; then
          echo "$file differs ($ftype)"
-         diff -u old/$file new/$file | head -n 200
+         diff -u old/$file new/$file | $buildcompare_head
          return 1
        fi
        ;;
