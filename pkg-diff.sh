@@ -461,13 +461,13 @@ check_single_file()
        return $ret
        ;;
     *.zip|*.jar|*.war)
-       cd old
-       unjar_l ./$file |sort > flist
-       filter_zip_flist flist
-       cd ../new
-       unjar_l ./$file |sort > flist
-       filter_zip_flist flist
-       cd ..
+       for dir in old new ; do
+          (
+             cd $dir
+             unjar_l ./$file |sort > flist
+             filter_zip_flist flist
+          )
+       done
        if ! cmp -s old/flist new/flist; then
           echo "$file has different file list"
           diff -u old/flist new/flist
