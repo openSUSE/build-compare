@@ -9,6 +9,8 @@
 FUNCTIONS=${0%/*}/functions.sh
 : ${buildcompare_head:="head -n 200"}
 nofilter=${buildcompare_nofilter}
+sort=sort
+[[ $nofilter ]] && sort=cat
 
 check_all=
 case $1 in
@@ -402,7 +404,7 @@ check_single_file()
        return 0
        ;;
     *.cpio)
-       flist=`cpio --quiet --list --force-local < "new/$file" | sort`
+       flist=`cpio --quiet --list --force-local < "new/$file" | $sort`
        pwd=$PWD
        fdir=$file.extract.$PPID.$$
        mkdir old/$fdir new/$fdir
@@ -424,7 +426,7 @@ check_single_file()
        return $ret
        ;;
     *.squashfs)
-       flist=`unsquashfs -no-progress -ls -dest '' "new/$file" | grep -Ev '^(Parallel unsquashfs:|[0-9]+ inodes )' | sort`
+       flist=`unsquashfs -no-progress -ls -dest '' "new/$file" | grep -Ev '^(Parallel unsquashfs:|[0-9]+ inodes )' | $sort`
        fdir=$file.extract.$PPID.$$
        unsquashfs -no-progress -dest old/$fdir "old/$file"
        unsquashfs -no-progress -dest new/$fdir "new/$file"
@@ -464,7 +466,7 @@ check_single_file()
        for dir in old new ; do
           (
              cd $dir
-             unjar_l ./$file |sort > flist
+             unjar_l ./$file | $sort > flist
              filter_zip_flist flist
           )
        done
@@ -628,7 +630,7 @@ check_single_file()
         # deprecated-list is randomly ordered, sort it for comparison
         case $f in
           */deprecated-list.html)
-            sort -o $f $f
+            [[ $nofilter ]] || sort -o $f $f
           ;;
         esac
       done
@@ -642,7 +644,7 @@ check_single_file()
      */fonts.scale|*/fonts.dir|*/encodings.dir)
        for f in old/$file new/$file; do
          # sort files before comparing
-         sort -o $f $f
+         [[ $nofilter ]] || sort -o $f $f
        done
        ;;
      /var/adm/perl-modules/*)
