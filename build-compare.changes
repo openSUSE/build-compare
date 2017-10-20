@@ -1,4 +1,13 @@
 -------------------------------------------------------------------
+Fri Oct 20 06:53:18 UTC 2017 - olaf@aepfle.de
+
+- Remove newly introduced files-duplicate check from rpmlint
+  In case files are hardlinked, the source and destination is
+  scrambled in rpm output: the pkg will be republished.
+  In case files are not hardlinked, the source and destination
+  is scrambled in rpmlint output: the pkg will be republished
+
+-------------------------------------------------------------------
 Thu Jul 27 12:05:25 UTC 2017 - olaf@aepfle.de
 
 - Compare also supplements and recomments (issue#18)
