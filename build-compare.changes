@@ -1,4 +1,9 @@
 -------------------------------------------------------------------
+Fri Nov  3 14:03:04 UTC 2017 - olaf@aepfle.de
+
+- Catch empty rpm -qp --qf output for tags not understood by rpm
+
+-------------------------------------------------------------------
 Fri Oct 20 06:53:18 UTC 2017 - olaf@aepfle.de
 
 - Remove newly introduced files-duplicate check from rpmlint

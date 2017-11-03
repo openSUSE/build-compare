@@ -225,6 +225,15 @@ function cmp_spec ()
     check_header "$QF_ALL" $oldrpm > $spec_old
     check_header "$QF_ALL" $newrpm > $spec_new
 
+    # rpm returns 0 even in case of error
+    if test -s $spec_old && test -s $spec_new
+    then
+      : some output provided, all query tags understood by rpm
+    else
+      echo "empty 'rpm -qp' output..."
+      return 1
+    fi
+
     name_new="$(get_value QF_NAME $spec_new)"
     version_release_new="$(get_value QF_VER_REL $spec_new)"
     name_ver_rel_new="$(get_value QF_NAME_VER_REL $spec_new)"
