@@ -146,7 +146,7 @@ function unpackage()
 # $1: printed info
 # $2: file1
 # $3: file2
-# $4, $5: spec_old and spec_new, for cleanup.
+# $4, $5: rpm_meta_old and rpm_meta_new, for cleanup.
 function comp_file()
 {
     echo "comparing $1"
@@ -219,45 +219,45 @@ function cmp_rpm_meta ()
 
     file1=`mktemp`
     file2=`mktemp`
-    spec_old=`mktemp`
-    spec_new=`mktemp`
+    rpm_meta_old=`mktemp`
+    rpm_meta_new=`mktemp`
 
-    check_header "$QF_ALL" $oldrpm > $spec_old
-    check_header "$QF_ALL" $newrpm > $spec_new
+    check_header "$QF_ALL" $oldrpm > $rpm_meta_old
+    check_header "$QF_ALL" $newrpm > $rpm_meta_new
 
     # rpm returns 0 even in case of error
-    if test -s $spec_old && test -s $spec_new ; then
+    if test -s $rpm_meta_old && test -s $rpm_meta_new ; then
       : some output provided, all query tags understood by rpm
     else
-      ls -l $spec_old $spec_new
+      ls -l $rpm_meta_old $rpm_meta_new
       echo "empty 'rpm -qp' output..."
       return 1
     fi
 
-    name_new="$(get_value QF_NAME $spec_new)"
-    version_release_new="$(get_value QF_VER_REL $spec_new)"
-    name_ver_rel_new="$(get_value QF_NAME_VER_REL $spec_new)"
+    name_new="$(get_value QF_NAME $rpm_meta_new)"
+    version_release_new="$(get_value QF_VER_REL $rpm_meta_new)"
+    name_ver_rel_new="$(get_value QF_NAME_VER_REL $rpm_meta_new)"
 
-    version_release_old="$(get_value QF_VER_REL $spec_old)"
-    name_ver_rel_old="$(get_value QF_NAME_VER_REL $spec_old)"
+    version_release_old="$(get_value QF_VER_REL $rpm_meta_old)"
+    name_ver_rel_old="$(get_value QF_NAME_VER_REL $rpm_meta_old)"
 
     set_regex
 
     # Check the whole spec file at first, return 0 immediately if the
     # are the same.
-    cat $spec_old | trim_release_old > $file1
-    cat $spec_new | trim_release_new > $file2
+    cat $rpm_meta_old | trim_release_old > $file1
+    cat $rpm_meta_new | trim_release_new > $file2
     echo "comparing the rpm tags of $name_new"
     if diff -au $file1 $file2; then
       if test -z "$check_all"; then
-        rm $file1 $file2 $spec_old $spec_new
+        rm $file1 $file2 $rpm_meta_old $rpm_meta_new
         return 0
       fi
     fi
 
-    get_value QF_TAGS $spec_old > $file1
-    get_value QF_TAGS $spec_new > $file2
-    comp_file rpmtags $file1 $file2 $spec_old $spec_new || return 1
+    get_value QF_TAGS $rpm_meta_old > $file1
+    get_value QF_TAGS $rpm_meta_new > $file2
+    comp_file rpmtags $file1 $file2 $rpm_meta_old $rpm_meta_new || return 1
 
     # This might happen when?!
     echo "comparing RELEASE"
@@ -275,24 +275,24 @@ function cmp_rpm_meta ()
       esac
     fi
 
-    get_value QF_PROVIDES $spec_old | trim_release_old | sort > $file1
-    get_value QF_PROVIDES $spec_new | trim_release_new | sort > $file2
-    comp_file PROVIDES $file1 $file2 $spec_old $spec_new || return 1
+    get_value QF_PROVIDES $rpm_meta_old | trim_release_old | sort > $file1
+    get_value QF_PROVIDES $rpm_meta_new | trim_release_new | sort > $file2
+    comp_file PROVIDES $file1 $file2 $rpm_meta_old $rpm_meta_new || return 1
 
-    get_value QF_SCRIPT $spec_old | trim_release_old > $file1
-    get_value QF_SCRIPT $spec_new | trim_release_new > $file2
-    comp_file scripts $file1 $file2 $spec_old $spec_new || return 1
+    get_value QF_SCRIPT $rpm_meta_old | trim_release_old > $file1
+    get_value QF_SCRIPT $rpm_meta_new | trim_release_new > $file2
+    comp_file scripts $file1 $file2 $rpm_meta_old $rpm_meta_new || return 1
 
     # First check the file attributes and later the md5s
-    get_value QF_FILELIST $spec_old | trim_release_old > $file1
-    get_value QF_FILELIST $spec_new | trim_release_new > $file2
-    comp_file filelist $file1 $file2 $spec_old $spec_new || return 1
+    get_value QF_FILELIST $rpm_meta_old | trim_release_old > $file1
+    get_value QF_FILELIST $rpm_meta_new | trim_release_new > $file2
+    comp_file filelist $file1 $file2 $rpm_meta_old $rpm_meta_new || return 1
 
     # now the md5sums. if they are different, we check more detailed
     # if there are different filenames, we will already have aborted before
     # file flag 64 means "ghost", filter those out.
-    get_value QF_CHECKSUM $spec_old | grep -v " 64$" | trim_release_old > $file1
-    get_value QF_CHECKSUM $spec_new | grep -v " 64$" | trim_release_new > $file2
+    get_value QF_CHECKSUM $rpm_meta_old | grep -v " 64$" | trim_release_old > $file1
+    get_value QF_CHECKSUM $rpm_meta_new | grep -v " 64$" | trim_release_new > $file2
     RES=2
     # done if the same
     echo "comparing file checksum"
