@@ -60,8 +60,8 @@ esac
 # nothing else
 
 dir=`mktemp -d`
-unrpm $oldrpm $dir/old
-unrpm $newrpm $dir/new
+unpackage $oldrpm $dir/old
+unpackage $newrpm $dir/new
 cd $dir
 
 check_single_file()
