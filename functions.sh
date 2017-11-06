@@ -226,10 +226,10 @@ function cmp_spec ()
     check_header "$QF_ALL" $newrpm > $spec_new
 
     # rpm returns 0 even in case of error
-    if test -s $spec_old && test -s $spec_new
-    then
+    if test -s $spec_old && test -s $spec_new ; then
       : some output provided, all query tags understood by rpm
     else
+      ls -l $spec_old $spec_new
       echo "empty 'rpm -qp' output..."
       return 1
     fi
