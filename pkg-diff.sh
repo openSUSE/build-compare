@@ -223,7 +223,7 @@ echo "Comparing `basename $oldpkg` to `basename $newpkg`"
 
 case $oldpkg in
   *.rpm)
-     cmp_spec "$rename_script" "$oldpkg" "$newpkg"
+     cmp_rpm_meta "$rename_script" "$oldpkg" "$newpkg"
      RES=$?
      case $RES in
        0)
@@ -264,7 +264,7 @@ case $oldpkg in
   ;;
 esac
 
-# files is set in cmp_spec for rpms, so if RES is empty we should assume
+# files is set in cmp_rpm_meta for rpms, so if RES is empty we should assume
 # it wasn't an rpm and pick all files for comparison.
 if [ -z $RES ]; then
     oldfiles=`cd $dir/old; find . -type f`
@@ -926,7 +926,7 @@ if [ ! -d /proc/self/ ]; then
   PROC_MOUNTED=1
 fi
 
-# preserve cmp_spec result for check_all runs
+# preserve cmp_rpm_meta result for check_all runs
 ret=$RES
 for file in $files; do
    if ! check_single_file $file; then

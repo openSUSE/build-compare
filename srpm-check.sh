@@ -37,7 +37,7 @@ ver_rel_new=$(rpm -qp --nodigest --nosignature --qf "%{RELEASE}" "${newrpm}"|sed
 # if those are not the same, the source RPM has changed and therefore 
 # the resulting files are needed.
 
-cmp_spec "$rename_script" "$oldrpm" "$newrpm"
+cmp_rpm_meta "$rename_script" "$oldrpm" "$newrpm"
 RES=$?
 case $RES in
   0)

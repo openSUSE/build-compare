@@ -208,7 +208,7 @@ function set_regex() {
 # 1 in case of errors or difference
 # 2 in case of differences that need further investigation
 # Sets $files with list of files that need further investigation
-function cmp_spec ()
+function cmp_rpm_meta ()
 {
     local RES
     local file1 file2
