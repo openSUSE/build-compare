@@ -26,6 +26,7 @@ source $FUNCTIONS
 
 oldrpm=`readlink -f $1`
 newrpm=`readlink -f $2`
+rename_script=
 
 # Get version-release from first RPM and keep for rpmlint check
 # Remember to quote the "." for future regexes
@@ -36,7 +37,7 @@ ver_rel_new=$(rpm -qp --nodigest --nosignature --qf "%{RELEASE}" "${newrpm}"|sed
 # if those are not the same, the source RPM has changed and therefore 
 # the resulting files are needed.
 
-cmp_spec
+cmp_spec "$rename_script" "$oldrpm" "$newrpm"
 RES=$?
 case $RES in
   0)

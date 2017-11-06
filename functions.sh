@@ -303,7 +303,7 @@ function cmp_spec ()
     # Get only files with different MD5sums
     files=`diff -U0 $file1 $file2 | fgrep -v +++ | grep ^+ | cut -b2- | awk '{print $1}'`
 
-    if test -f "$sh"; then
+    if test -n "$sh"; then
       echo "creating rename script"
       # Create a temporary helper script to rename files/dirs with release in it
       for f in `$RPM --qf '[%{FILENAMES} %{FILEFLAGS}\n]\n' "$oldrpm" | grep_release_old | grep -vw 64$ | awk '{ print $1}'`

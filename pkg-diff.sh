@@ -223,7 +223,7 @@ echo "Comparing `basename $oldpkg` to `basename $newpkg`"
 
 case $oldpkg in
   *.rpm)
-     cmp_spec $rename_script $oldpkg $newpkg
+     cmp_spec "$rename_script" "$oldpkg" "$newpkg"
      RES=$?
      case $RES in
        0)
