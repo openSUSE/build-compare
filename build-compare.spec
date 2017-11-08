@@ -30,6 +30,7 @@ Source4:        functions.sh
 Source5:        srpm-check.sh
 %if 0%{?suse_version}
 Requires:       bash
+Requires:       cpio
 Requires:       coreutils
 Requires:       diffutils
 Requires:       file
