@@ -548,7 +548,7 @@ check_single_file()
        done
        return $ret
        ;;
-    *.zip|*.jar|*.war)
+    *.zip|*.egg|*.jar|*.war)
        for dir in old new ; do
           (
              cd $dir
