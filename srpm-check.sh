@@ -69,8 +69,8 @@ check_single_file()
   local file=$1
   case $file in
     *.spec)
-       sed -i -e "s,Release:.*${ver_rel_old}$,Release: @RELEASE@," old/$file
-       sed -i -e "s,Release:.*${ver_rel_new}$,Release: @RELEASE@," new/$file
+       sed -i -e 's,^Release:.*$,Release: @RELEASE@,' old/$file
+       sed -i -e 's,^Release:.*$,Release: @RELEASE@,' new/$file
        if ! cmp -s old/$file new/$file; then
          echo "$file differs (spec file)"
          diff -u old/$file new/$file | head -n 20
