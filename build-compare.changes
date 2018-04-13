@@ -1,4 +1,9 @@
 -------------------------------------------------------------------
+Fri Apr 13 07:10:30 UTC 2018 - olaf@aepfle.de
+
+- check rpm capabilities for recommends/suggests
+
+-------------------------------------------------------------------
 Fri Dec  8 16:57:00 UTC 2017 - ol@infoserver.lv
 
 - Ignore /usr/lib/.build-id differences in package filelist

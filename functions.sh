@@ -10,6 +10,12 @@
 
 RPM="rpm -qp --nodigest --nosignature"
 
+set_rpm_meta_global_variables() {
+
+  local pkg=$1
+  local rpm_tags=
+  local out=`mktemp`
+
 # Name, Version, Release
 QF_NAME="%{NAME}"
 QF_VER_REL="%{VERSION}-%{RELEASE}"
@@ -21,8 +27,19 @@ QF_PROVIDES="[%{PROVIDENAME} %{PROVIDEFLAGS} %{PROVIDEVERSION}\\n]\\n"
 QF_PROVIDES="${QF_PROVIDES}[%{REQUIRENAME} %{REQUIREFLAGS} %{REQUIREVERSION}\\n]\\n"
 QF_PROVIDES="${QF_PROVIDES}[%{CONFLICTNAME} %{CONFLICTFLAGS} %{CONFLICTVERSION}\\n]\\n"
 QF_PROVIDES="${QF_PROVIDES}[%{OBSOLETENAME} %{OBSOLETEFLAGS} %{OBSOLETEVERSION}\\n]\\n"
-QF_PROVIDES="${QF_PROVIDES}[%{RECOMMENDNAME} %{RECOMMENDFLAGS} %{RECOMMENDVERSION}\\n]\\n"
-QF_PROVIDES="${QF_PROVIDES}[%{SUPPLEMENTNAME} %{SUPPLEMENTFLAGS} %{SUPPLEMENTVERSION}\\n]\\n"
+
+rpm_tags="%{RECOMMENDNAME} %{RECOMMENDFLAGS} %{RECOMMENDVERSION}"
+check_header "%{NAME} ${rpm_tags}" > "${out}"
+if test -s "${out}"
+then
+  QF_PROVIDES="${QF_PROVIDES}[${rpm_tags}\\n]\\n"
+fi
+rpm_tags="%{SUPPLEMENTNAME} %{SUPPLEMENTFLAGS} %{SUPPLEMENTVERSION}"
+check_header "%{NAME} ${rpm_tags}" > "${out}"
+if test -s "${out}"
+then
+  QF_PROVIDES="${QF_PROVIDES}[${rpm_tags}\\n]\\n"
+fi
 
 # don't look at RELEASE, it contains our build number
 QF_TAGS="%{NAME} %{VERSION} %{EPOCH}\\n"
@@ -65,6 +82,7 @@ QF_ALL="$QF_ALL\n___QF_PROVIDES___\n${QF_PROVIDES}\n___QF_PROVIDES___\n"
 QF_ALL="$QF_ALL\n___QF_SCRIPT___\n${QF_SCRIPT}\n___QF_SCRIPT___\n"
 QF_ALL="$QF_ALL\n___QF_FILELIST___\n${QF_FILELIST}\n___QF_FILELIST___\n"
 QF_ALL="$QF_ALL\n___QF_CHECKSUM___\n${QF_CHECKSUM}\n___QF_CHECKSUM___\n"
+}
 
 check_header()
 {
@@ -223,6 +241,8 @@ function cmp_rpm_meta ()
     file2=`mktemp`
     rpm_meta_old=`mktemp`
     rpm_meta_new=`mktemp`
+
+    set_rpm_meta_global_variables $oldrpm
 
     check_header "$QF_ALL" $oldrpm > $rpm_meta_old
     check_header "$QF_ALL" $newrpm > $rpm_meta_new
