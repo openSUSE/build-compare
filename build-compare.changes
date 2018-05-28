@@ -1,4 +1,10 @@
 -------------------------------------------------------------------
+Mon May 28 13:26:44 UTC 2018 - olaf@aepfle.de
+
+- Avoid large temporary files from hexdump output and avoid
+  diff(1) runing OOM by using a fifo (issue#24)
+
+-------------------------------------------------------------------
 Fri Apr 13 07:10:30 UTC 2018 - olaf@aepfle.de
 
 - check rpm capabilities for recommends/suggests

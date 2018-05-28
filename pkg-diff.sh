@@ -280,6 +280,9 @@ dfile=`mktemp`
 
 diff_two_files()
 {
+  local offset length
+  local po pn
+
   if test ! -e old/$file; then
     echo "Missing in old package: $file"
     return 1
@@ -289,15 +292,25 @@ diff_two_files()
     return 1
   fi
 
-  if cmp -s old/$file new/$file; then
+  if cmp -b old/$file new/$file > $dfile ; then
     return 0
   fi
+  if ! test -s $dfile ; then
+    return 1
+  fi
 
-  echo "$file differs ($ftype)"
-  hexdump -C old/$file > $file1 &
-  hexdump -C new/$file > $file2 &
-  wait
-  diff -u $file1 $file2 | $buildcompare_head
+  offset=`sed 's@^.*differ: byte @@;s@,.*@@' < $dfile`
+  echo "$file differs at offset '$offset' ($ftype)"
+  po=`mktemp --dry-run $TMPDIR/old.XXX`
+  pn=`mktemp --dry-run $TMPDIR/new.XXX`
+  mkfifo -m 0600 $po
+  mkfifo -m 0600 $pn
+  offset=$(( ($offset >> 6) << 6 ))
+  length=512
+  hexdump -C -s $offset -l $length old/$file > $po &
+  hexdump -C -s $offset -l $length new/$file > $pn &
+  diff -u $po $pn | $buildcompare_head
+  rm -f $po $pn
   return 1
 }
 
