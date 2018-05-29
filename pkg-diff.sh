@@ -307,8 +307,8 @@ diff_two_files()
   mkfifo -m 0600 $pn
   offset=$(( ($offset >> 6) << 6 ))
   length=512
-  hexdump -C -s $offset -l $length old/$file > $po &
-  hexdump -C -s $offset -l $length new/$file > $pn &
+  hexdump -C -s $offset -n $length old/$file > $po &
+  hexdump -C -s $offset -n $length new/$file > $pn &
   diff -u $po $pn | $buildcompare_head
   rm -f $po $pn
   return 1
