@@ -824,7 +824,7 @@ check_single_file()
          return 1
        fi
        ;;
-    ELF*executable*|ELF*[LM]SB\ relocatable*|ELF*[LM]SB\ shared\ object*|setuid ELF*[LM]SB\ shared\ object*)
+    ELF*executable*|ELF*[LM]SB\ relocatable*|ELF*[LM]SB\ shared\ object*|setuid\ ELF*[LM]SB\ shared\ object*)
        $OBJDUMP -d --no-show-raw-insn old/$file > $file1
        ret=$?
        $OBJDUMP -d --no-show-raw-insn new/$file > $file2
