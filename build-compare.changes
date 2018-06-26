@@ -1,4 +1,9 @@
 -------------------------------------------------------------------
+Tue Jun 26 06:45:38 UTC 2018 - olaf@aepfle.de
+
+- Recognize "setuid ELF nn-bit xSB shared object" ELF binaries
+
+-------------------------------------------------------------------
 Mon May 28 13:26:44 UTC 2018 - olaf@aepfle.de
 
 - Avoid large temporary files from hexdump output and avoid
