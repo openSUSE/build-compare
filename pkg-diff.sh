@@ -707,7 +707,7 @@ check_single_file()
         esac
       done
     ;;
-    /usr/share/javadoc/gjdoc.properties |\
+    /usr/share/javadoc/gjdoc.properties|\
     /usr/share/javadoc/*/gjdoc.properties)
       for f in old/$file new/$file; do
         sed -i -e 's|^#[A-Z][a-z]\{2\} [A-Z][a-z]\{2\} [0-9]\{2\} ..:..:.. GMT 20..$|#Fri Jan 01 11:27:36 GMT 2009|' $f
@@ -744,7 +744,7 @@ check_single_file()
      *.elc)
        filter_generic emacs_lisp
        ;;
-     /var/lib/texmf/web2c/*/*fmt |\
+     /var/lib/texmf/web2c/*/*fmt|\
      /var/lib/texmf/web2c/metafont/*.base|\
      /var/lib/texmf/web2c/metapost/*.mem)
        # binary dump of TeX and Metafont formats, we can ignore them for good

@@ -1,4 +1,9 @@
 -------------------------------------------------------------------
+Wed Jul  4 05:42:05 UTC 2018 - olaf@aepfle.de
+
+- Remove trailing space from two match patterns
+
+-------------------------------------------------------------------
 Tue Jun 26 06:45:38 UTC 2018 - olaf@aepfle.de
 
 - Recognize "setuid ELF nn-bit xSB shared object" ELF binaries
