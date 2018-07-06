@@ -831,7 +831,7 @@ check_single_file()
     ELF*[LM]SB\ pie\ executable*|\
     setuid\ ELF*[LM]SB\ pie\ executable*)
        $OBJDUMP -d --no-show-raw-insn old/$file > $file1
-       ret=$?
+       local ret=$?
        $OBJDUMP -d --no-show-raw-insn new/$file > $file2
        if test ${ret}$? != 00 ; then
          # objdump has no idea how to handle it
