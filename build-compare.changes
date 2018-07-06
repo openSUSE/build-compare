@@ -1,4 +1,9 @@
 -------------------------------------------------------------------
+Fri Jul  6 14:01:17 UTC 2018 - olaf@aepfle.de
+
+- pkg-diff: fix diff returning 0
+
+-------------------------------------------------------------------
 Wed Jul  4 05:58:13 UTC 2018 - olaf@aepfle.de
 
 - Match also ELF pie executable (bsc#1097339)
