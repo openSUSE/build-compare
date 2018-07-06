@@ -469,6 +469,7 @@ check_compressed_file()
 check_single_file()
 {
   local file="$1"
+  local ret=0
 
   # If the two files are the same, return at once.
   if [ -f old/$file -a -f new/$file ]; then
@@ -512,7 +513,6 @@ check_single_file()
        cd $pwd/new/$fdir
        cpio --quiet --extract --force-local < "../${file##*/}"
        cd $pwd
-       local ret=0
        for f in $flist; do
          if ! check_single_file $fdir/$f; then
            ret=1
@@ -529,7 +529,6 @@ check_single_file()
        fdir=$file.extract.$PPID.$$
        unsquashfs -no-progress -dest old/$fdir "old/$file"
        unsquashfs -no-progress -dest new/$fdir "new/$file"
-       local ret=0
        for f in $flist; do
          if ! check_single_file $fdir/$f; then
            ret=1
@@ -550,7 +549,6 @@ check_single_file()
        cd $pwd/new/$fdir
        tar xf `basename $file`
        cd $pwd
-       local ret=0
        for f in $flist; do
          if ! check_single_file $fdir/$f; then
            ret=1
@@ -582,7 +580,6 @@ check_single_file()
        cd $pwd/new/$fdir
        unjar `basename $file`
        cd $pwd
-       local ret=0
        for f in $flist; do
          if test -f new/$fdir/$f && ! check_single_file $fdir/$f; then
            ret=1
@@ -831,7 +828,7 @@ check_single_file()
     ELF*[LM]SB\ pie\ executable*|\
     setuid\ ELF*[LM]SB\ pie\ executable*)
        $OBJDUMP -d --no-show-raw-insn old/$file > $file1
-       local ret=$?
+       ret=$?
        $OBJDUMP -d --no-show-raw-insn new/$file > $file2
        if test ${ret}$? != 00 ; then
          # objdump has no idea how to handle it
