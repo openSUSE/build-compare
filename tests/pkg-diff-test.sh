@@ -13,3 +13,11 @@ it_finds_text_diff()
     $p rpms/stringtext-1-[01].*.rpm
     ! $p rpms/stringtext-1-[02].*.rpm
 }
+
+it_finds_diff_even_with_identical_files()
+{
+    ! $p -a rpms/stringtext-1-1[01].*.rpm
+    ! $p -a rpms/stringtext-1-1[02].*.rpm
+    ! $p -a rpms/stringtext-1-1[12].*.rpm
+    ! $p -a rpms/stringtext-1-{2,12}.*.rpm
+}

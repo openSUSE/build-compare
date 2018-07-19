@@ -14,7 +14,19 @@ stringtext()
     mv ~/rpmbuild/RPMS/x86_64/stringtext-1-0.x86_64.rpm $r/stringtext-1-$n.x86_64.rpm
 }
 
+stringtext2()
+{
+    n=$1
+    string=$2
+    string2=$3
+    rpmbuild -bb -D '%outfile string.txt string2.txt' -D "%outcmd echo -e '$string' > string.txt ; echo -e '$string2' > string2.txt" stringtext.spec
+    mv ~/rpmbuild/RPMS/x86_64/stringtext-1-0.x86_64.rpm $r/stringtext-1-$n.x86_64.rpm
+}
+
 # generate rpms with differing text files
 stringtext 0 123456
 stringtext 1 123456
 stringtext 2 X98765
+stringtext2 10 123456 789
+stringtext2 11 123456 123
+stringtext2 12 X98765 123
