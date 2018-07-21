@@ -184,6 +184,6 @@ fi
 if test $SUCCESS -eq 0; then
   exit 1
 fi
-echo 'compare validated built as identical !'
+echo 'compare validated build as identical !'
 exit 0
 # vim: tw=666 ts=2 shiftwidth=2 et
