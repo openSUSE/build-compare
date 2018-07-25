@@ -1,0 +1,8 @@
+language: bash
+sudo: required
+install:
+  - sudo apt-get -y install rpm
+  - (cd tests/specs && ./build.sh)
+script:
+  #- (cd tests && ! ../pkg-diff.sh rpms/stringtext-1-[02].*.rpm) # debug
+  - make -C tests
