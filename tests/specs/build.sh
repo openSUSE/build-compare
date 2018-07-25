@@ -10,7 +10,7 @@ stringtext()
 {
     n=$1
     string=$2
-    rpmbuild -bb -D '%outfile string.txt' -D "%outcmd echo $string > %outfile" stringtext.spec
+    rpmbuild -bb -D '%outfile string.txt' -D "%outcmd echo $string > %outfile" stringtext.spec || exit 15
     mv ~/rpmbuild/RPMS/x86_64/stringtext-1-0.x86_64.rpm $r/stringtext-1-$n.x86_64.rpm
 }
 
