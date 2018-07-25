@@ -16,13 +16,13 @@ it_finds_text_diff()
 
 it_prints_md5_diff()
 {
-    $p rpms/stringtext-1-[02].*.rpm | grep '^-/usr/share/doc/packages/stringtext/string.txt f447b20a7fcbf53a5d5be013ea0b1' #= echo 123456|md5sum
+    $p rpms/stringtext-1-[02].*.rpm | grep '^-/usr/share/doc.*/stringtext[^/]*/string.txt f447b20a7fcbf53a5d5be013ea0b1' #= echo 123456|md5sum
 }
 
 it_prints_text_diff()
 {
     $p rpms/stringtext-1-[02].*.rpm | grep '^-123456$'
-    $p rpms/stringtext-1-[02].*.rpm | grep '^+++ new//usr/share/doc/packages/stringtext/string.txt'
+    $p rpms/stringtext-1-[02].*.rpm | grep '^+++ new//usr/share/doc.*/stringtext[^/]*/string.txt'
 }
 
 it_finds_diff_even_with_identical_files()
