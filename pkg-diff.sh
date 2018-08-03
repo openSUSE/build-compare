@@ -59,12 +59,8 @@ if test ! -f "$newpkg"; then
     exit 1
 fi
 
-#usage unjar <file>
-function unjar()
+function findunjarbin
 {
-    local file
-    file=$1
-
     if [[ $(type -p fastjar) ]]; then
         UNJAR=fastjar
     elif [[ $(type -p jar) ]]; then
@@ -75,7 +71,15 @@ function unjar()
         echo "ERROR: jar, fastjar, or unzip is not installed (trying file $file)"
         exit 1
     fi
+}
 
+#usage unjar <file>
+function unjar()
+{
+    local file
+    file=$1
+
+    findunjarbin
     case $UNJAR in
         jar|fastjar)
         # echo jar -xf $file
@@ -94,17 +98,7 @@ function unjar_l()
     local file
     file=$1
 
-    if [[ $(type -p fastjar) ]]; then
-        UNJAR=fastjar
-    elif [[ $(type -p jar) ]]; then
-        UNJAR=jar
-    elif [[ $(type -p unzip) ]]; then
-        UNJAR=unzip
-    else
-        echo "ERROR: jar, fastjar, or unzip is not installed (trying file $file)"
-        exit 1
-    fi
-
+    findunjarbin
     case $UNJAR in
         jar|fastjar)
         ${UNJAR} -tf $file
@@ -572,7 +566,12 @@ check_single_file()
           diff -u old/flist new/flist
           return 1
        fi
-       flist=`grep date new/flist | sed -e 's,.* date ,,'`
+       findunjarbin
+       if [ "$UNJAR" = unzip ] ; then
+          flist=`grep date new/flist | sed -e 's,.* date ,,'`
+       else
+          flist=`cat new/flist`
+       fi
        pwd=$PWD
        fdir=`dirname $file`
        cd old/$fdir
