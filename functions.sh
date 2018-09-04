@@ -175,6 +175,7 @@ function comp_file()
         rm $2 $3 $4 $5
         return 1
       fi
+      difffound=1
     fi
     return 0
 }
@@ -291,6 +292,7 @@ function cmp_rpm_meta ()
           if test -z "$check_all"; then
             return 1
           fi
+          difffound=1
           ;;
         # Every other package is allowed to have a different RELEASE
         *) ;;
@@ -340,6 +342,7 @@ function cmp_rpm_meta ()
     fi
     #
     rm $file1 $file2
+    [ "$difffound" = 1 ] && RES=1
     return $RES
 }
 
