@@ -266,16 +266,14 @@ function cmp_rpm_meta ()
 
     set_regex
 
-    # Check the whole spec file at first, return 0 immediately if the
+    # Check the whole spec file at first, return 0 immediately if they
     # are the same.
     cat $rpm_meta_old | trim_release_old > $file1
     cat $rpm_meta_new | trim_release_new > $file2
     echo "comparing the rpm tags of $name_new"
     if diff -au $file1 $file2; then
-      if test -z "$check_all"; then
-        rm $file1 $file2 $rpm_meta_old $rpm_meta_new
-        return 0
-      fi
+      rm $file1 $file2 $rpm_meta_old $rpm_meta_new
+      return 0
     fi
 
     get_value QF_TAGS $rpm_meta_old > $file1
