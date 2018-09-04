@@ -17,6 +17,7 @@ Version:        1
 Release:        0
 License:        MIT
 Summary:        build-compare test rpm
+%?metadata
 
 %description
 build-compare test rpm

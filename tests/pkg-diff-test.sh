@@ -41,3 +41,9 @@ it_reports_missing_files()
     ! $p -a rpms/stringtext-1-{2,12}.*.rpm || return 1
     $p -a rpms/stringtext-1-{2,12}.*.rpm | grep 'string2.txt differs'
 }
+
+it_reports_differing_rpm_tags()
+{
+    ! $p -a rpms/stringtext-1-{1,3}.*.rpm || return 1
+    $p -a rpms/stringtext-1-{1,3}.*.rpm | grep '^+bar 0'
+}
