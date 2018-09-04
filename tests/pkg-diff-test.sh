@@ -11,7 +11,7 @@ p=$basedir/pkg-diff.sh
 it_finds_text_diff()
 {
     $p rpms/stringtext-1-[01].*.rpm
-    ! $p rpms/stringtext-1-[02].*.rpm
+    ! $p rpms/stringtext-1-[02].*.rpm || return 1
 }
 
 it_prints_md5_or_sha256_diff()
@@ -31,13 +31,13 @@ it_prints_text_diff()
 
 it_finds_diff_even_with_identical_files()
 {
-    ! $p -a rpms/stringtext-1-1[01].*.rpm
-    ! $p -a rpms/stringtext-1-1[02].*.rpm
-    ! $p -a rpms/stringtext-1-1[12].*.rpm
+    ! $p -a rpms/stringtext-1-1[01].*.rpm || return 1
+    ! $p -a rpms/stringtext-1-1[02].*.rpm || return 1
+    ! $p -a rpms/stringtext-1-1[12].*.rpm || return 1
 }
 
 it_reports_missing_files()
 {
-    ! $p -a rpms/stringtext-1-{2,12}.*.rpm
+    ! $p -a rpms/stringtext-1-{2,12}.*.rpm || return 1
     $p -a rpms/stringtext-1-{2,12}.*.rpm | grep 'string2.txt differs'
 }
