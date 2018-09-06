@@ -10,7 +10,13 @@ stringtext()
 {
     n=$1
     string=$2
-    rpmbuild -bb -D '%outfile string.txt' -D "%outcmd echo $string > %outfile" stringtext.spec || exit 15
+    meta=$3
+    [ -z "$meta" ] && meta="Provides: foo"
+    rpmbuild -bb \
+        -D '%outfile string.txt' \
+        -D "%outcmd echo $string > %outfile" \
+        -D "%metadata $meta" \
+        stringtext.spec || exit 15
     mv ~/rpmbuild/RPMS/x86_64/stringtext-1-0.x86_64.rpm $r/stringtext-1-$n.x86_64.rpm
 }
 
@@ -27,6 +33,7 @@ stringtext2()
 stringtext 0 123456
 stringtext 1 123456
 stringtext 2 X98765
+stringtext 3 123456 "Provides: bar"
 stringtext2 10 123456 789
 stringtext2 11 123456 123
 stringtext2 12 X98765 123
