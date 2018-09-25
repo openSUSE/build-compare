@@ -91,7 +91,7 @@ function unjar()
     esac
 }
 
-# list files in directory
+# list files in given jar file
 #usage unjar_l <file>
 function unjar_l()
 {
@@ -104,7 +104,7 @@ function unjar_l()
         ${UNJAR} -tf $file
         ;;
         unzip)
-        unzip -l $file
+        unzip -Z -1 $file
         ;;
     esac
 }
@@ -114,16 +114,6 @@ filter_disasm()
    local file=$1
    [[ $nofilter ]] && return
    sed -i -e 's/^ *[0-9a-f]\+://' -e 's/\$0x[0-9a-f]\+/$something/' -e 's/callq *[0-9a-f]\+/callq /' -e 's/# *[0-9a-f]\+/#  /' -e 's/\(0x\)\?[0-9a-f]\+(/offset(/' -e 's/[0-9a-f]\+ </</' -e 's/^<\(.*\)>:/\1:/' -e 's/<\(.*\)+0x[0-9a-f]\+>/<\1 + ofs>/' ${file}
-}
-
-filter_zip_flist()
-{
-   local file=$1
-   [[ $nofilter ]] && return
-   #  10-05-2010 14:39
-   sed -i -e "s, [0-9][0-9]-[0-9][0-9]-[0-9]\+ [0-9][0-9]:[0-9][0-9] , date ," $file
-   # 2012-02-03 07:59
-   sed -i -e "s, 20[0-9][0-9]-[0-9][0-9]-[0-9][0-9] [0-9][0-9]:[0-9][0-9] , date ," $file
 }
 
 filter_xenefi() {
@@ -558,7 +548,6 @@ check_single_file()
           (
              cd $dir
              unjar_l ./$file | $sort > flist
-             filter_zip_flist flist
           )
        done
        if ! cmp -s old/flist new/flist; then
@@ -566,12 +555,7 @@ check_single_file()
           diff -u old/flist new/flist
           return 1
        fi
-       findunjarbin
-       if [ "$UNJAR" = unzip ] ; then
-          flist=`grep date new/flist | sed -e 's,.* date ,,'`
-       else
-          flist=`cat new/flist`
-       fi
+       flist=`cat new/flist`
        pwd=$PWD
        fdir=`dirname $file`
        cd old/$fdir
