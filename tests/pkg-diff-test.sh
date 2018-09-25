@@ -42,6 +42,12 @@ it_reports_missing_files()
     $p -a rpms/stringtext-1-{2,12}.*.rpm | grep 'string2.txt differs'
 }
 
+it_reports_diffs_for_files_with_spaces()
+{
+    ! $p -a rpms/stringtext-1-10{0,1}.*.rpm || return 1
+    $p -a rpms/stringtext-1-10{0,1}.*.rpm | grep '^-123456'
+}
+
 it_reports_differing_rpm_tags()
 {
     ! $p -a rpms/stringtext-1-{1,3}.*.rpm || return 1

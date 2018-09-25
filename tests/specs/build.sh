@@ -39,3 +39,5 @@ stringtext 3 123456 "Provides: bar"
 stringtext2 10 123456 789
 stringtext2 11 123456 123
 stringtext2 12 X98765 123
+stringtext 100 123456 "" "foo bar"
+stringtext 101 X98765 "" "foo bar"
