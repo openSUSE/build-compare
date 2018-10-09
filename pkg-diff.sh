@@ -267,16 +267,16 @@ diff_two_files()
   local offset length
   local po pn
 
-  if test ! -e old/$file; then
+  if test ! -e "old/$file"; then
     echo "Missing in old package: $file"
     return 1
   fi
-  if test ! -e new/$file; then
+  if test ! -e "new/$file"; then
     echo "Missing in new package: $file"
     return 1
   fi
 
-  if cmp -b old/$file new/$file > $dfile ; then
+  if cmp -b "old/$file" "new/$file" > $dfile ; then
     return 0
   fi
   if ! test -s $dfile ; then
@@ -291,8 +291,8 @@ diff_two_files()
   mkfifo -m 0600 $pn
   offset=$(( ($offset >> 6) << 6 ))
   length=512
-  hexdump -C -s $offset -n $length old/$file > $po &
-  hexdump -C -s $offset -n $length new/$file > $pn &
+  hexdump -C -s $offset -n $length "old/$file" > $po &
+  hexdump -C -s $offset -n $length "new/$file" > $pn &
   diff -u $po $pn | $buildcompare_head
   rm -f $po $pn
   return 1
@@ -456,15 +456,15 @@ check_single_file()
   local ret=0
 
   # If the two files are the same, return at once.
-  if [ -f old/$file -a -f new/$file ]; then
-    if cmp -s old/$file new/$file; then
+  if [ -f "old/$file" -a -f "new/$file" ]; then
+    if cmp -s "old/$file" "new/$file"; then
       return 0
     fi
   fi
-  case $file in
+  case "$file" in
     *.spec)
-       sed -i -e "s,Release:.*$release1,Release: @RELEASE@," old/$file
-       sed -i -e "s,Release:.*$release2,Release: @RELEASE@," new/$file
+       sed -i -e "s,Release:.*$release1,Release: @RELEASE@," "old/$file"
+       sed -i -e "s,Release:.*$release2,Release: @RELEASE@," "new/$file"
        ;;
     *.exe.mdb|*.dll.mdb)
        # Just debug information, we can skip them
@@ -472,16 +472,16 @@ check_single_file()
        return 0
        ;;
     *.a)
-       flist=`ar t new/$file`
+       flist=`ar t "new/$file"`
        pwd=$PWD
-       fdir=`dirname $file`
-       cd old/$fdir
-       ar x `basename $file`
-       cd $pwd/new/$fdir
-       ar x `basename $file`
-       cd $pwd
+       fdir=`dirname "$file"`
+       cd "old/$fdir"
+       ar x `basename "$file"`
+       cd "$pwd/new/$fdir"
+       ar x `basename "$file"`
+       cd "$pwd"
        for f in $flist; do
-          if ! check_single_file $fdir/$f; then
+          if ! check_single_file "$fdir/$f"; then
              return 1
           fi
        done
@@ -490,51 +490,51 @@ check_single_file()
     *.cpio)
        flist=`cpio --quiet --list --force-local < "new/$file" | $sort`
        pwd=$PWD
-       fdir=$file.extract.$PPID.$$
-       mkdir old/$fdir new/$fdir
-       cd old/$fdir
+       fdir="$file.extract.$PPID.$$"
+       mkdir "old/$fdir" "new/$fdir"
+       cd "old/$fdir"
        cpio --quiet --extract --force-local < "../${file##*/}"
-       cd $pwd/new/$fdir
+       cd "$pwd/new/$fdir"
        cpio --quiet --extract --force-local < "../${file##*/}"
-       cd $pwd
+       cd "$pwd"
        for f in $flist; do
-         if ! check_single_file $fdir/$f; then
+         if ! check_single_file "$fdir/$f"; then
            ret=1
            if test -z "$check_all"; then
              break
            fi
          fi
        done
-       rm -rf old/$fdir new/$fdir
+       rm -rf "old/$fdir" "new/$fdir"
        return $ret
        ;;
     *.squashfs)
        flist=`unsquashfs -no-progress -ls -dest '' "new/$file" | grep -Ev '^(Parallel unsquashfs:|[0-9]+ inodes )' | $sort`
-       fdir=$file.extract.$PPID.$$
-       unsquashfs -no-progress -dest old/$fdir "old/$file"
-       unsquashfs -no-progress -dest new/$fdir "new/$file"
+       fdir="$file.extract.$PPID.$$"
+       unsquashfs -no-progress -dest "old/$fdir" "old/$file"
+       unsquashfs -no-progress -dest "new/$fdir" "new/$file"
        for f in $flist; do
-         if ! check_single_file $fdir/$f; then
+         if ! check_single_file "$fdir/$f"; then
            ret=1
            if test -z "$check_all"; then
              break
            fi
          fi
        done
-       rm -rf old/$fdir new/$fdir
+       rm -rf "old/$fdir" "new/$fdir"
        return $ret
        ;;
     *.tar|*.tar.bz2|*.tar.gz|*.tgz|*.tbz2)
-       flist=`tar tf new/$file`
+       flist=`tar tf "new/$file"`
        pwd=$PWD
-       fdir=`dirname $file`
-       cd old/$fdir
-       tar xf `basename $file`
-       cd $pwd/new/$fdir
-       tar xf `basename $file`
-       cd $pwd
+       fdir=`dirname "$file"`
+       cd "old/$fdir"
+       tar xf `basename "$file"`
+       cd "$pwd/new/$fdir"
+       tar xf `basename "$file"`
+       cd "$pwd"
        for f in $flist; do
-         if ! check_single_file $fdir/$f; then
+         if ! check_single_file "$fdir/$f"; then
            ret=1
            if test -z "$check_all"; then
              break
@@ -787,16 +787,16 @@ check_single_file()
       ;;
   esac
 
-  ftype=`/usr/bin/file old/$file | sed -e 's@^[^:]\+:[[:blank:]]*@@' -e 's@[[:blank:]]*$@@'`
+  ftype=`/usr/bin/file "old/$file" | sed -e 's@^[^:]\+:[[:blank:]]*@@' -e 's@[[:blank:]]*$@@'`
   case $ftype in
      PE32\ executable*Mono\/\.Net\ assembly*)
        echo "PE32 Mono/.Net assembly: $file"
        if [ -x /usr/bin/monodis ] ; then
-         monodis old/$file 2>/dev/null|sed -e 's/GUID = {.*}/GUID = { 42 }/;'> ${file1}
-         monodis new/$file 2>/dev/null|sed -e 's/GUID = {.*}/GUID = { 42 }/;'> ${file2}
-         if ! cmp -s ${file1} ${file2}; then
+         monodis "old/$file" 2>/dev/null|sed -e 's/GUID = {.*}/GUID = { 42 }/;'> ${file1}
+         monodis "new/$file" 2>/dev/null|sed -e 's/GUID = {.*}/GUID = { 42 }/;'> ${file2}
+         if ! cmp -s "${file1}" "${file2}"; then
            echo "$file differs ($ftype)"
-           diff --speed-large-files -u ${file1} ${file2}
+           diff --speed-large-files -u "${file1}" "${file2}"
            return 1
          fi
        else
@@ -850,9 +850,9 @@ check_single_file()
        return 1
        ;;
      *ASCII*|*text*)
-       if ! cmp -s old/$file new/$file; then
+       if ! cmp -s "old/$file" "new/$file"; then
          echo "$file differs ($ftype)"
-         diff -u old/$file new/$file | $buildcompare_head
+         diff -u "old/$file" "new/$file" | $buildcompare_head
          return 1
        fi
        ;;
@@ -929,8 +929,9 @@ fi
 
 # preserve cmp_rpm_meta result for check_all runs
 ret=$RES
-for file in $files; do
-   if ! check_single_file $file; then
+readarray -t filesarray <<<"$files"
+for file in "${filesarray[@]}"; do
+   if ! check_single_file "$file"; then
        ret=1
        if test -z "$check_all"; then
            break

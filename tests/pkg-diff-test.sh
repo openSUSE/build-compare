@@ -19,14 +19,14 @@ it_prints_md5_or_sha256_diff()
     #= echo 123456|md5sum
     #= echo 123456|sha256sum
     $p rpms/stringtext-1-[02].*.rpm | grep \
-        -e '^-/usr/share/doc.*/stringtext[^/]*/string.txt f447b20a7fcbf53a5d5be013ea0b1' \
-        -e '^-/usr/share/doc.*/stringtext[^/]*/string.txt e150a1ec81e8e93e1eae2c3a77e66ec6dbd6a3b460f89c1d08aecf422ee401a0'
+        -e '^-/usr/share/doc.*/stringtext[^/]*/dir/string.txt f447b20a7fcbf53a5d5be013ea0b1' \
+        -e '^-/usr/share/doc.*/stringtext[^/]*/dir/string.txt e150a1ec81e8e93e1eae2c3a77e66ec6dbd6a3b460f89c1d08aecf422ee401a0'
 }
 
 it_prints_text_diff()
 {
     $p rpms/stringtext-1-[02].*.rpm | grep '^-123456$'
-    $p rpms/stringtext-1-[02].*.rpm | grep '^+++ new//usr/share/doc.*/stringtext[^/]*/string.txt'
+    $p rpms/stringtext-1-[02].*.rpm | grep '^+++ new//usr/share/doc.*/stringtext[^/]*/dir/string.txt'
 }
 
 it_finds_diff_even_with_identical_files()
@@ -40,6 +40,12 @@ it_reports_missing_files()
 {
     ! $p -a rpms/stringtext-1-{2,12}.*.rpm || return 1
     $p -a rpms/stringtext-1-{2,12}.*.rpm | grep 'string2.txt differs'
+}
+
+it_reports_diffs_for_files_with_spaces()
+{
+    ! $p -a rpms/stringtext-1-10{0,1}.*.rpm || return 1
+    $p -a rpms/stringtext-1-10{0,1}.*.rpm | grep '^-123456'
 }
 
 it_reports_differing_rpm_tags()

@@ -323,7 +323,7 @@ function cmp_rpm_meta ()
     fi
 
     # Get only files with different MD5sums
-    files=`diff -U0 $file1 $file2 | fgrep -v +++ | grep ^+ | cut -b2- | awk '{print $1}'`
+    files=`diff -U0 $file1 $file2 | fgrep -v +++ | grep ^+ | cut -b2- | sed -E -e 's/ [0-9a-f]+ [0-9]+$//'`
 
     if test -n "$sh"; then
       echo "creating rename script"
