@@ -1,4 +1,12 @@
 -------------------------------------------------------------------
+Tue Feb 19 09:30:20 UTC 2019 - olaf@aepfle.de
+
+- javadoc: filter dc.created
+- Support filenames with spaces
+- jar: always list files without date+size
+- Fix differing jars reported as identical
+
+-------------------------------------------------------------------
 Tue Aug 28 20:14:53 UTC 2018 - ol@infoserver.lv
 
 - Ignore value of Release header when comparing spec files
