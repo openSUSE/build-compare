@@ -376,6 +376,43 @@ check_compressed_file()
   return $ret
 }
 
+# returns 0 if file should be skipped
+file_is_on_ignorelist()
+{
+  local file="$1"
+  local ret=0
+
+  case "${file}" in
+    # Just debug information, we can skip them
+    *.exe.mdb|*.dll.mdb) ;;
+
+    # binary dump of TeX and Metafont formats, we can ignore them for good
+    /var/lib/texmf/web2c/*/*fmt|\
+    /var/lib/texmf/web2c/metafont/*.base|\
+    /var/lib/texmf/web2c/metapost/*.mem) ;;
+
+    # ruby documentation, file just contains a timestamp and nothing else
+    */created.rid) ;;
+
+    # R binary cache of DESCRIPTION
+    /usr/lib*/R/library/*/Meta/package.rds) ;;
+
+    # binary cache of interpreted R code
+    /usr/lib*/R/library/*/R/*.rd[bx]) ;;
+
+    # LibreOffice log file
+    /usr/lib/libreoffice/solver/inc/*/deliver.log) ;;
+
+    # packaged by libguestfs
+    */ld.so.cache|*/etc/machine-id) ;;
+
+    # everything else will be processed
+    *) ret=1 ;;
+  esac
+
+  return ${ret}
+}
+
 check_single_file()
 {
   local file="$1"
@@ -387,15 +424,16 @@ check_single_file()
       return 0
     fi
   fi
+
+  if file_is_on_ignorelist "${file}"
+  then
+    return 0
+  fi
+
   case "$file" in
     *.spec)
        sed -i -e "s,Release:.*$release1,Release: @RELEASE@," "old/$file"
        sed -i -e "s,Release:.*$release2,Release: @RELEASE@," "new/$file"
-       ;;
-    *.exe.mdb|*.dll.mdb)
-       # Just debug information, we can skip them
-       wprint "$file skipped as debug file."
-       return 0
        ;;
     *.a)
        flist=`ar t "new/$file"`
@@ -658,13 +696,6 @@ check_single_file()
      *.elc)
        filter_generic emacs_lisp
        ;;
-     /var/lib/texmf/web2c/*/*fmt|\
-     /var/lib/texmf/web2c/metafont/*.base|\
-     /var/lib/texmf/web2c/metapost/*.mem)
-       # binary dump of TeX and Metafont formats, we can ignore them for good
-       wprint "difference in $file ignored."
-       return 0
-       ;;
      */libtool)
        for f in old/$file new/$file; do
 	  sed -i -e 's|^# Libtool was configured on host [A-Za-z0-9]*:$|# Libtool was configured on host x42:|' $f
@@ -677,26 +708,10 @@ check_single_file()
 	  sed -i -e 's|built by abuild@[a-z0-9]* on ... ... [0-9]* [0-9]*:[0-9][0-9]:[0-9][0-9] .* 20[0-9][0-9]|built by abuild@build42 on Thu May 6 11:21:17 UTC 2010|' $f
        done
        ;;
-    */created.rid)
-       # ruby documentation
-       # file just contains a timestamp and nothing else, so ignore it
-       wprint "Ignore $file"
-       return 0
-       ;;
     /usr/lib*/R/library/*/DESCRIPTION)
        # Simulate R CMD INSTALL --built-timestamp=''
        # Built: R 3.6.1; x86_64-suse-linux-gnu; 2019-08-13 04:19:49 UTC; unix
        sed -i -e 's|\(Built: [^;]*; [^;]*; \)20[0-9][0-9]-[01][0-9]-[0123][0-9] [012][0-9]:[0-5][0-9]:[0-5][0-9] UTC\(; .*\)$|\1\2|' old/$file new/$file
-       ;;
-    /usr/lib*/R/library/*/Meta/package.rds)
-       # R binary cache of DESCRIPTION
-       wprint "Ignore $file"
-       return 0
-       ;;
-    /usr/lib*/R/library/*/R/*.rd[bx])
-       # binary cache of interpreted R code
-       wprint "Ignore $file"
-       return 0
        ;;
     */Linux*Env.Set.sh)
        # LibreOffice files, contains:
@@ -705,11 +720,6 @@ check_single_file()
 	 sed -i -e 's%^# Generated on:.*UTC 201[0-9] *$%# Generated on: Sometime%g' $f
        done
        ;;
-    /usr/lib/libreoffice/solver/inc/*/deliver.log)
-       # LibreOffice log file
-      wprint "Ignore $file"
-      return 0
-      ;;
     /var/adm/update-messages/*|/var/adm/update-scripts/*)
       # fetchmsttfonts embeds the release number in the update shell script.
       sed -i "s/${name_ver_rel_old_regex_l}/@NAME_VER_REL@/" old/$file
@@ -724,10 +734,6 @@ check_single_file()
       */linuxrc.config)
         wprint "${file}"
         filter_generic linuxrc_config
-      ;;
-      */ld.so.cache|*/etc/machine-id)
-        # packaged by libguestfs
-        return 0
       ;;
       */etc/hosts)
         # packaged by libguestfs
