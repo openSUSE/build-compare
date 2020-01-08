@@ -188,11 +188,13 @@ filter_generic()
    done
 }
 
-
-diff_two_files()
+# returns 0 if both files are identical
+# returns 1 if files differ or one is missing
+# returns 2 if files must be processed further
+verify_before_processing()
 {
-  local offset length
-  local po pn
+  local file="$1"
+  local cmpout="$2"
 
   if test ! -e "old/$file"; then
     wprint "Missing in old package: $file"
@@ -203,12 +205,30 @@ diff_two_files()
     return 1
   fi
 
-  if cmp -b "old/$file" "new/$file" > $dfile ; then
+  if cmp -b "old/$file" "new/$file" > "${cmpout}" ; then
     return 0
   fi
-  if ! test -s $dfile ; then
-    return 1
+
+  if test -s "${cmpout}" ; then
+    # cmp produced output for futher processing
+    return 2
   fi
+
+  # cmp failed
+  return 1
+}
+
+diff_two_files()
+{
+  local offset length
+  local po pn
+
+  verify_before_processing "${file}" "${dfile}"
+  case "$?" in
+    0) return 0 ;;
+    1) return 1 ;;
+    *) ;;
+  esac
 
   offset=`sed 's@^.*differ: byte @@;s@,.*@@' < $dfile`
   wprint "$file differs at offset '$offset' ($ftype)"
