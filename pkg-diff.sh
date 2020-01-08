@@ -5,60 +5,6 @@
 #
 # Written by Michael Matz and Stephan Coolo
 # Enhanced by Andreas Jaeger
-
-FUNCTIONS=${0%/*}/functions.sh
-: ${buildcompare_head:="head -n 200"}
-nofilter=${buildcompare_nofilter}
-sort=sort
-[[ $nofilter ]] && sort=cat
-
-check_all=
-case $1 in
-  -a | --check-all)
-    check_all=1
-    shift
-esac
-
-if test "$#" != 2; then
-   echo "usage: $0 [-a|--check-all] old.rpm new.rpm"
-   exit 1
-fi
-
-test -z $OBJDUMP && OBJDUMP=objdump
-
-# Always clean up on exit
-local_tmpdir=`mktemp -d`
-if test -z "${local_tmpdir}"
-then
-  exit 1
-fi
-function _exit()
-{
-  chmod -R u+w "${local_tmpdir}"
-  rm -rf "${local_tmpdir}"
-}
-trap _exit EXIT
-# Let further mktemp refer to private tmpdir
-export TMPDIR=$local_tmpdir
-
-self_script=$(cd $(dirname $0); echo $(pwd)/$(basename $0))
-
-source $FUNCTIONS
-
-oldpkg=`readlink -f $1`
-newpkg=`readlink -f $2`
-rename_script=`mktemp`
-
-if test ! -f "$oldpkg"; then
-    echo "can't open $1"
-    exit 1
-fi
-
-if test ! -f "$newpkg"; then
-    echo "can't open $2"
-    exit 1
-fi
-
 declare -i watchdog_host_timeout_seconds='3600'
 # a value close to 100 avoids the host watchdog
 # producing output every 20 minutes avoids 'IncompleteRead(0 bytes read)' from 'osc rbl'
@@ -242,65 +188,6 @@ filter_generic()
    done
 }
 
-
-echo "Comparing `basename $oldpkg` to `basename $newpkg`"
-
-case $oldpkg in
-  *.rpm)
-     cmp_rpm_meta "$rename_script" "$oldpkg" "$newpkg"
-     RES=$?
-     case $RES in
-       0)
-          echo "RPM meta information is identical"
-          if test -z "$check_all"; then
-             exit 0
-          fi
-          ;;
-       1)
-          echo "RPM meta information is different"
-          if test -z "$check_all"; then
-             exit 1
-          fi
-          ;;
-       2)
-          echo "RPM file checksum differs."
-          RES=0
-          ;;
-       *)
-          echo "Wrong exit code!"
-          exit 1
-          ;;
-     esac
-     ;;
-esac
-
-file1=`mktemp`
-file2=`mktemp`
-
-dir=`mktemp -d`
-wprint "Extracting packages"
-unpackage $oldpkg $dir/old
-unpackage $newpkg $dir/new
-
-case $oldpkg in
-  *.deb|*.ipk)
-     adjust_controlfile $dir/old $dir/new
-  ;;
-esac
-
-# files is set in cmp_rpm_meta for rpms, so if RES is empty we should assume
-# it wasn't an rpm and pick all files for comparison.
-if [ -z $RES ]; then
-    oldfiles=`cd $dir/old; find . -type f`
-    newfiles=`cd $dir/new; find . -type f`
-
-    files=`echo -e "$oldfiles\n$newfiles" | sort -u`
-fi
-
-cd $dir
-bash $rename_script
-
-dfile=`mktemp`
 
 diff_two_files()
 {
@@ -981,6 +868,117 @@ check_single_file()
   esac
   return 0
 }
+
+FUNCTIONS=${0%/*}/functions.sh
+: ${buildcompare_head:="head -n 200"}
+nofilter=${buildcompare_nofilter}
+sort=sort
+[[ $nofilter ]] && sort=cat
+
+check_all=
+case $1 in
+  -a | --check-all)
+    check_all=1
+    shift
+esac
+
+if test "$#" != 2; then
+   echo "usage: $0 [-a|--check-all] old.rpm new.rpm"
+   exit 1
+fi
+
+test -z $OBJDUMP && OBJDUMP=objdump
+
+# Always clean up on exit
+local_tmpdir=`mktemp -d`
+if test -z "${local_tmpdir}"
+then
+  exit 1
+fi
+function _exit()
+{
+  chmod -R u+w "${local_tmpdir}"
+  rm -rf "${local_tmpdir}"
+}
+trap _exit EXIT
+# Let further mktemp refer to private tmpdir
+export TMPDIR=$local_tmpdir
+
+self_script=$(cd $(dirname $0); echo $(pwd)/$(basename $0))
+
+source $FUNCTIONS
+
+oldpkg=`readlink -f $1`
+newpkg=`readlink -f $2`
+rename_script=`mktemp`
+
+file1=`mktemp`
+file2=`mktemp`
+dir=`mktemp -d`
+dfile=`mktemp`
+
+if test ! -f "$oldpkg"; then
+    echo "can't open $1"
+    exit 1
+fi
+
+if test ! -f "$newpkg"; then
+    echo "can't open $2"
+    exit 1
+fi
+
+echo "Comparing `basename $oldpkg` to `basename $newpkg`"
+
+case $oldpkg in
+  *.rpm)
+    cmp_rpm_meta "$rename_script" "$oldpkg" "$newpkg"
+    RES=$?
+    case $RES in
+    0)
+      echo "RPM meta information is identical"
+      if test -z "$check_all"; then
+        exit 0
+      fi
+      ;;
+    1)
+      echo "RPM meta information is different"
+      if test -z "$check_all"; then
+        exit 1
+      fi
+      ;;
+    2)
+      echo "RPM file checksum differs."
+      RES=0
+      ;;
+    *)
+      echo "Wrong exit code!"
+      exit 1
+      ;;
+    esac
+  ;;
+esac
+
+wprint "Extracting packages"
+unpackage $oldpkg $dir/old
+unpackage $newpkg $dir/new
+
+case $oldpkg in
+  *.deb|*.ipk)
+    adjust_controlfile $dir/old $dir/new
+  ;;
+esac
+
+# files is set in cmp_rpm_meta for rpms, so if RES is empty we should assume
+# it wasn't an rpm and pick all files for comparison.
+if [ -z $RES ]; then
+  oldfiles=`cd $dir/old; find . -type f`
+  newfiles=`cd $dir/new; find . -type f`
+
+  files=`echo -e "$oldfiles\n$newfiles" | sort -u`
+fi
+
+cd $dir
+bash $rename_script
 
 # We need /proc mounted for some tests, so check that it's mounted and
 # complain if not.
