@@ -438,17 +438,17 @@ check_single_file()
   local file="$1"
   local ret=0
 
-  # If the two files are the same, return at once.
-  if [ -f "old/$file" -a -f "new/$file" ]; then
-    if cmp -s "old/$file" "new/$file"; then
-      return 0
-    fi
-  fi
-
   if file_is_on_ignorelist "${file}"
   then
     return 0
   fi
+
+  verify_before_processing "${file}" "${dfile}"
+  case "$?" in
+    0) return 0 ;;
+    1) return 1 ;;
+    *) ;;
+  esac
 
   case "$file" in
     *.spec)
