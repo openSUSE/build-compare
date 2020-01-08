@@ -431,10 +431,9 @@ check_compressed_file()
           ;;
         fifo*pipe*)
           ftype_new="`/usr/bin/file new/$file | sed -e 's@^[^:]\+:[[:blank:]]*@@' -e 's@[[:blank:]]*$@@'`"
-          if [ "$ftype_new" = "$ftype"  ]; then
-            return 0
+          if [ "$ftype_new" != "$ftype"  ]; then
+            ret=1
           fi
-          return 1
           ;;
         *)
           echo "unhandled $ext content: $ftype"
