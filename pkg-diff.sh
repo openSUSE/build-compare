@@ -229,7 +229,6 @@ verify_before_processing()
 diff_two_files()
 {
   local offset length
-  local po pn
 
   verify_before_processing "${file}" "${dfile}"
   case "$?" in
@@ -240,16 +239,11 @@ diff_two_files()
 
   offset=`sed 's@^.*differ: byte @@;s@,.*@@' < $dfile`
   wprint "$file differs at offset '$offset' ($ftype)"
-  po=`mktemp --dry-run $TMPDIR/old.XXX`
-  pn=`mktemp --dry-run $TMPDIR/new.XXX`
-  mkfifo -m 0600 $po
-  mkfifo -m 0600 $pn
   offset=$(( ($offset >> 6) << 6 ))
   length=512
-  hexdump -C -s $offset -n $length "old/$file" > $po &
-  hexdump -C -s $offset -n $length "new/$file" > $pn &
-  diff -u $po $pn | $buildcompare_head
-  rm -f $po $pn
+  diff -u \
+    <( hexdump -C -s $offset -n $length "old/$file" ) \
+    <( hexdump -C -s $offset -n $length "new/$file" ) | $buildcompare_head
   return 1
 }
 
