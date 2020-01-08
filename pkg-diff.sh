@@ -962,8 +962,6 @@ if [ "$PROC_MOUNTED" -eq "1" ]; then
   umount /proc
 fi
 
-rm $file1 $file2 $dfile $rename_script
-rm -rf $dir
 if test "$ret" = 0; then
      echo "Package content is identical"
 fi
