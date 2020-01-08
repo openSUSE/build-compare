@@ -59,6 +59,46 @@ if test ! -f "$newpkg"; then
     exit 1
 fi
 
+declare -i watchdog_host_timeout_seconds='3600'
+# a value close to 100 avoids the host watchdog
+# producing output every 20 minutes avoids 'IncompleteRead(0 bytes read)' from 'osc rbl'
+declare -i watchdog_touch_percent_prior_timeout='33'
+declare -i watchdog_next_touch_seconds=0
+
+function watchdog_reset
+{
+  local uptime idle
+  local -i next_touch now
+
+  read uptime idle < /proc/uptime
+
+  now="${uptime%.*}"
+  next_touch=$(( ${now} + ( (${watchdog_host_timeout_seconds} * ${watchdog_touch_percent_prior_timeout}) / 100 ) ))
+  watchdog_next_touch_seconds=${next_touch}
+}
+
+function watchdog_touch
+{
+  local uptime idle
+  local -i next_touch now
+
+  read uptime idle < /proc/uptime
+
+  now="${uptime%.*}"
+  if test "${now}" -lt "${watchdog_next_touch_seconds}"
+  then
+    return
+  fi
+  echo 'build-compare touching host-watchdog.'
+  watchdog_reset
+}
+
+function wprint
+{
+  echo "$@"
+  watchdog_reset
+}
+
 function findunjarbin
 {
     if [[ $(type -p fastjar) ]]; then
