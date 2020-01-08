@@ -278,7 +278,7 @@ file1=`mktemp`
 file2=`mktemp`
 
 dir=`mktemp -d`
-echo "Extracting packages"
+wprint "Extracting packages"
 unpackage $oldpkg $dir/old
 unpackage $newpkg $dir/new
 
@@ -308,11 +308,11 @@ diff_two_files()
   local po pn
 
   if test ! -e "old/$file"; then
-    echo "Missing in old package: $file"
+    wprint "Missing in old package: $file"
     return 1
   fi
   if test ! -e "new/$file"; then
-    echo "Missing in new package: $file"
+    wprint "Missing in new package: $file"
     return 1
   fi
 
@@ -324,7 +324,7 @@ diff_two_files()
   fi
 
   offset=`sed 's@^.*differ: byte @@;s@,.*@@' < $dfile`
-  echo "$file differs at offset '$offset' ($ftype)"
+  wprint "$file differs at offset '$offset' ($ftype)"
   po=`mktemp --dry-run $TMPDIR/old.XXX`
   pn=`mktemp --dry-run $TMPDIR/new.XXX`
   mkfifo -m 0600 $po
@@ -422,7 +422,7 @@ check_compressed_file()
   local tmpdir=`mktemp -d`
   local ftype
   local ret=0
-  echo "$ext file with odd filename: $file"
+  wprint "$ext file with odd filename: $file"
   if test -n "$tmpdir"; then
     mkdir $tmpdir/{old,new}
     cp --parents --dereference old/$file $tmpdir/
@@ -454,7 +454,7 @@ check_compressed_file()
       ftype=`/usr/bin/file old/$file | sed 's@^[^:]\+:[[:blank:]]*@@'`
       case $ftype in
         POSIX\ tar\ archive)
-          echo "$ext content is: $ftype"
+          wprint "$ext content is: $ftype"
           mv old/$file{,.tar}
           mv new/$file{,.tar}
           if ! check_single_file ${file}.tar; then
@@ -462,7 +462,7 @@ check_compressed_file()
           fi
           ;;
         ASCII\ cpio\ archive\ *)
-          echo "$ext content is: $ftype"
+          wprint "$ext content is: $ftype"
           mv old/$file{,.cpio}
           mv new/$file{,.cpio}
           if ! check_single_file ${file}.cpio; then
@@ -476,7 +476,7 @@ check_compressed_file()
           fi
           ;;
         *)
-          echo "unhandled $ext content: $ftype"
+          wprint "unhandled $ext content: $ftype"
           if ! diff_two_files; then
             ret=1
           fi
@@ -507,7 +507,7 @@ check_single_file()
        ;;
     *.exe.mdb|*.dll.mdb)
        # Just debug information, we can skip them
-       echo "$file skipped as debug file."
+       wprint "$file skipped as debug file."
        return 0
        ;;
     *.a)
@@ -523,6 +523,7 @@ check_single_file()
           if ! check_single_file "$fdir/$f"; then
              return 1
           fi
+         watchdog_touch
        done
        return 0
        ;;
@@ -543,6 +544,7 @@ check_single_file()
              break
            fi
          fi
+         watchdog_touch
        done
        rm -rf "old/$fdir" "new/$fdir"
        return $ret
@@ -559,6 +561,7 @@ check_single_file()
              break
            fi
          fi
+         watchdog_touch
        done
        rm -rf "old/$fdir" "new/$fdir"
        return $ret
@@ -579,6 +582,7 @@ check_single_file()
              break
            fi
          fi
+         watchdog_touch
        done
        return $ret
        ;;
@@ -590,7 +594,7 @@ check_single_file()
           )
        done
        if ! cmp -s old/flist new/flist; then
-          echo "$file has different file list"
+          wprint "$file has different file list"
           diff -u old/flist new/flist
           return 1
        fi
@@ -609,6 +613,7 @@ check_single_file()
              break
            fi
          fi
+         watchdog_touch
        done
        return $ret;;
      */xen*.efi)
@@ -770,7 +775,7 @@ check_single_file()
      /var/lib/texmf/web2c/metafont/*.base|\
      /var/lib/texmf/web2c/metapost/*.mem)
        # binary dump of TeX and Metafont formats, we can ignore them for good
-       echo "difference in $file ignored."
+       wprint "difference in $file ignored."
        return 0
        ;;
      */libtool)
@@ -788,7 +793,7 @@ check_single_file()
     */created.rid)
        # ruby documentation
        # file just contains a timestamp and nothing else, so ignore it
-       echo "Ignore $file"
+       wprint "Ignore $file"
        return 0
        ;;
     /usr/lib*/R/library/*/DESCRIPTION)
@@ -798,12 +803,12 @@ check_single_file()
        ;;
     /usr/lib*/R/library/*/Meta/package.rds)
        # R binary cache of DESCRIPTION
-       echo "Ignore $file"
+       wprint "Ignore $file"
        return 0
        ;;
     /usr/lib*/R/library/*/R/*.rd[bx])
        # binary cache of interpreted R code
-       echo "Ignore $file"
+       wprint "Ignore $file"
        return 0
        ;;
     */Linux*Env.Set.sh)
@@ -815,7 +820,7 @@ check_single_file()
        ;;
     /usr/lib/libreoffice/solver/inc/*/deliver.log)
        # LibreOffice log file
-      echo "Ignore $file"
+      wprint "Ignore $file"
       return 0
       ;;
     /var/adm/update-messages/*|/var/adm/update-scripts/*)
@@ -830,7 +835,7 @@ check_single_file()
       filter_generic pdf
       ;;
       */linuxrc.config)
-        echo "${file}"
+        wprint "${file}"
         filter_generic linuxrc_config
       ;;
       */ld.so.cache|*/etc/machine-id)
@@ -847,17 +852,17 @@ check_single_file()
   ftype=`/usr/bin/file "old/$file" | sed -e 's@^[^:]\+:[[:blank:]]*@@' -e 's@[[:blank:]]*$@@'`
   case $ftype in
      PE32\ executable*Mono\/\.Net\ assembly*)
-       echo "PE32 Mono/.Net assembly: $file"
+       wprint "PE32 Mono/.Net assembly: $file"
        if [ -x /usr/bin/monodis ] ; then
          monodis "old/$file" 2>/dev/null|sed -e 's/GUID = {.*}/GUID = { 42 }/;'> ${file1}
          monodis "new/$file" 2>/dev/null|sed -e 's/GUID = {.*}/GUID = { 42 }/;'> ${file2}
          if ! cmp -s "${file1}" "${file2}"; then
-           echo "$file differs ($ftype)"
+           wprint "$file differs ($ftype)"
            diff --speed-large-files -u "${file1}" "${file2}"
            return 1
          fi
        else
-         echo "Cannot compare, no monodis installed"
+         wprint "Cannot compare, no monodis installed"
          return 1
        fi
        ;;
@@ -883,32 +888,34 @@ check_single_file()
        sed -i -e "s,new/,," $file2
        elfdiff=
        if ! diff --speed-large-files -u $file1 $file2 > $dfile; then
-          echo "$file differs in assembler output"
+          wprint "$file differs in assembler output"
           $buildcompare_head $dfile
           elfdiff="1"
        fi
-       echo "" >$file1
-       echo "" >$file2
+       wprint "" >$file1
+       wprint "" >$file2
        # Don't compare .build-id, .gnu_debuglink and .gnu_debugdata sections
        sections="$($OBJDUMP -s new/$file | grep "Contents of section .*:" | sed -r "s,.* (.*):,\1,g" | grep -v -e "\.build-id" -e "\.gnu_debuglink" -e "\.gnu_debugdata" | tr "\n" " ")"
        for section in $sections; do
           $OBJDUMP -s -j $section old/$file | sed "s,^old/,," > $file1
           $OBJDUMP -s -j $section new/$file | sed "s,^new/,," > $file2
           if ! diff -u $file1 $file2 > $dfile; then
-             echo "$file differs in ELF section $section"
+             wprint "$file differs in ELF section $section"
              $buildcompare_head $dfile
              elfdiff="1"
+          else
+            watchdog_touch
           fi
        done
        if test -z "$elfdiff"; then
-          echo "$file: only difference was in build-id, gnu_debuglink or gnu_debugdata, GOOD."
+          wprint "$file: only difference was in build-id, gnu_debuglink or gnu_debugdata, GOOD."
           return 0
        fi
        return 1
        ;;
      *ASCII*|*text*)
        if ! cmp -s "old/$file" "new/$file"; then
-         echo "$file differs ($ftype)"
+         wprint "$file differs ($ftype)"
          diff -u "old/$file" "new/$file" | $buildcompare_head
          return 1
        fi
@@ -947,7 +954,7 @@ check_single_file()
           fi
      ;;
      Squashfs\ filesystem,*)
-        echo "$file ($ftype)"
+        wprint "$file ($ftype)"
         mv old/$file{,.squashfs}
         mv new/$file{,.squashfs}
         if ! check_single_file ${file}.squashfs; then
@@ -958,7 +965,7 @@ check_single_file()
        readlink "old/$file" > $file1
        readlink "new/$file" > $file2
        if ! diff -u $file1 $file2; then
-         echo "symlink target for $file differs"
+         wprint "symlink target for $file differs"
          return 1
        fi
        ;;
