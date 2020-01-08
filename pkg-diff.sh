@@ -6,9 +6,7 @@
 # Written by Michael Matz and Stephan Coolo
 # Enhanced by Andreas Jaeger
 declare -i watchdog_host_timeout_seconds='3600'
-# a value close to 100 avoids the host watchdog
-# producing output every 20 minutes avoids 'IncompleteRead(0 bytes read)' from 'osc rbl'
-declare -i watchdog_touch_percent_prior_timeout='33'
+declare -i watchdog_touch_percent_prior_timeout='96'
 declare -i watchdog_next_touch_seconds=0
 
 function watchdog_reset
