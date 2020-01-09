@@ -1,6 +1,7 @@
 -------------------------------------------------------------------
 Tue Jan  7 13:59:43 UTC 2020 - olaf@aepfle.de
 
+- this new decade must be handled in man pages created by docbook.xml 
 - use bash Process Substitution in diff_two_files
 - use bash Process Substitution when processing ELF files
 - move normalizing code from check_single_file into separate function
