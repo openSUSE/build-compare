@@ -641,6 +641,110 @@ normalize_file()
   esac
 }
 
+a_list()
+{
+  ar t "$1"
+}
+a_extract()
+{
+  ar x "$1"
+}
+
+cpio_list()
+{
+  cpio --quiet --list --force-local < "$1"
+}
+cpio_extract()
+{
+  cpio --quiet --extract --force-local < "$1"
+}
+
+squashfs_list()
+{
+  unsquashfs -no-progress -ls -dest '' "$1" | grep -Ev '^(Parallel unsquashfs:|[0-9]+ inodes )'
+}
+squashfs_extract()
+{
+  unsquashfs -no-progress -dest "." "$1"
+}
+
+tar_list()
+{
+  tar tf "$1"
+}
+tar_extract()
+{
+  tar xf "$1"
+}
+
+zip_list()
+{
+  unjar_l "$1"
+}
+zip_extract()
+{
+  unjar "$1"
+}
+
+# returns 0 if content is identical
+# returns 1 if at least one file differs
+compare_archive()
+{
+  local file="$1"
+  local old="$2"
+  local new="$3"
+  local tool="$4"
+  local fn_list="$5"
+  local fn_extr="$6"
+  local f=
+  local -a content
+  local -i ret=1
+
+  test -x "$(type -P ${tool})" || return 1
+
+  mkdir -p "d/old/${file}" "d/new/${file}"
+  if pushd "d" > /dev/null
+  then
+    ${fn_list} "${old}" | ${sort} > 'co'
+    ${fn_list} "${new}" | ${sort} > 'cn'
+    if cmp -s 'co' 'cn'
+    then
+      if pushd "old/${file}" > /dev/null
+      then
+        "${fn_extr}" "${old}"
+        popd > /dev/null
+      fi
+      if pushd "new/${file}" > /dev/null
+      then
+        "${fn_extr}" "${new}"
+        popd > /dev/null
+      fi
+      readarray -t content < 'cn'
+      compare_archive_content "${file}" "${content[@]}"
+      for f in "${content[@]}"
+      do
+        if ! check_single_file "${file}/${f}"
+        then
+          ret=1
+          if test -z "$check_all"
+          then
+            break
+          fi
+        fi
+        watchdog_touch
+      done
+      ret=$?
+    else
+      wprint "$file has different file list"
+      diff -u 'co' 'cn'
+    fi
+    popd > /dev/null
+    rm -rf "d"
+  fi
+
+  return ${ret}
+}
+
 check_single_file()
 {
   local file="$1"
@@ -668,111 +772,25 @@ check_single_file()
 
   case "$file" in
     *.a)
-       flist=`ar t "new/$file"`
-       pwd=$PWD
-       fdir=`dirname "$file"`
-       cd "old/$fdir"
-       ar x `basename "$file"`
-       cd "$pwd/new/$fdir"
-       ar x `basename "$file"`
-       cd "$pwd"
-       for f in $flist; do
-          if ! check_single_file "$fdir/$f"; then
-             return 1
-          fi
-         watchdog_touch
-       done
-       return 0
+      compare_archive "${file}" "`readlink -f \"old/$file\"`" "`readlink -f \"new/$file\"`" 'ar' 'a_list' 'a_extract'
+      return $?
        ;;
     *.cpio)
-       flist=`cpio --quiet --list --force-local < "new/$file" | $sort`
-       pwd=$PWD
-       fdir="$file.extract.$PPID.$$"
-       mkdir "old/$fdir" "new/$fdir"
-       cd "old/$fdir"
-       cpio --quiet --extract --force-local < "../${file##*/}"
-       cd "$pwd/new/$fdir"
-       cpio --quiet --extract --force-local < "../${file##*/}"
-       cd "$pwd"
-       for f in $flist; do
-         if ! check_single_file "$fdir/$f"; then
-           ret=1
-           if test -z "$check_all"; then
-             break
-           fi
-         fi
-         watchdog_touch
-       done
-       rm -rf "old/$fdir" "new/$fdir"
-       return $ret
+      compare_archive "${file}" "`readlink -f \"old/$file\"`" "`readlink -f \"new/$file\"`" 'cpio' 'cpio_list' 'cpio_extract'
+      return $?
        ;;
     *.squashfs)
-       flist=`unsquashfs -no-progress -ls -dest '' "new/$file" | grep -Ev '^(Parallel unsquashfs:|[0-9]+ inodes )' | $sort`
-       fdir="$file.extract.$PPID.$$"
-       unsquashfs -no-progress -dest "old/$fdir" "old/$file"
-       unsquashfs -no-progress -dest "new/$fdir" "new/$file"
-       for f in $flist; do
-         if ! check_single_file "$fdir/$f"; then
-           ret=1
-           if test -z "$check_all"; then
-             break
-           fi
-         fi
-         watchdog_touch
-       done
-       rm -rf "old/$fdir" "new/$fdir"
-       return $ret
+      compare_archive "${file}" "`readlink -f \"old/$file\"`" "`readlink -f \"new/$file\"`" 'unsquashfs' 'squashfs_list' 'squashfs_extract'
+      return $?
        ;;
     *.tar|*.tar.bz2|*.tar.gz|*.tgz|*.tbz2)
-       flist=`tar tf "new/$file"`
-       pwd=$PWD
-       fdir=`dirname "$file"`
-       cd "old/$fdir"
-       tar xf `basename "$file"`
-       cd "$pwd/new/$fdir"
-       tar xf `basename "$file"`
-       cd "$pwd"
-       for f in $flist; do
-         if ! check_single_file "$fdir/$f"; then
-           ret=1
-           if test -z "$check_all"; then
-             break
-           fi
-         fi
-         watchdog_touch
-       done
-       return $ret
-       ;;
+      compare_archive "${file}" "`readlink -f \"old/$file\"`" "`readlink -f \"new/$file\"`" 'tar' 'tar_list' 'tar_extract'
+      return $?
+      ;;
     *.zip|*.egg|*.jar|*.war)
-       for dir in old new ; do
-          (
-             cd $dir
-             unjar_l ./$file | $sort > flist
-          )
-       done
-       if ! cmp -s old/flist new/flist; then
-          wprint "$file has different file list"
-          diff -u old/flist new/flist
-          return 1
-       fi
-       flist=`cat new/flist`
-       pwd=$PWD
-       fdir=`dirname $file`
-       cd old/$fdir
-       unjar `basename $file`
-       cd $pwd/new/$fdir
-       unjar `basename $file`
-       cd $pwd
-       for f in $flist; do
-         if test -f new/$fdir/$f && ! check_single_file $fdir/$f; then
-           ret=1
-           if test -z "$check_all"; then
-             break
-           fi
-         fi
-         watchdog_touch
-       done
-       return $ret;;
+      compare_archive "${file}" "`readlink -f \"old/$file\"`" "`readlink -f \"new/$file\"`" 'true' 'zip_list' 'zip_extract'
+      return $?
+      ;;
      *.bz2)
         bunzip2 -c old/$file > old/${file/.bz2/}
         bunzip2 -c new/$file > new/${file/.bz2/}
