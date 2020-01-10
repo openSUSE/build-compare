@@ -211,6 +211,14 @@ verify_before_processing()
     return 1
   fi
 
+  # consider only files and symlinks
+  if test ! -f "old/$file"; then
+    return 0
+  fi
+  if test ! -f "new/$file"; then
+    return 0
+  fi
+
   if cmp -b "old/$file" "new/$file" > "${cmpout}" ; then
     return 0
   fi
