@@ -43,56 +43,6 @@ function wprint
   watchdog_reset
 }
 
-function findunjarbin
-{
-    if [[ $(type -p fastjar) ]]; then
-        UNJAR=fastjar
-    elif [[ $(type -p jar) ]]; then
-        UNJAR=jar
-    elif [[ $(type -p unzip) ]]; then
-        UNJAR=unzip
-    else
-        echo "ERROR: jar, fastjar, or unzip is not installed (trying file $file)"
-        exit 1
-    fi
-}
-
-#usage unjar <file>
-function unjar()
-{
-    local file
-    file=$1
-
-    findunjarbin
-    case $UNJAR in
-        jar|fastjar)
-        # echo jar -xf $file
-        ${UNJAR} -xf $file
-        ;;
-        unzip)
-        unzip -oqq $file
-        ;;
-    esac
-}
-
-# list files in given jar file
-#usage unjar_l <file>
-function unjar_l()
-{
-    local file
-    file=$1
-
-    findunjarbin
-    case $UNJAR in
-        jar|fastjar)
-        ${UNJAR} -tf $file
-        ;;
-        unzip)
-        unzip -Z -1 $file
-        ;;
-    esac
-}
-
 filter_disasm()
 {
   [[ $nofilter ]] && return
@@ -641,82 +591,181 @@ normalize_file()
   esac
 }
 
-a_list()
+archive_a()
 {
-  ar t "$1"
-}
-a_extract()
-{
-  ar x "$1"
-}
-
-cpio_list()
-{
-  cpio --quiet --list --force-local < "$1"
-}
-cpio_extract()
-{
-  cpio --quiet --extract --force-local < "$1"
-}
-
-squashfs_list()
-{
-  unsquashfs -no-progress -ls -dest '' "$1" | grep -Ev '^(Parallel unsquashfs:|[0-9]+ inodes )'
-}
-squashfs_extract()
-{
-  unsquashfs -no-progress -dest "." "$1"
+  local cmd=$1
+  local file=$2
+  case "${cmd}" in
+  f)
+    test -x "$(type -P ar)" && return 0
+    echo "ERROR: ar missing for ${file}"
+    return 1
+  ;;
+  l)
+    ar t "${file}"
+    test "$?" = "0" && return 0
+    return 1
+  ;;
+  x)
+    ar x "${file}"
+    test "$?" = "0" && return 0
+    return 1
+  ;;
+  esac
 }
 
-tar_list()
+archive_cpio()
 {
-  tar tf "$1"
-}
-tar_extract()
-{
-  tar xf "$1"
+  local cmd=$1
+  local file=$2
+  case "${cmd}" in
+  f)
+    test -x "$(type -P cpio)" && return 0
+    echo "ERROR: cpio missing for ${file}"
+    return 1
+  ;;
+  l)
+    cpio --quiet --list --force-local < "${file}"
+    test "$?" = "0" && return 0
+    return 1
+  ;;
+  x)
+    cpio --quiet --extract --force-local < "${file}"
+    test "$?" = "0" && return 0
+    return 1
+  ;;
+  esac
 }
 
-zip_list()
+archive_squashfs()
 {
-  unjar_l "$1"
+  local cmd=$1
+  local file=$2
+  case "${cmd}" in
+  f)
+    test -x "$(type -P unsquashfs)" && return 0
+    echo "ERROR: unsquashfs missing for ${file}"
+    return 1
+  ;;
+  l)
+    unsquashfs -no-progress -ls -dest '' "${file}" | grep -Ev '^(Parallel unsquashfs:|[0-9]+ inodes )'
+    test "$?" = "0" && return 0
+    return 1
+  ;;
+  x)
+    unsquashfs -no-progress -dest "." "${file}"
+    test "$?" = "0" && return 0
+    return 1
+  ;;
+  esac
 }
-zip_extract()
+
+archive_tar()
 {
-  unjar "$1"
+  local cmd=$1
+  local file=$2
+  case "${cmd}" in
+  f)
+    test -x "$(type -P tar)" && return 0
+    echo "ERROR: tar missing for ${file}"
+    return 1
+  ;;
+  l)
+    tar tf "${file}"
+    test "$?" = "0" && return 0
+    return 1
+  ;;
+  x)
+    tar xf "${file}"
+    test "$?" = "0" && return 0
+    return 1
+  ;;
+  esac
+}
+
+UNJAR=
+archive_zip()
+{
+  local cmd=$1
+  local file=$2
+  case "${cmd}" in
+  f)
+    if test -x "$(type -P fastjar)"
+     then
+      UNJAR="${_}"
+    elif test -x "$(type -P jar)"
+    then
+      UNJAR="${_}"
+    elif test -x "$(type -P unzip)"
+    then
+      UNJAR="${_}"
+    else
+      echo "ERROR: jar/fastjar/unzip missing for ${file}"
+      return 1
+    fi
+    return 0
+  ;;
+  l)
+    case "${UNJAR##*/}" in
+      jar|fastjar)
+        "${UNJAR}" -tf "${file}"
+      ;;
+      unzip)
+        "${UNJAR}" -Z -1 "${file}"
+      ;;
+    esac
+    test "$?" = "0" && return 0
+    return 1
+  ;;
+  x)
+    case "${UNJAR##*/}" in
+      jar|fastjar)
+        "${UNJAR}" -xf "${file}"
+      ;;
+      unzip)
+        "${UNJAR}" -oqq "${file}"
+      ;;
+    esac
+    test "$?" = "0" && return 0
+    return 1
+  ;;
+  esac
 }
 
 # returns 0 if content is identical
 # returns 1 if at least one file differs
+# handler f returns 1 if required tool for inspection is missing
+# handler l lists content, returns 1 if tool failed
+# handler x extracts content, returns 1 if tool failed
 compare_archive()
 {
   local file="$1"
-  local old="$2"
-  local new="$3"
-  local tool="$4"
-  local fn_list="$5"
-  local fn_extr="$6"
-  local f=
+  local handler="$2"
+  local old="`readlink -f \"old/$file\"`"
+  local new="`readlink -f \"new/$file\"`"
+  local f
   local -a content
   local -i ret=1
 
-  test -x "$(type -P ${tool})" || return 1
+  "${handler}" 'f' "${file}" || return 1
 
   mkdir -p "d/old/${file}" "d/new/${file}"
   if pushd "d" > /dev/null
   then
-    ${fn_list} "${old}" | ${sort} > 'co'
-    ${fn_list} "${new}" | ${sort} > 'cn'
+    "${handler}" 'l' "${old}" | ${sort} > 'co'
+    test "${PIPESTATUS[0]}" = "0" || return 1
+    "${handler}" 'l' "${new}" | ${sort} > 'cn'
+    test "${PIPESTATUS[0]}" = "0" || return 1
     if cmp -s 'co' 'cn'
     then
       if pushd "old/${file}" > /dev/null
       then
-        "${fn_extr}" "${old}"
+        "${handler}" 'x' "${old}" || return 1
         popd > /dev/null
       fi
       if pushd "new/${file}" > /dev/null
       then
-        "${fn_extr}" "${new}"
+        "${handler}" 'x' "${new}" || return 1
         popd > /dev/null
       fi
       readarray -t content < 'cn'
@@ -771,23 +820,23 @@ check_single_file()
 
   case "$file" in
     *.a)
-      compare_archive "${file}" "`readlink -f \"old/$file\"`" "`readlink -f \"new/$file\"`" 'ar' 'a_list' 'a_extract'
+      compare_archive "${file}" 'archive_a'
       return $?
        ;;
     *.cpio)
-      compare_archive "${file}" "`readlink -f \"old/$file\"`" "`readlink -f \"new/$file\"`" 'cpio' 'cpio_list' 'cpio_extract'
+      compare_archive "${file}" 'archive_cpio'
       return $?
        ;;
     *.squashfs)
-      compare_archive "${file}" "`readlink -f \"old/$file\"`" "`readlink -f \"new/$file\"`" 'unsquashfs' 'squashfs_list' 'squashfs_extract'
+      compare_archive "${file}" 'archive_squashfs'
       return $?
        ;;
     *.tar|*.tar.bz2|*.tar.gz|*.tgz|*.tbz2)
-      compare_archive "${file}" "`readlink -f \"old/$file\"`" "`readlink -f \"new/$file\"`" 'tar' 'tar_list' 'tar_extract'
+      compare_archive "${file}" 'archive_tar'
       return $?
       ;;
     *.zip|*.egg|*.jar|*.war)
-      compare_archive "${file}" "`readlink -f \"old/$file\"`" "`readlink -f \"new/$file\"`" 'true' 'zip_list' 'zip_extract'
+      compare_archive "${file}" 'archive_zip'
       return $?
       ;;
      *.bz2)
