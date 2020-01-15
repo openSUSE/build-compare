@@ -720,7 +720,6 @@ compare_archive()
         popd > /dev/null
       fi
       readarray -t content < 'cn'
-      compare_archive_content "${file}" "${content[@]}"
       for f in "${content[@]}"
       do
         if ! check_single_file "${file}/${f}"
