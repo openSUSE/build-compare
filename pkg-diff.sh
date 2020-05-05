@@ -1047,6 +1047,11 @@ check_single_file()
            return 1
        fi
        ;;
+    Zip\ archive\ data,*)
+      if ! compare_archive "${file}" 'archive_zip' ; then
+        return 1
+      fi
+      ;;
      POSIX\ tar\ archive)
           mv old/$file{,.tar}
           mv new/$file{,.tar}
