@@ -1,4 +1,9 @@
 -------------------------------------------------------------------
+Wed May 13 13:13:13 UTC 2020 - olaf@aepfle.de
+
+- compare also posttrans scripts, and pretrans + verifyscript
+
+-------------------------------------------------------------------
 Tue May  5 05:05:05 UTC 2020 - olaf@aepfle.de
 
 - handle oddly named ZIP archives
