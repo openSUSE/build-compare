@@ -10,36 +10,56 @@
 
 RPM="rpm -qp --nodigest --nosignature"
 
+declare -A rpm_querytags
+collect_rpm_querytags() {
+  while read
+  do
+    : ${REPLY}
+    rpm_querytags[${REPLY}]=Y
+  done < <(rpm --querytags)
+}
+
 set_rpm_meta_global_variables() {
 
   local pkg=$1
   local rpm_tags=
   local out=`mktemp`
+  local t v qt
+  local -a type variant list
 
 # Name, Version, Release
 QF_NAME="%{NAME}"
 QF_VER_REL="%{VERSION}-%{RELEASE}"
 QF_NAME_VER_REL="%{NAME}-%{VERSION}-%{RELEASE}"
 
-# provides destroy this because at least the self-provide includes the
-# -buildnumber :-(
-QF_PROVIDES="[%{PROVIDENAME} %{PROVIDEFLAGS} %{PROVIDEVERSION}\\n]\\n"
-QF_PROVIDES="${QF_PROVIDES}[%{REQUIRENAME} %{REQUIREFLAGS} %{REQUIREVERSION}\\n]\\n"
-QF_PROVIDES="${QF_PROVIDES}[%{CONFLICTNAME} %{CONFLICTFLAGS} %{CONFLICTVERSION}\\n]\\n"
-QF_PROVIDES="${QF_PROVIDES}[%{OBSOLETENAME} %{OBSOLETEFLAGS} %{OBSOLETEVERSION}\\n]\\n"
-
-rpm_tags="%{RECOMMENDNAME} %{RECOMMENDFLAGS} %{RECOMMENDVERSION}"
-check_header "%{NAME} ${rpm_tags}" > "${out}"
-if test -s "${out}"
-then
-  QF_PROVIDES="${QF_PROVIDES}[${rpm_tags}\\n]\\n"
-fi
-rpm_tags="%{SUPPLEMENTNAME} %{SUPPLEMENTFLAGS} %{SUPPLEMENTVERSION}"
-check_header "%{NAME} ${rpm_tags}" > "${out}"
-if test -s "${out}"
-then
-  QF_PROVIDES="${QF_PROVIDES}[${rpm_tags}\\n]\\n"
-fi
+QF_PROVIDES=
+type=(
+CONFLICT
+OBSOLETE
+OLDSUGGESTS
+PROVIDE
+RECOMMEND
+REQUIRE
+SUGGEST
+SUPPLEMENT
+)
+variant=(
+  NAME
+  FLAGS
+  VERSION
+)
+for t in "${type[@]}"
+do
+  unset list
+  list=()
+  for v in "${variant[@]}"
+  do
+    qt=${t}${v}
+    test -n "${rpm_querytags[${qt}]}" || continue
+    list+=("%{${qt}}")
+  done
+  QF_PROVIDES+="${t}\\n[${list[@]}\\n]\\n"
+done
 
 # don't look at RELEASE, it contains our build number
 QF_TAGS="%{NAME} %{VERSION} %{EPOCH}\\n"
@@ -256,6 +276,7 @@ function cmp_rpm_meta ()
     rpm_meta_old=`mktemp`
     rpm_meta_new=`mktemp`
 
+    collect_rpm_querytags
     set_rpm_meta_global_variables $oldrpm
 
     check_header "$QF_ALL" $oldrpm > $rpm_meta_old
