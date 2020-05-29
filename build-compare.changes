@@ -1,4 +1,9 @@
 -------------------------------------------------------------------
+Fri May 29 19:20:21 UTC 2020 - olaf@aepfle.de
+
+- Remove usage of readarray to remain compatible with bash3
+
+-------------------------------------------------------------------
 Fri May 29 07:30:51 UTC 2020 - olaf@aepfle.de
 
 - Colltect a list of known rpm tags and use it to build the

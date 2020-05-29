@@ -276,7 +276,7 @@ function set_regex() {
 # 0 in case of same content
 # 1 in case of errors or difference
 # 2 in case of differences that need further investigation
-# Sets $files with list of files that need further investigation
+# Sets ${files[@]} array with list of files that need further investigation
 function cmp_rpm_meta ()
 {
     local RES
@@ -366,13 +366,18 @@ function cmp_rpm_meta ()
     get_value QF_CHECKSUM $rpm_meta_new | grep -v " 64$" | trim_release_new > $file2
     RES=2
     # done if the same
+    files=()
     echo "comparing file checksum"
     if cmp -s $file1 $file2; then
       RES=0
+    else
+      # Get only files with different MD5sums
+      while read
+      do
+        : "${REPLY}"
+        files+=( "${REPLY}" )
+      done < <(diff -U0 $file1 $file2 | sed -E -n -e '/^-\//{s/^-//;s/ [0-9a-f]+ [0-9]+$//;p}')
     fi
-
-    # Get only files with different MD5sums
-    files=`diff -U0 $file1 $file2 | fgrep -v +++ | grep ^+ | cut -b2- | sed -E -e 's/ [0-9a-f]+ [0-9]+$//'`
 
     if test -n "$sh"; then
       echo "creating rename script"
