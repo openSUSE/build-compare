@@ -10,13 +10,16 @@
 
 RPM="rpm -qp --nodigest --nosignature"
 
-declare -A rpm_querytags
+declare -a rpm_querytags
 collect_rpm_querytags() {
-  while read
-  do
-    : ${REPLY}
-    rpm_querytags[${REPLY}]=Y
-  done < <(rpm --querytags)
+  rpm_querytags=( $(rpm --querytags) )
+}
+# returns 0 if tag is known, returns 1 if unknown
+rpmtag_known() {
+  local needle="\<${1}\>"
+  local haystack="${rpm_querytags[@]}"
+  [[ "${haystack}" =~ ${needle} ]]
+  return $?
 }
 
 set_rpm_meta_global_variables() {
@@ -54,8 +57,8 @@ do
   list=()
   for v in "${variant[@]}"
   do
-    qt=${t}${v}
-    test -n "${rpm_querytags[${qt}]}" || continue
+    qt="${t}${v}"
+    rpmtag_known "${qt}" || continue
     list+=("%{${qt}}")
   done
   QF_PROVIDES+="${t}\\n[${list[@]}\\n]\\n"
@@ -99,8 +102,8 @@ do
   list=()
   for v in "${variant[@]}"
   do
-    qt=${t}${v}
-    test -n "${rpm_querytags[${qt}]}" || continue
+    qt="${t}${v}"
+    rpmtag_known "${qt}" || continue
     list+=("%{${qt}}")
   done
   QF_SCRIPT+="${t}\\n[${list[@]}\\n]\\n"
