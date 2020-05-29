@@ -79,19 +79,32 @@ QF_TAGS="${QF_TAGS}[%{VERIFYSCRIPTPROG} %{VERIFYSCRIPT}]\\n"
 QF_TAGS="${QF_TAGS}%{CHANGELOGTIME} %{CHANGELOGNAME} %{CHANGELOGTEXT}\\n"
 
 # scripts, might contain release number
-script_types='
-PRETRANS
-PREIN
-POSTIN
-PREUN
-POSTUN
-POSTTRANS
-VERIFYSCRIPT
-'
 QF_SCRIPT=
-for script_type in ${script_types}
+type=(
+  PRETRANS
+  PREIN
+  POSTIN
+  PREUN
+  POSTUN
+  POSTTRANS
+  VERIFYSCRIPT
+)
+variant=(
+  PROG
+  FLAGS
+  ''
+)
+for t in "${type[@]}"
 do
-  QF_SCRIPT="${QF_SCRIPT}[%{${script_type}PROG} %{${script_type}FLAGS} %{${script_type}}\\n]\\n"
+  unset list
+  list=()
+  for v in "${variant[@]}"
+  do
+    qt=${t}${v}
+    test -n "${rpm_querytags[${qt}]}" || continue
+    list+=("%{${qt}}")
+  done
+  QF_SCRIPT+="${t}\\n[${list[@]}\\n]\\n"
 done
 
 # Now the files. We leave out mtime and size.  For normal files
