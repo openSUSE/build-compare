@@ -74,7 +74,6 @@ QF_TAGS="${QF_TAGS}%{PAYLOADFORMAT} %{PAYLOADCOMPRESSOR} %{PAYLOADFLAGS}\\n"
 # XXX We also need to check the existence (but not the content (!))
 # of SIGGPG (and perhaps the other SIG*)
 # XXX We don't look at triggers
-QF_TAGS="${QF_TAGS}[%{VERIFYSCRIPTPROG} %{VERIFYSCRIPT}]\\n"
 # Only the first ChangeLog entry; should be enough
 QF_TAGS="${QF_TAGS}%{CHANGELOGTIME} %{CHANGELOGNAME} %{CHANGELOGTEXT}\\n"
 
