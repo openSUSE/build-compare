@@ -789,6 +789,7 @@ compare_archive()
         : "${REPLY}"
         filelist+=( "${REPLY}" )
       done < 'cn'
+      ret=0
       for f in "${filelist[@]}"
       do
         if ! check_single_file "${file}/${f}"
@@ -801,7 +802,6 @@ compare_archive()
         fi
         watchdog_touch
       done
-      ret=$?
     else
       wprint "$file has different file list"
       diff -u 'co' 'cn'
