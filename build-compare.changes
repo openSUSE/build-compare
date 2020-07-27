@@ -2,6 +2,7 @@
 Mon Jul 27 06:06:06 UTC 2020 - bwiedemann@suse.de
 
 - Fix regression in compare_archive
+- Fix unit tests
 
 -------------------------------------------------------------------
 Fri May 29 19:20:21 UTC 2020 - olaf@aepfle.de

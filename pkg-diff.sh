@@ -832,7 +832,7 @@ check_single_file()
   verify_before_processing "${file}" "${dfile}"
   case "$?" in
     0) return 0 ;;
-    1) return 1 ;;
+    1) test -z "$check_all" && return 1 ;;
     *) ;;
   esac
 
