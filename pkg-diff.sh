@@ -1107,7 +1107,10 @@ check_single_file()
   return 0
 }
 
-FUNCTIONS=${0%/*}/functions.sh
+case "${0}" in
+  */*) FUNCTIONS=${0%/*}/functions.sh ;;
+  *)   FUNCTIONS=functions.sh ;;
+esac
 : ${buildcompare_head:="head -n 200"}
 nofilter=${buildcompare_nofilter}
 sort=sort
