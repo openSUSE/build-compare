@@ -812,8 +812,15 @@ compare_archive()
         watchdog_touch
       done
     else
-      wprint "$file has different file list"
-      diff -u 'co' 'cn'
+      # Wine .a have false positives due to --export .spec
+      if echo ${file} | grep "/wine/" > /dev/null
+      then
+        wprint "$file has different file list. Ignoring for Wine."
+        ret=0
+      else
+        wprint "$file has different file list"
+        diff -u 'co' 'cn'
+      fi
     fi
     popd > /dev/null
     rm -rf "d"
