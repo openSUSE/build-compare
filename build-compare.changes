@@ -1,4 +1,9 @@
 -------------------------------------------------------------------
+Mon Sep  6 07:15:06 UTC 2021 - bwiedemann@suse.de
+
+- Drop another duration from rpmlint.log 
+
+-------------------------------------------------------------------
 Wed Aug 11 20:30:40 UTC 2021 - olaf@aepfle.de
 
 - Handle another Date: variant in DocBook generated man pages
