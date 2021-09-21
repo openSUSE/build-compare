@@ -906,9 +906,9 @@ check_single_file()
     ELF*executable*|\
     ELF*[LM]SB\ relocatable*|\
     ELF*[LM]SB\ shared\ object*|\
-    setuid\ ELF*[LM]SB\ shared\ object*|\
+    set?id\ ELF*[LM]SB\ shared\ object*|\
     ELF*[LM]SB\ pie\ executable*|\
-    setuid\ ELF*[LM]SB\ pie\ executable*)
+    set?id\ ELF*[LM]SB\ pie\ executable*)
       diff --speed-large-files --unified \
         --label "old $file (disasm)" \
         --label "new $file (disasm)" \
