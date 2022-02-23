@@ -886,10 +886,10 @@ check_single_file()
 
   ftype=`/usr/bin/file "old/$file" | sed -e 's@^[^:]\+:[[:blank:]]*@@' -e 's@[[:blank:]]*$@@'`
   case $ftype in
-     PE32\ executable*Mono\/\.Net\ assembly*)
-       wprint "PE32 Mono/.Net assembly: $file"
-       if [ -x /usr/bin/monodis ] ; then
-         monodis "old/$file" 2>/dev/null|sed -e 's/GUID = {.*}/GUID = { 42 }/;'> ${file1}
+    PE32\ executable*Mono\/\.Net\ assembly*)
+      wprint "PE32 Mono/.Net assembly: $file"
+      if [ -x /usr/bin/monodis ] ; then
+        monodis "old/$file" 2>/dev/null|sed -e 's/GUID = {.*}/GUID = { 42 }/;'> ${file1}
          monodis "new/$file" 2>/dev/null|sed -e 's/GUID = {.*}/GUID = { 42 }/;'> ${file2}
          if ! cmp -s "${file1}" "${file2}"; then
            wprint "$file differs ($ftype)"
@@ -1241,12 +1241,12 @@ fi
 # preserve cmp_rpm_meta result for check_all runs
 ret=$RES
 for file in "${files[@]}"; do
-   if ! check_single_file "$file"; then
-       ret=1
-       if test -z "$check_all"; then
-           break
-       fi
-   fi
+  if ! check_single_file "$file"; then
+    ret=1
+    if test -z "$check_all"; then
+      break
+    fi
+  fi
 done
 
 if [ "$PROC_MOUNTED" -eq "1" ]; then
@@ -1255,7 +1255,7 @@ if [ "$PROC_MOUNTED" -eq "1" ]; then
 fi
 
 if test "$ret" = 0; then
-     echo "Package content is identical"
+  echo "Package content is identical"
 fi
 exit $ret
 # vim: tw=666 ts=2 shiftwidth=2 et
