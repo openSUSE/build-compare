@@ -414,7 +414,7 @@ normalize_file()
     *.dvi)
       filter_generic dvi
       ;;
-    *png)
+    *.png)
       # Try to remove timestamps, only if convert from ImageMagick is installed
       if [[ $(type -p convert) ]]; then
         filter_generic png
@@ -599,7 +599,7 @@ normalize_file()
     *.ps)
       filter_generic ps
       ;;
-    *pdf)
+    *.pdf)
       filter_generic pdf
       ;;
     */linuxrc.config)
