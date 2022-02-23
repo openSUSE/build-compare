@@ -141,23 +141,38 @@ check_header()
 # - it is used as direntry below certain paths
 # - it is assigned to some variable in scripts, at the end of a line
 # - it is used in PROVIDES, at the end of a line
+#   - special-case KMP package:
+#     PROVIDES version_k.*-release at end of line, trim release
+#     [   23s] -acpi_call-kmp-default 8 1.2.2_k5.17.0_rc5_1.ga9b2c1d-6.110
+#     [   23s] +acpi_call-kmp-default 8 1.2.2_k5.17.0_rc5_1.ga9b2c1d-6.111
 # Trim name-version-release string:
 # - it is used in update-scripts which are called by libzypp
+#   - special-case KMP package:
+#     [   64s]  PREIN
+#     [   64s]  /bin/sh (none)  /usr/lib/module-init-tools/kernel-scriptlets/kmp-pre --name "acpi_call-kmp-default" \
+#     [   64s] -  --version "1.2.2_k5.17.0_rc5_1.ga9b2c1d" --release "6.112" --kernelrelease "5.17.0-rc5-1.ga9b2c1d" \
+#     [   64s] +  --version "1.2.2_k5.17.0_rc5_1.ga9b2c1d" --release "6.113" --kernelrelease "5.17.0-rc5-1.ga9b2c1d" \
 function trim_release_old()
 {
+  local rel_regex_l=${version_release_old_regex_l##*-}
   sed -e "
   /\(\/boot\|\/lib\/modules\|\/lib\/firmware\|\/usr\/src\|$version_release_old_regex_l\$\|$version_release_old_regex_l)\)/{s,$version_release_old_regex_l,@VERSION@-@RELEASE_LONG@,g;s,$version_release_old_regex_s,@VERSION@-@RELEASE_SHORT@,g}
   s/\(\/var\/adm\/update-scripts\/\)${name_ver_rel_old_regex_l}\([^[:blank:]]\+\)/\1@NAME_VER_REL@\2/g
   s/\(\/var\/adm\/update-messages\/\)${name_ver_rel_old_regex_l}\([^[:blank:]]\+\)/\1@NAME_VER_REL@\2/g
+  s/\(^[^[:blank:]].*-kmp-.*[[:blank:]].*_k.*-\)${rel_regex_l}$/\1@RELEASE_LONG@/g
+  s/--release \"${rel_regex_l}\" --kernel/--release \"@RELEASE_LONG@\" --kernel/g
   /\/usr\/lib\/\.build-id/d
   "
 }
 function trim_release_new()
 {
+  local rel_regex_l=${version_release_new_regex_l##*-}
   sed -e "
   /\(\/boot\|\/lib\/modules\|\/lib\/firmware\|\/usr\/src\|$version_release_new_regex_l\$\|$version_release_new_regex_l)\)/{s,$version_release_new_regex_l,@VERSION@-@RELEASE_LONG@,g;s,$version_release_new_regex_s,@VERSION@-@RELEASE_SHORT@,g}
   s/\(\/var\/adm\/update-scripts\/\)${name_ver_rel_new_regex_l}\([^[:blank:]]\+\)/\1@NAME_VER_REL@\2/g
   s/\(\/var\/adm\/update-messages\/\)${name_ver_rel_new_regex_l}\([^[:blank:]]\+\)/\1@NAME_VER_REL@\2/g
+  s/\(^[^[:blank:]].*-kmp-.*[[:blank:]].*_k.*-\)${rel_regex_l}$/\1@RELEASE_LONG@/g
+  s/--release \"${rel_regex_l}\" --kernel/--release \"@RELEASE_LONG@\" --kernel/g
   /\/usr\/lib\/\.build-id/d
   "
 }
