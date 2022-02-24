@@ -55,7 +55,7 @@ filter_disasm()
     s/[0-9a-f]\+ </</
     s/^<\(.*\)>:/\1:/
     s/<\(.*\)+0x[0-9a-f]\+>/<\1 + ofs>/
-  ' 
+  '
 }
 
 filter_xenefi() {
@@ -922,50 +922,83 @@ check_single_file()
     set?id\ ELF*[LM]SB\ shared\ object*|\
     ELF*[LM]SB\ pie\ executable*|\
     set?id\ ELF*[LM]SB\ pie\ executable*)
+      local sections=($(
+      $OBJDUMP -s new/$file |
+        sed -n --regexp-extended -e '
+          /Contents of section .*:/ {
+            s,.* (.*):,-j \1,g
+            /\.build-id/d
+            /\.gnu_debuglink/d
+            /\.gnu_debugdata/d
+            p
+          }
+        '))
+      ($OBJDUMP -s ${sections[@]} old/$file |
+        sed -e "s,old/,,"  ; echo "${PIPESTATUS[@]}" > $file1 ) > old/$file.objdump &
+      ($OBJDUMP -s ${sections[@]} new/$file |
+        sed -e "s,new/,,"  ; echo "${PIPESTATUS[@]}" > $file2 ) > new/$file.objdump &
+      wait
       diff --speed-large-files --unified \
-        --label "old $file (disasm)" \
-        --label "new $file (disasm)" \
-        <( $OBJDUMP -d --no-show-raw-insn old/$file |
-          filter_disasm |
-          sed -e "s,old/,," ;
-          echo "${PIPESTATUS[@]}" > $file1
-          ) \
-        <( $OBJDUMP -d --no-show-raw-insn new/$file |
-          filter_disasm |
-          sed -e "s,new/,," ;
-          echo "${PIPESTATUS[@]}" > $file2
-          ) > $dfile
+        --label "old $file (objdump)" \
+        --label "new $file (objdump)" \
+        old/$file.objdump new/$file.objdump > $dfile
       ret=$?
-
-      failed=
       read i < ${file1}
       pipestatus=( $i )
       objdump_failed="${pipestatus[0]}"
-      i=0
-      while test $i -lt ${#pipestatus[@]}
-      do
-        if test "${pipestatus[$i]}" != "0"
-        then
-          wprint "ELF: pipe command #$i failed with ${pipestatus[$i]} for old/$file"
-          failed='failed'
-        fi
-        : $(( i++ ))
-      done
+      if [[ ${pipestatus[*]} =~ [1-9] ]]
+      then
+        wprint "ELF section: pipe command failed for old/$file"
+        elfdiff='failed'
+      fi
       read i < ${file2}
       pipestatus=( $i )
       objdump_failed="${objdump_failed}${pipestatus[0]}"
-      i=0
-      while test $i -lt ${#pipestatus[@]}
-      do
-        if test "${pipestatus[$i]}" != "0"
-        then
-          wprint "ELF: pipe command #$i failed with ${pipestatus[$i]} for new/$file"
-          failed='failed'
-        fi
-        : $(( i++ ))
-      done
-
-      if test "${objdump_failed}" != "00" || test -n "${failed}"
+      if [[ ${pipestatus[*]} =~ [1-9] ]]
+      then
+        wprint "ELF section: pipe command failed for new/$file"
+        elfdiff='failed'
+      fi
+      if test "$ret" != "0"
+      then
+        wprint "$file differs in ELF sections"
+        $buildcompare_head $dfile
+        elfdiff='elfdiff'
+      else
+        watchdog_touch
+      fi
+      if test -n "$elfdiff"
+      then
+        return 1
+      fi
+      ($OBJDUMP -d --no-show-raw-insn old/$file | filter_disasm |
+        sed -e "s,old/,,"  ; echo "${PIPESTATUS[@]}" > $file1 ) > old/$file.objdump &
+      ($OBJDUMP -d --no-show-raw-insn new/$file | filter_disasm |
+        sed -e "s,new/,,"  ; echo "${PIPESTATUS[@]}" > $file2 ) > new/$file.objdump &
+      wait
+      diff --speed-large-files --unified \
+        --label "old $file (disasm)" \
+        --label "new $file (disasm)" \
+        old/$file.objdump new/$file.objdump > $dfile
+      ret=$?
+      rm old/$file.objdump new/$file.objdump
+      read i < ${file1}
+      pipestatus=( $i )
+      objdump_failed="${objdump_failed}${pipestatus[0]}"
+      if [[ ${pipestatus[*]} =~ [1-9] ]]
+      then
+        wprint "ELF disassembly: pipe command failed for old/$file"
+        elfdiff='failed'
+      fi
+      read i < ${file2}
+      pipestatus=( $i )
+      objdump_failed="${objdump_failed}${pipestatus[0]}"
+      if [[ ${pipestatus[*]} =~ [1-9] ]]
+      then
+        wprint "ELF disassembly: pipe command failed for new/$file"
+        elfdiff='failed'
+      fi
+      if test ${objdump_failed} -gt 0 || test -n "${elfdiff}"
       then
         # objdump had no idea how to handle it
         if diff_two_files; then
@@ -973,81 +1006,12 @@ check_single_file()
         fi
         return 1
       fi
-
-      elfdiff=
       if test "$ret" != "0"
       then
         wprint "$file differs in assembler output"
         $buildcompare_head $dfile
         elfdiff='elfdiff'
       fi
-
-      sections="$(
-        $OBJDUMP -s new/$file |
-        sed -n --regexp-extended -e '
-          /Contents of section .*:/ {
-            s,.* (.*):,\1,g
-            /\.build-id/d
-            /\.gnu_debuglink/d
-            /\.gnu_debugdata/d
-            p
-          }
-        '
-        )"
-      for section in $sections
-      do
-        diff --unified \
-          --label "old $file (objdump)" \
-          --label "new $file (objdump)" \
-          <( $OBJDUMP -s -j $section old/$file |
-              sed -e "s,^old/,," ;
-              echo "${PIPESTATUS[@]}" > $file1) \
-          <( $OBJDUMP -s -j $section new/$file |
-            sed -e "s,^new/,," ;
-            echo "${PIPESTATUS[@]}" > $file2
-            ) > $dfile
-        ret=$?
-        failed=
-        read i < ${file1}
-        pipestatus=( $i )
-        objdump_failed="${pipestatus[0]}"
-        i=0
-        while test $i -lt ${#pipestatus[@]}
-        do
-          if test "${pipestatus[$i]}" != "0"
-          then
-            wprint "ELF section: pipe command #$i failed with ${pipestatus[$i]} for old/$file"
-            failed='failed'
-          fi
-          : $(( i++ ))
-        done
-        read i < ${file2}
-        pipestatus=( $i )
-        objdump_failed="${objdump_failed}${pipestatus[0]}"
-        i=0
-        while test $i -lt ${#pipestatus[@]}
-        do
-          if test "${pipestatus[$i]}" != "0"
-          then
-            wprint "ELF section: pipe command #$i failed with ${pipestatus[$i]} for new/$file"
-            failed='failed'
-          fi
-          : $(( i++ ))
-        done
-        if test -n "${failed}"
-        then
-          elfdiff='elfdiff'
-          break
-        fi
-        if test "$ret" != "0"
-        then
-          wprint "$file differs in ELF section $section"
-          $buildcompare_head $dfile
-          elfdiff='elfdiff'
-        else
-          watchdog_touch
-        fi
-      done
       if test -n "$elfdiff"
       then
         return 1

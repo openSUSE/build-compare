@@ -320,7 +320,7 @@ function cmp_rpm_meta ()
     trim_release_old < $rpm_meta_old > $file1
     trim_release_new < $rpm_meta_new > $file2
     echo "comparing the rpm tags of $name_new"
-    if diff --label old-rpm-tags --label new-rpm-tags -au $file1 $file2; then
+    if diff --speed-large-files --label old-rpm-tags --label new-rpm-tags -au0 $file1 $file2; then
       rm -rf "$tmpdir"
       return 0
     fi
