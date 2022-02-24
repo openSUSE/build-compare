@@ -281,15 +281,17 @@ function cmp_rpm_meta ()
 {
     local RES
     local file1 file2
+    local rpm_meta_old rpm_meta_new
     local f
     local sh=$1
     local oldrpm=$2
     local newrpm=$3
+    local tmpdir="$(mktemp -d)"
 
-    file1=`mktemp`
-    file2=`mktemp`
-    rpm_meta_old=`mktemp`
-    rpm_meta_new=`mktemp`
+    file1="$tmpdir/file1"
+    file2="$tmpdir/file2"
+    rpm_meta_old="$tmpdir/rpm-meta-old"
+    rpm_meta_new="$tmpdir/rpm-meta-new"
 
     collect_rpm_querytags
     set_rpm_meta_global_variables $oldrpm
@@ -317,11 +319,12 @@ function cmp_rpm_meta ()
 
     # Check the whole spec file at first, return 0 immediately if they
     # are the same.
-    cat $rpm_meta_old | trim_release_old > $file1
-    cat $rpm_meta_new | trim_release_new > $file2
+    trim_release_old < $rpm_meta_old > $file1
+    trim_release_new < $rpm_meta_new > $file2
     echo "comparing the rpm tags of $name_new"
     if diff --label old-rpm-tags --label new-rpm-tags -au $file1 $file2; then
       rm $file1 $file2 $rpm_meta_old $rpm_meta_new
+      rmdir $tmpfile
       return 0
     fi
 
@@ -392,8 +395,9 @@ function cmp_rpm_meta ()
         echo mv -v \"new/${f}\" \"new/`echo ${f} | trim_release_new`\"
       done >> "${sh}"
     fi
-    #
-    rm $file1 $file2
+
+    rm $file1 $file2 $rpm_meta_old $rpm_meta_new
+    rmdir $tmpdir
     [ "$difffound" = 1 ] && RES=1
     return $RES
 }
@@ -404,9 +408,9 @@ function adjust_controlfile() {
     version_release_new="`sed -ne 's/^Version: \(.*\)/\1/p' $2/control`"
     name_ver_rel_new="`sed -n -e 's/^Package: \(.*\)/\1/p' $2/control`-`sed -n -e 's/^Version: \(.*\)/\1/p' $2/control`"
     set_regex
-    cat $1/control | trim_release_old > $1/control.fixed
+    trim_release_old < $1/control > $1/control.fixed
     mv $1/control.fixed $1/control
-    cat $2/control | trim_release_new > $2/control.fixed
+    trim_release_new < $2/control > $2/control.fixed
     mv $2/control.fixed $2/control
 }
 
