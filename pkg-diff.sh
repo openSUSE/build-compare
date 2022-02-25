@@ -318,6 +318,13 @@ check_compressed_file()
           xz -d new/$file.xz &
           wait
           ;;
+        zst)
+          mv old/$file{,.zst}
+          mv new/$file{,.zst}
+          zstd -d old/$file.zst &
+          zstd -d new/$file.zst &
+          wait
+          ;;
       esac
       ftype=`/usr/bin/file old/$file | sed 's@^[^:]\+:[[:blank:]]*@@'`
       case $ftype in
@@ -414,7 +421,7 @@ normalize_file()
     *.dvi)
       filter_generic dvi
       ;;
-    *png)
+    *.png)
       # Try to remove timestamps, only if convert from ImageMagick is installed
       if [[ $(type -p convert) ]]; then
         filter_generic png
@@ -599,7 +606,7 @@ normalize_file()
     *.ps)
       filter_generic ps
       ;;
-    *pdf)
+    *.pdf)
       filter_generic pdf
       ;;
     */linuxrc.config)
@@ -858,7 +865,7 @@ check_single_file()
       compare_archive "${file}" 'archive_squashfs'
       return $?
        ;;
-    *.tar|*.tar.bz2|*.tar.gz|*.tgz|*.tbz2)
+    *.tar|*.tar.bz2|*.tar.gz|*.tgz|*.tbz2|*.tar.zst)
       compare_archive "${file}" 'archive_tar'
       return $?
       ;;
@@ -866,30 +873,36 @@ check_single_file()
       compare_archive "${file}" 'archive_zip'
       return $?
       ;;
-     *.bz2)
-        bunzip2 -c old/$file > old/${file/.bz2/}
-        bunzip2 -c new/$file > new/${file/.bz2/}
-        check_single_file ${file/.bz2/}
-        return $?
-        ;;
-     *.gz)
-        gunzip -c old/$file > old/${file/.gz/}
-        gunzip -c new/$file > new/${file/.gz/}
-        check_single_file ${file/.gz/}
-        return $?
-        ;;
-     *.rpm)
-	$self_script -a old/$file new/$file
-        return $?
-        ;;
+    *.bz2)
+      bunzip2 -c old/$file > old/${file/.bz2/}
+      bunzip2 -c new/$file > new/${file/.bz2/}
+      check_single_file ${file/.bz2/}
+      return $?
+      ;;
+    *.gz)
+      gunzip -c old/$file > old/${file/.gz/}
+      gunzip -c new/$file > new/${file/.gz/}
+      check_single_file ${file/.gz/}
+      return $?
+      ;;
+    *.zst)
+      zstd -dc old/$file > old/${file/.zst/}
+      zstd -dc new/$file > new/${file/.zst/}
+      check_single_file ${file/.zst/}
+      return $?
+      ;;
+    *.rpm)
+      $self_script -a old/$file new/$file
+      return $?
+      ;;
   esac
 
   ftype=`/usr/bin/file "old/$file" | sed -e 's@^[^:]\+:[[:blank:]]*@@' -e 's@[[:blank:]]*$@@'`
   case $ftype in
-     PE32\ executable*Mono\/\.Net\ assembly*)
-       wprint "PE32 Mono/.Net assembly: $file"
-       if [ -x /usr/bin/monodis ] ; then
-         monodis "old/$file" 2>/dev/null|sed -e 's/GUID = {.*}/GUID = { 42 }/;'> ${file1}
+    PE32\ executable*Mono\/\.Net\ assembly*)
+      wprint "PE32 Mono/.Net assembly: $file"
+      if [ -x /usr/bin/monodis ] ; then
+        monodis "old/$file" 2>/dev/null|sed -e 's/GUID = {.*}/GUID = { 42 }/;'> ${file1}
          monodis "new/$file" 2>/dev/null|sed -e 's/GUID = {.*}/GUID = { 42 }/;'> ${file2}
          if ! cmp -s "${file1}" "${file2}"; then
            wprint "$file differs ($ftype)"
@@ -1035,81 +1048,87 @@ check_single_file()
           watchdog_touch
         fi
       done
-      if test -n "$elfdiff"; then
+      if test -n "$elfdiff"
+      then
         return 1
       fi
       return 0
       ;;
-     *ASCII*|*text*)
-       if ! cmp -s "old/$file" "new/$file"; then
-         wprint "$file differs ($ftype)"
-         diff -u "old/$file" "new/$file" | $buildcompare_head
-         return 1
-       fi
-       ;;
-     directory|setuid\ directory|setuid,\ directory|sticky,\ directory)
-       # tar might package directories - ignore them here
-       return 0
-       ;;
-     bzip2\ compressed\ data*)
-       if ! check_compressed_file "$file" "bz2"; then
-           return 1
-       fi
-       ;;
-     gzip\ compressed\ data*)
-       if ! check_compressed_file "$file" "gzip"; then
-           return 1
-       fi
-       ;;
-     XZ\ compressed\ data*)
-       if ! check_compressed_file "$file" "xz"; then
-           return 1
-       fi
-       ;;
+    *ASCII*|*text*)
+      if ! cmp -s "old/$file" "new/$file" ; then
+        wprint "$file differs ($ftype)"
+        diff -u "old/$file" "new/$file" | $buildcompare_head
+        return 1
+      fi
+      ;;
+    directory|setuid\ directory|setuid,\ directory|sticky,\ directory)
+      # tar might package directories - ignore them here
+      return 0
+      ;;
+    bzip2\ compressed\ data*)
+      if ! check_compressed_file "$file" "bz2" ; then
+        return 1
+      fi
+      ;;
+    gzip\ compressed\ data*)
+      if ! check_compressed_file "$file" "gzip" ; then
+        return 1
+      fi
+      ;;
+    XZ\ compressed\ data*)
+      if ! check_compressed_file "$file" "xz" ; then
+        return 1
+      fi
+      ;;
+    Zstandard\ compressed\ data*)
+      if ! check_compressed_file "$file" "zst" ; then
+        return 1
+      fi
+      ;;
     Zip\ archive\ data,*)
       if ! compare_archive "${file}" 'archive_zip' ; then
         return 1
       fi
       ;;
-     POSIX\ tar\ archive)
-          mv old/$file{,.tar}
-          mv new/$file{,.tar}
-          if ! check_single_file ${file}.tar; then
-            return 1
-          fi
-       ;;
-     cpio\ archive)
-          mv old/$file{,.cpio}
-          mv new/$file{,.cpio}
-          if ! check_single_file ${file}.cpio; then
-            return 1
-          fi
-     ;;
-     Squashfs\ filesystem,*)
-        wprint "$file ($ftype)"
-        mv old/$file{,.squashfs}
-        mv new/$file{,.squashfs}
-        if ! check_single_file ${file}.squashfs; then
-          return 1
-        fi
-     ;;
-     broken\ symbolic\ link\ to\ *|symbolic\ link\ to\ *)
-       readlink "old/$file" > $file1
-       readlink "new/$file" > $file2
-       if ! diff -u $file1 $file2; then
-         wprint "symlink target for $file differs"
-         return 1
-       fi
-       ;;
-     block\ special\ *)
-     ;;
-     character\ special\ *)
-     ;;
-     *)
-       if ! diff_two_files; then
-           return 1
-       fi
-       ;;
+    POSIX\ tar\ archive)
+      mv old/$file{,.tar}
+      mv new/$file{,.tar}
+      if ! check_single_file ${file}.tar; then
+        return 1
+      fi
+      ;;
+    cpio\ archive)
+      mv old/$file{,.cpio}
+      mv new/$file{,.cpio}
+      if ! check_single_file ${file}.cpio; then
+        return 1
+      fi
+      ;;
+    Squashfs\ filesystem,*)
+      wprint "$file ($ftype)"
+      mv old/$file{,.squashfs}
+      mv new/$file{,.squashfs}
+      if ! check_single_file ${file}.squashfs; then
+        return 1
+      fi
+      ;;
+    broken\ symbolic\ link\ to\ *|symbolic\ link\ to\ *)
+      readlink "old/$file" > $file1
+      readlink "new/$file" > $file2
+      if ! diff -u $file1 $file2; then
+        wprint "symlink target for $file differs"
+        return 1
+      fi
+      ;;
+    block\ special\ *)
+      ;;
+    character\ special\ *)
+      ;;
+    *)
+      if ! diff_two_files; then
+        return 1
+      fi
+      ;;
   esac
   return 0
 }
@@ -1241,12 +1260,12 @@ fi
 # preserve cmp_rpm_meta result for check_all runs
 ret=$RES
 for file in "${files[@]}"; do
-   if ! check_single_file "$file"; then
-       ret=1
-       if test -z "$check_all"; then
-           break
-       fi
-   fi
+  if ! check_single_file "$file"; then
+    ret=1
+    if test -z "$check_all"; then
+      break
+    fi
+  fi
 done
 
 if [ "$PROC_MOUNTED" -eq "1" ]; then
@@ -1255,7 +1274,7 @@ if [ "$PROC_MOUNTED" -eq "1" ]; then
 fi
 
 if test "$ret" = 0; then
-     echo "Package content is identical"
+  echo "Package content is identical"
 fi
 exit $ret
 # vim: tw=666 ts=2 shiftwidth=2 et
