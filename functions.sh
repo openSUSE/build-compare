@@ -280,18 +280,15 @@ function set_regex() {
 function cmp_rpm_meta ()
 {
     local RES
-    local file1 file2
-    local rpm_meta_old rpm_meta_new
     local f
     local sh=$1
     local oldrpm=$2
     local newrpm=$3
     local tmpdir="$(mktemp -d)"
-
-    file1="$tmpdir/file1"
-    file2="$tmpdir/file2"
-    rpm_meta_old="$tmpdir/rpm-meta-old"
-    rpm_meta_new="$tmpdir/rpm-meta-new"
+    local file1="$tmpdir/file1"
+    local file2="$tmpdir/file2"
+    local rpm_meta_old="$tmpdir/rpm-meta-old"
+    local rpm_meta_new="$tmpdir/rpm-meta-new"
 
     collect_rpm_querytags
     set_rpm_meta_global_variables $oldrpm
@@ -305,6 +302,7 @@ function cmp_rpm_meta ()
     else
       ls -l $rpm_meta_old $rpm_meta_new
       echo "empty 'rpm -qp' output..."
+      rm -rf "$tmpdir"
       return 1
     fi
 
@@ -323,14 +321,16 @@ function cmp_rpm_meta ()
     trim_release_new < $rpm_meta_new > $file2
     echo "comparing the rpm tags of $name_new"
     if diff --label old-rpm-tags --label new-rpm-tags -au $file1 $file2; then
-      rm $file1 $file2 $rpm_meta_old $rpm_meta_new
-      rmdir $tmpfile
+      rm -rf "$tmpdir"
       return 0
     fi
 
     get_value QF_TAGS $rpm_meta_old > $file1
     get_value QF_TAGS $rpm_meta_new > $file2
-    comp_file rpmtags $file1 $file2 $rpm_meta_old $rpm_meta_new || return 1
+    if ! comp_file rpmtags $file1 $file2 $rpm_meta_old $rpm_meta_new; then
+      rm -rf "$tmpdir"
+      return 1
+    fi
 
     # This might happen when?!
     echo "comparing RELEASE"
@@ -340,6 +340,7 @@ function cmp_rpm_meta ()
           # Make sure all kernel packages have the same %RELEASE
           echo "release prefix mismatch"
           if test -z "$check_all"; then
+            rm -rf "$tmpdir"
             return 1
           fi
           difffound=1
@@ -351,16 +352,25 @@ function cmp_rpm_meta ()
 
     get_value QF_PROVIDES $rpm_meta_old | trim_release_old | sort > $file1
     get_value QF_PROVIDES $rpm_meta_new | trim_release_new | sort > $file2
-    comp_file PROVIDES $file1 $file2 $rpm_meta_old $rpm_meta_new || return 1
+    if ! comp_file PROVIDES $file1 $file2 $rpm_meta_old $rpm_meta_new; then
+      rm -rf "$tmpdir"
+      return 1
+    fi
 
     get_value QF_SCRIPT $rpm_meta_old | trim_release_old > $file1
     get_value QF_SCRIPT $rpm_meta_new | trim_release_new > $file2
-    comp_file scripts $file1 $file2 $rpm_meta_old $rpm_meta_new || return 1
+    if ! comp_file scripts $file1 $file2 $rpm_meta_old $rpm_meta_new; then
+      rm -rf "$tmpdir"
+      return 1
+    fi
 
     # First check the file attributes and later the md5s
     get_value QF_FILELIST $rpm_meta_old | trim_release_old > $file1
     get_value QF_FILELIST $rpm_meta_new | trim_release_new > $file2
-    comp_file filelist $file1 $file2 $rpm_meta_old $rpm_meta_new || return 1
+    if ! comp_file filelist $file1 $file2 $rpm_meta_old $rpm_meta_new; then
+      rm -rf "$tmpdir"
+      return 1
+    fi
 
     # now the md5sums. if they are different, we check more detailed
     # if there are different filenames, we will already have aborted before
@@ -396,8 +406,7 @@ function cmp_rpm_meta ()
       done >> "${sh}"
     fi
 
-    rm $file1 $file2 $rpm_meta_old $rpm_meta_new
-    rmdir $tmpdir
+    rm -rf "$tmpdir"
     [ "$difffound" = 1 ] && RES=1
     return $RES
 }
