@@ -1,10 +1,11 @@
 #!/bin/bash
 #
 # Copyright (c) 2009, 2010 SUSE Linux Product GmbH, Germany.
+# Copyright (c) 2022 SUSE LLC
 # Licensed under GPL v2, see COPYING file for details.
 #
-# Written by Michael Matz and Stephan Coolo
-# Enhanced by Andreas Jaeger
+# Written by Michael Matz and Stephan Kulow
+# Enhanced by Andreas Jaeger and Dirk Müller
 
 # Compare two source RPMs
 
@@ -59,10 +60,11 @@ esac
 # Now check that only the spec file has a changed release number and
 # nothing else
 
-dir=`mktemp -d`
-unpackage $oldrpm $dir/old
-unpackage $newrpm $dir/new
+dir=$(mktemp -d)
+unpackage $oldrpm $dir/old &
+unpackage $newrpm $dir/new &
 cd $dir
+wait
 
 check_single_file()
 { 

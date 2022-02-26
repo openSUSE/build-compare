@@ -1230,8 +1230,9 @@ case $oldpkg in
 esac
 
 wprint "Extracting packages"
-unpackage $oldpkg $dir/old
-unpackage $newpkg $dir/new
+unpackage $oldpkg $dir/old &
+unpackage $newpkg $dir/new &
+wait
 
 case $oldpkg in
   *.deb|*.ipk)
