@@ -25,8 +25,8 @@ fi
 
 source $FUNCTIONS
 
-oldrpm=`readlink -f $1`
-newrpm=`readlink -f $2`
+oldrpm=$(readlink -f $1)
+newrpm=$(readlink -f $2)
 rename_script=
 
 # Get version-release from first RPM and keep for rpmlint check
