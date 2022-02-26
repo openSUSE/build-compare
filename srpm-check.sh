@@ -29,11 +29,6 @@ oldrpm=$(readlink -f $1)
 newrpm=$(readlink -f $2)
 rename_script=
 
-# Get version-release from first RPM and keep for rpmlint check
-# Remember to quote the "." for future regexes
-ver_rel_old=$(rpm -qp --nodigest --nosignature --qf "%{RELEASE}" "${oldrpm}"|sed -e 's/\./\\./g')
-ver_rel_new=$(rpm -qp --nodigest --nosignature --qf "%{RELEASE}" "${newrpm}"|sed -e 's/\./\\./g')
-
 # For source RPMs, we can just check the metadata in the spec file
 # if those are not the same, the source RPM has changed and therefore 
 # the resulting files are needed.
