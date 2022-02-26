@@ -19,8 +19,8 @@ case $1 in
 esac
 
 if test "$#" != 2; then
-   echo "usage: $0 [-a|--check-all] old.rpm new.rpm"
-   exit 1
+  echo "usage: $0 [-a|--check-all] old.rpm new.rpm"
+  exit 1
 fi
 
 source $FUNCTIONS
@@ -66,31 +66,27 @@ check_single_file()
   local file=$1
   case $file in
     *.spec)
-       sed -i -e 's,^Release:.*$,Release: @RELEASE@,' old/$file
-       sed -i -e 's,^Release:.*$,Release: @RELEASE@,' new/$file
-       if ! cmp -s old/$file new/$file; then
-         echo "$file differs (spec file)"
-         diff -u old/$file new/$file | head -n 20
-         return 1
-       fi
-       return 0
-       ;;
+      sed -i -e 's,^Release:.*$,Release: @RELEASE@,' old/$file
+      sed -i -e 's,^Release:.*$,Release: @RELEASE@,' new/$file
+      diff --speed-large-files -su0 old/$file new/$file | head -n 20
+      return $?
+      ;;
     *)
-       echo "$file differs"
-       # Nothing else should be changed
-       ;;
-   esac
-   return 1
+      echo "$file differs"
+      # Nothing else should be changed
+      ;;
+  esac
+  return 1
 }
 
 ret=0
 for file in "${files[@]}"; do
-   if ! check_single_file $file; then
-       ret=1
-       if test -z "$check_all"; then
-           break
-       fi
-   fi
+  if ! check_single_file $file; then
+    ret=1
+    if test -z "$check_all"; then
+      break
+    fi
+  fi
 done
 
 rm -rf $dir
