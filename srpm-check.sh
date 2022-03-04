@@ -69,7 +69,7 @@ check_single_file()
       sed -i -e 's,^Release:.*$,Release: @RELEASE@,' old/$file
       sed -i -e 's,^Release:.*$,Release: @RELEASE@,' new/$file
       diff --speed-large-files -su0 old/$file new/$file | head -n 20
-      return $?
+      return "${PIPESTATUS[0]}"
       ;;
     *)
       echo "$file differs"
