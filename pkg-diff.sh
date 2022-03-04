@@ -938,11 +938,6 @@ check_single_file()
       ($OBJDUMP -s ${sections[@]} new/$file |
         sed -e "s,new/,,"  ; echo "${PIPESTATUS[@]}" > $file2 ) > new/$file.objdump &
       wait
-      diff --speed-large-files --unified \
-        --label "old $file (objdump)" \
-        --label "new $file (objdump)" \
-        old/$file.objdump new/$file.objdump > $dfile
-      ret=$?
       read i < ${file1}
       pipestatus=( $i )
       objdump_failed="${pipestatus[0]}"
@@ -959,29 +954,31 @@ check_single_file()
         wprint "ELF section: pipe command failed for new/$file"
         elfdiff='failed'
       fi
-      if test "$ret" != "0"
+      if test -z "${elfdiff}"
       then
-        wprint "$file differs in ELF sections"
-        $buildcompare_head $dfile
-        elfdiff='elfdiff'
-      else
-        watchdog_touch
+        diff --speed-large-files --unified \
+          --label "old $file (objdump)" \
+          --label "new $file (objdump)" \
+          old/$file.objdump new/$file.objdump > $dfile
+        ret=$?
+        if test "$ret" != "0"
+        then
+          wprint "$file differs in ELF sections"
+          $buildcompare_head $dfile
+          elfdiff='elfdiff'
+        fi
       fi
       if test -n "$elfdiff"
       then
+        rm old/$file.objdump new/$file.objdump &
         return 1
       fi
+      watchdog_touch
       ($OBJDUMP -d --no-show-raw-insn old/$file | filter_disasm |
         sed -e "s,old/,,"  ; echo "${PIPESTATUS[@]}" > $file1 ) > old/$file.objdump &
       ($OBJDUMP -d --no-show-raw-insn new/$file | filter_disasm |
         sed -e "s,new/,,"  ; echo "${PIPESTATUS[@]}" > $file2 ) > new/$file.objdump &
       wait
-      diff --speed-large-files --unified \
-        --label "old $file (disasm)" \
-        --label "new $file (disasm)" \
-        old/$file.objdump new/$file.objdump > $dfile
-      ret=$?
-      rm old/$file.objdump new/$file.objdump
       read i < ${file1}
       pipestatus=( $i )
       objdump_failed="${objdump_failed}${pipestatus[0]}"
@@ -1001,22 +998,30 @@ check_single_file()
       if test ${objdump_failed} -gt 0 || test -n "${elfdiff}"
       then
         # objdump had no idea how to handle it
+        rm old/$file.objdump new/$file.objdump &
         if diff_two_files; then
           return 0
         fi
         return 1
       fi
+      diff --speed-large-files --unified \
+        --label "old $file (disasm)" \
+        --label "new $file (disasm)" \
+        old/$file.objdump new/$file.objdump > $dfile
+      ret=$?
+      rm old/$file.objdump new/$file.objdump &
       if test "$ret" != "0"
       then
         wprint "$file differs in assembler output"
         $buildcompare_head $dfile
         elfdiff='elfdiff'
+      else
+        watchdog_touch
       fi
       if test -n "$elfdiff"
       then
         return 1
       fi
-      return 0
       ;;
     *ASCII*|*text*)
       if ! cmp -s "old/$file" "new/$file" ; then
