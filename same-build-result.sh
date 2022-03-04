@@ -21,6 +21,31 @@ _x() {
 }
 trap _x EXIT
 #
+remove_check_time_report() {
+  local f=$1
+  awk '
+    BEGIN {
+      ctr_seen=0;
+    }
+    /Check time report .*:$/ {
+      ctr_seen=1;
+      next;
+    }
+    /TOTAL[[:blank:]]+[0-9]/ {
+      if (ctr_seen == 1) {
+        ctr_seen=0;
+        next;
+      }
+    }
+    {
+      if (ctr_seen == 1) {
+        next;
+      }
+      print $0;
+    }
+  ' < "${f}"
+}
+#
 check_all=
 if test "$1" = "-a"
 then
@@ -134,12 +159,15 @@ else
 fi
 
 if test -n "$OTHERDIR"; then
-  if test -e $OLDDIR/rpmlint.log -a -e $OTHERDIR/rpmlint.log; then
-    echo "comparing $OLDDIR/rpmlint.log and $OTHERDIR/rpmlint.log"
+  old_log=$OLDDIR/rpmlint.log
+  new_log=$OTHERDIR/rpmlint.log
+  if test -e ${old_log} && test -e ${new_log} ; then
+    echo "comparing ${old_log} and ${new_log}"
+    # Remove --time-report from rpmlint
     # Sort the files first since the order of messages is not deterministic
     # Remove release from files
-    sort -u $OLDDIR/rpmlint.log|sed -e "s,$ver_rel1,@VERSION@-@RELEASE@,g" -e "s|/tmp/rpmlint\..*spec|.spec|g" > $file1
-    sort -u $OTHERDIR/rpmlint.log|sed -e "s,$ver_rel2,@VERSION@-@RELEASE@,g" -e "s|/tmp/rpmlint\..*spec|.spec|g"  > $file2
+    remove_check_time_report ${old_log}|sort -u|sed -e "s,$ver_rel1,@VERSION@-@RELEASE@,g" -e "s|/tmp/rpmlint\..*spec|.spec|g" > $file1
+    remove_check_time_report ${new_log}|sort -u|sed -e "s,$ver_rel2,@VERSION@-@RELEASE@,g" -e "s|/tmp/rpmlint\..*spec|.spec|g" > $file2
     # Remove odd warning about not-hardlinked files
     # Remove odd warning about data and time, it comes and goes
     # Remove warning about python mtime mismatch, a republish will not help
@@ -159,7 +187,7 @@ if test -n "$OTHERDIR"; then
       SUCCESS=0
     fi
     rm $file1 $file2
-  elif test -e $OTHERDIR/rpmlint.log; then
+  elif test -e ${new_log} ; then
     echo "rpmlint.log is new"
     SUCCESS=0
   fi
