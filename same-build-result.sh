@@ -123,7 +123,6 @@ if [ -n "${NEWRPMS[0]}" ]; then
   exit 1
 fi
 
-# Compare rpmlint.log files
 if test -d /home/abuild/rpmbuild/OTHER; then
   OTHERDIR=/home/abuild/rpmbuild/OTHER
 elif test -d /usr/src/packages/OTHER; then
@@ -134,36 +133,6 @@ else
 fi
 
 if test -n "$OTHERDIR"; then
-  if test -e $OLDDIR/rpmlint.log -a -e $OTHERDIR/rpmlint.log; then
-    echo "comparing $OLDDIR/rpmlint.log and $OTHERDIR/rpmlint.log"
-    # Sort the files first since the order of messages is not deterministic
-    # Remove release from files
-    sort -u $OLDDIR/rpmlint.log|sed -e "s,$ver_rel1,@VERSION@-@RELEASE@,g" -e "s|/tmp/rpmlint\..*spec|.spec|g" > $file1
-    sort -u $OTHERDIR/rpmlint.log|sed -e "s,$ver_rel2,@VERSION@-@RELEASE@,g" -e "s|/tmp/rpmlint\..*spec|.spec|g"  > $file2
-    # Remove odd warning about not-hardlinked files
-    # Remove odd warning about data and time, it comes and goes
-    # Remove warning about python mtime mismatch, a republish will not help
-    # Remove odd warning about filenames, they contain VERSION-RELEASE
-    # Remove durations from progress reports
-    sed -i -e "
-    /: W: files-duplicate /d
-    /: W: file-contains-date-and-time /d
-    /: W: python-bytecode-inconsistent-mtime /d
-    /: W: filename-too-long-for-joliet /d
-    /: I: \(filelist-initialization\|check-completed\) /s| [0-9]\+\.[0-9] s| x.x s|
-    s/; has taken [0-9]\+\.[0-9] s/; has taken x.x s/
-    " $file1 $file2
-    if ! cmp -s $file1 $file2; then
-      echo "rpmlint.log files differ:"
-      diff -u $file1 $file2 |head -n 20
-      SUCCESS=0
-    fi
-    rm $file1 $file2
-  elif test -e $OTHERDIR/rpmlint.log; then
-    echo "rpmlint.log is new"
-    SUCCESS=0
-  fi
-
   appdatas=$(cd $OTHERDIR && find . -name "*-appdata.xml")
   for xml in $appdatas; do
     # compare appstream data

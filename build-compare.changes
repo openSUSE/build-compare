@@ -1,4 +1,9 @@
 -------------------------------------------------------------------
+Fri Mar  4 16:40:50 UTC 2022 - Bernhard Wiedemann <bwiedemann@suse.com>
+
+- Stop considering rpmlint.log diffs
+
+-------------------------------------------------------------------
 Tue Sep 21 19:19:19 UTC 2021 - Stephan Kulow <coolo@suse.de>
 
 - Fix build-compare for shadow package
