@@ -968,16 +968,17 @@ check_single_file()
           elfdiff='elfdiff'
         fi
       fi
-      if test -n "$elfdiff"
+      if test -z "$elfdiff"
       then
         rm old/$file.objdump new/$file.objdump &
         return 1
       fi
       watchdog_touch
+      elfdiff=
       ($OBJDUMP -d --no-show-raw-insn old/$file | filter_disasm |
-        sed -e "s,old/,,"  ; echo "${PIPESTATUS[@]}" > $file1 ) > old/$file.objdump &
+        sed -e "s,^old/[^:]\+,,"  ; echo "${PIPESTATUS[@]}" > $file1 ) > old/$file.objdump &
       ($OBJDUMP -d --no-show-raw-insn new/$file | filter_disasm |
-        sed -e "s,new/,,"  ; echo "${PIPESTATUS[@]}" > $file2 ) > new/$file.objdump &
+        sed -e "s,^new/[^:]\+,,"  ; echo "${PIPESTATUS[@]}" > $file2 ) > new/$file.objdump &
       wait
       read i < ${file1}
       pipestatus=( $i )
@@ -1004,6 +1005,7 @@ check_single_file()
         fi
         return 1
       fi
+      elfdiff=
       diff --speed-large-files --unified \
         --label "old $file (disasm)" \
         --label "new $file (disasm)" \
