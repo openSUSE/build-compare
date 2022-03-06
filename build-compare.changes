@@ -1,6 +1,7 @@
 -------------------------------------------------------------------
 Fri Mar  4 12:34:56 UTC 2022 - olaf@aepfle.de
 
+- remove count of checks and packages from rpmlint.log
 - remove Check time report from rpmlint.log
 - ELF diffing performance improvements
 - unpack packages in parallel

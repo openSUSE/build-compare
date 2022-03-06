@@ -173,6 +173,7 @@ if test -n "$OTHERDIR"; then
     # Remove warning about python mtime mismatch, a republish will not help
     # Remove odd warning about filenames, they contain VERSION-RELEASE
     # Remove durations from progress reports
+    # Remove odd output about number of checks and packages
     sed -i -e "
     /: W: files-duplicate /d
     /: W: file-contains-date-and-time /d
@@ -180,6 +181,7 @@ if test -n "$OTHERDIR"; then
     /: W: filename-too-long-for-joliet /d
     /: I: \(filelist-initialization\|check-completed\) /s| [0-9]\+\.[0-9] s| x.x s|
     s/; has taken [0-9]\+\.[0-9] s/; has taken x.x s/
+    /^checks: [0-9]\+, packages: [0-9]\+/d
     " $file1 $file2
     if ! cmp -s $file1 $file2; then
       echo "rpmlint.log files differ:"
