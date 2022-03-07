@@ -209,7 +209,7 @@ if test -n "$OTHERDIR"; then
   appdatas=$(cd $OTHERDIR && find . -name "*-appdata.xml")
   for xml in $appdatas; do
     # compare appstream data
-    if test -e $OLDDIR/$xml -a -e $OTHERDIR/$xml; then
+    if test -e $OLDDIR/$xml && test -e $OTHERDIR/$xml; then
       file1=$OLDDIR/$xml
       file2=$OTHERDIR/$xml
       if ! cmp -s $file1 $file2; then
