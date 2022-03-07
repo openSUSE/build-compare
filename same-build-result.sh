@@ -18,6 +18,7 @@ declare -a exit_code
 # exit_code[0]='' # binaries_differ
 # exit_code[1]='' # rpmlint_differs
 # exit_code[2]='' # appdata_differs
+# exit_code[3]='' # srcrpm_differs
 file1=`mktemp`
 file2=`mktemp`
 _x() {
@@ -94,7 +95,13 @@ if test ! -f "$nsrpm"; then
 fi
 
 echo "compare $osrpm $nsrpm"
-bash $SCMPSCRIPT "$osrpm" "$nsrpm" || exit 1
+if bash $SCMPSCRIPT "$osrpm" "$nsrpm"
+then
+  : src.rpm identical
+else
+  test -z "${check_all}" && exit 1
+  exit_code[3]='srcrpm_differs'
+fi
 
 # technically we should not all exclude all -32bit but filter for different archs,
 # like done with -x86
