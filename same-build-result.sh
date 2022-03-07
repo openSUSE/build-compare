@@ -151,14 +151,20 @@ if [ -n "${NEWRPMS[0]}" ]; then
   exit 1
 fi
 
+OTHERDIR=
 # Compare rpmlint.log files
 if test -d /home/abuild/rpmbuild/OTHER; then
   OTHERDIR=/home/abuild/rpmbuild/OTHER
 elif test -d /usr/src/packages/OTHER; then
   OTHERDIR=/usr/src/packages/OTHER
 else
-  echo "no OTHERDIR"
-  OTHERDIR=
+  for newdir in $NEWDIRS
+  do
+    test -f "${newdir}/rpmlint.log" || continue
+    OTHERDIR="${newdir}"
+    break
+  done
+  test -n "$OTHERDIR" || echo "no OTHERDIR"
 fi
 
 if test -n "$OTHERDIR"; then
