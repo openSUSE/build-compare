@@ -1,6 +1,11 @@
 -------------------------------------------------------------------
 Fri Mar  4 12:34:56 UTC 2022 - olaf@aepfle.de
 
+- handle -a also in same-build-result.sh
+- Find rpmlint.log in more places
+- fix logic error in appstream comparison
+- rework exit handling in same-build-result.sh
+- Fix result in case no rpmlint.log exist
 - remove count of checks and packages from rpmlint.log
 - remove Check time report from rpmlint.log
 - ELF diffing performance improvements
