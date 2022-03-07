@@ -189,9 +189,17 @@ if test -n "$OTHERDIR"; then
       SUCCESS=0
     fi
     rm $file1 $file2
-  elif test -e ${new_log} ; then
-    echo "rpmlint.log is new"
-    SUCCESS=0
+  else
+    if test -e "${new_log}"
+    then
+      echo "rpmlint.log is new"
+    elif test -e "${old_log}"
+    then
+      echo "rpmlint.log disappeared"
+    else
+      SUCCESS=0
+      echo "No rpmlint.log available"
+    fi
   fi
 
   appdatas=$(cd $OTHERDIR && find . -name "*-appdata.xml")
