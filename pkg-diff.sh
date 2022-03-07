@@ -971,7 +971,7 @@ check_single_file()
       if test -z "$elfdiff"
       then
         rm old/$file.objdump new/$file.objdump &
-        return 1
+        return 0
       fi
       watchdog_touch
       elfdiff=
