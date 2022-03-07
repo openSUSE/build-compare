@@ -14,6 +14,10 @@
 CMPSCRIPT=${0%/*}/pkg-diff.sh
 SCMPSCRIPT=${0%/*}/srpm-check.sh
 
+declare -a exit_code
+# exit_code[0]='' # binaries_differ
+# exit_code[1]='' # rpmlint_differs
+# exit_code[2]='' # appdata_differs
 file1=`mktemp`
 file2=`mktemp`
 _x() {
@@ -121,7 +125,6 @@ NEWRPMS=($( sort --field-separator=/ --key=` sed -n '1s@[^/]@@gp' ${file2} | wc 
 ver_rel1=$(rpm -qp --nodigest --nosignature --qf "%{VERSION}-%{RELEASE}" "${OLDRPMS[0]}"|sed -e 's/\./\\./g')
 ver_rel2=$(rpm -qp --nodigest --nosignature --qf "%{VERSION}-%{RELEASE}" "${NEWRPMS[0]}"|sed -e 's/\./\\./g')
 
-SUCCESS=1
 rpmqp='rpm -qp --qf %{NAME} --nodigest --nosignature '
 for opac in ${OLDRPMS[*]}; do
   npac=${NEWRPMS[0]}
@@ -138,7 +141,7 @@ for opac in ${OLDRPMS[*]}; do
       echo "skipping -debuginfo package"
     ;;
     *)
-      bash $CMPSCRIPT $check_all "$opac" "$npac" || SUCCESS=0
+      bash $CMPSCRIPT $check_all "$opac" "$npac" || exit_code[0]='binaries_differ'
     ;;
   esac
 done
@@ -186,18 +189,19 @@ if test -n "$OTHERDIR"; then
     if ! cmp -s $file1 $file2; then
       echo "rpmlint.log files differ:"
       diff -u $file1 $file2 |head -n 20
-      SUCCESS=0
+      exit_code[1]='rpmlint_differs'
     fi
     rm $file1 $file2
   else
     if test -e "${new_log}"
     then
+      exit_code[1]='rpmlint_new'
       echo "rpmlint.log is new"
     elif test -e "${old_log}"
     then
+      exit_code[1]='rpmlint_old'
       echo "rpmlint.log disappeared"
     else
-      SUCCESS=0
       echo "No rpmlint.log available"
     fi
   fi
@@ -211,16 +215,15 @@ if test -n "$OTHERDIR"; then
       if ! cmp -s $file1 $file2; then
         echo "$xml files differ:"
         diff -u0 $file1 $file2 |head -n 20
-        SUCCESS=0
+        exit_code[2]='appdata_differs'
       fi
     elif test -e $OTHERDIR/$xml; then
       echo "$xml is new"
-      SUCCESS=0
+      exit_code[2]='appdata_new'
     fi
   done
 fi
-
-if test $SUCCESS -eq 0; then
+if test -n "${exit_code[*]}"; then
   exit 1
 fi
 echo 'compare validated build as identical !'
