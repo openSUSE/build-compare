@@ -216,7 +216,7 @@ Thu Jan  5 11:01:53 UTC 2017 - olaf@aepfle.de
 -------------------------------------------------------------------
 Wed Dec 14 08:44:11 UTC 2016 - olaf@aepfle.de
 
-- Remove warning about python mtime mismatch, a republish will not help
+- Remove warning about python mtime mismatch, a republish will not help (bsc#915948)
 - Handle yet another variant of numbered anchor in html file
 
 -------------------------------------------------------------------
