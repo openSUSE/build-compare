@@ -933,25 +933,17 @@ check_single_file()
             p
           }
         '))
-      ($OBJDUMP -s ${sections[@]} old/$file |
-        sed -e "s,old/,,"  ; echo "${PIPESTATUS[@]}" > $file1 ) > old/$file.objdump &
-      ($OBJDUMP -s ${sections[@]} new/$file |
-        sed -e "s,new/,,"  ; echo "${PIPESTATUS[@]}" > $file2 ) > new/$file.objdump &
+      (cd old && exec $OBJDUMP -s ${sections[@]} ./$file ) > old/$file.objdump &
+      (cd new && exec $OBJDUMP -s ${sections[@]} ./$file ) > new/$file.objdump &
       wait
-      read i < ${file1}
-      pipestatus=( $i )
-      objdump_failed="${pipestatus[0]}"
-      if [[ ${pipestatus[*]} =~ [1-9] ]]
+      if ! test -s old/$file.objdump
       then
-        wprint "ELF section: pipe command failed for old/$file"
+        wprint "ELF section: objdump failed for old/$file"
         elfdiff='failed'
       fi
-      read i < ${file2}
-      pipestatus=( $i )
-      objdump_failed="${objdump_failed}${pipestatus[0]}"
-      if [[ ${pipestatus[*]} =~ [1-9] ]]
+      if ! test -s new/$file.objdump
       then
-        wprint "ELF section: pipe command failed for new/$file"
+        wprint "ELF section: objdump failed for new/$file"
         elfdiff='failed'
       fi
       if test -z "${elfdiff}"
@@ -975,10 +967,10 @@ check_single_file()
       fi
       watchdog_touch
       elfdiff=
-      ($OBJDUMP -d --no-show-raw-insn old/$file | filter_disasm |
-        sed -e "s,^old/[^:]\+,,"  ; echo "${PIPESTATUS[@]}" > $file1 ) > old/$file.objdump &
-      ($OBJDUMP -d --no-show-raw-insn new/$file | filter_disasm |
-        sed -e "s,^new/[^:]\+,,"  ; echo "${PIPESTATUS[@]}" > $file2 ) > new/$file.objdump &
+      (cd old && exec $OBJDUMP -d --no-show-raw-insn ./$file | filter_disasm
+        echo "${PIPESTATUS[@]}" > $file1 ) > old/$file.objdump &
+      (cd new && exec $OBJDUMP -d --no-show-raw-insn ./$file | filter_disasm
+        echo "${PIPESTATUS[@]}" > $file2 ) > new/$file.objdump &
       wait
       read i < ${file1}
       pipestatus=( $i )

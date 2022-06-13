@@ -1,4 +1,9 @@
 -------------------------------------------------------------------
+Mon Jun 13 13:13:13 UTC 2022 - olaf@aepfle.de
+
+- fix objdump parsing (#52)
+
+-------------------------------------------------------------------
 Fri Mar  4 12:34:56 UTC 2022 - olaf@aepfle.de
 
 - handle -a also in same-build-result.sh
