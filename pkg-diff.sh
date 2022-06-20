@@ -833,7 +833,6 @@ check_single_file()
   local ret=0
   local i
   local failed
-  local objdump_failed
   local elfdiff
   local sections
   local -a pipestatus
@@ -974,7 +973,6 @@ check_single_file()
       wait
       read i < ${file1}
       pipestatus=( $i )
-      objdump_failed="${objdump_failed}${pipestatus[0]}"
       if [[ ${pipestatus[*]} =~ [1-9] ]]
       then
         wprint "ELF disassembly: pipe command failed for old/$file"
@@ -982,13 +980,12 @@ check_single_file()
       fi
       read i < ${file2}
       pipestatus=( $i )
-      objdump_failed="${objdump_failed}${pipestatus[0]}"
       if [[ ${pipestatus[*]} =~ [1-9] ]]
       then
         wprint "ELF disassembly: pipe command failed for new/$file"
         elfdiff='failed'
       fi
-      if test ${objdump_failed} -gt 0 || test -n "${elfdiff}"
+      if test -n "${elfdiff}"
       then
         # objdump had no idea how to handle it
         rm old/$file.objdump new/$file.objdump &
