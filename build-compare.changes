@@ -1,4 +1,9 @@
 -------------------------------------------------------------------
+Mon Jun 20 12:34:56 UTC 2022 - olaf@aepfle.de
+
+- fix objdump parsing for non-executable sections (#53)
+
+-------------------------------------------------------------------
 Mon Jun 13 13:13:13 UTC 2022 - olaf@aepfle.de
 
 - fix objdump parsing (#52)
