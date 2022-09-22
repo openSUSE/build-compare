@@ -1,4 +1,10 @@
 -------------------------------------------------------------------
+Mon Sep 19 08:02:40 UTC 2022 - Dirk Müller <dmueller@suse.com>
+
+- move license to licensedir
+- spec file cleanups
+
+-------------------------------------------------------------------
 Tue Aug 23 06:53:29 UTC 2022 - Martin Kampas <martin.kampas@jolla.com>
 
 - handle more setuid/setgid ELF variants (#54)
