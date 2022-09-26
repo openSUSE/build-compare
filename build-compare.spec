@@ -17,7 +17,7 @@
 
 
 Name:           build-compare
-Version:        __REPLACE_ME__
+Version:        0
 Release:        0
 Summary:        Build Result Compare Script
 License:        GPL-2.0-or-later
@@ -28,6 +28,7 @@ Source2:        same-build-result.sh
 Source3:        pkg-diff.sh
 Source4:        functions.sh
 Source5:        srpm-check.sh
+BuildRoot:      %{_tmppath}/%{name}-%{version}-build
 #!BuildIgnore:  build-compare
 BuildArch:      noarch
 %if 0%{?suse_version}
@@ -57,7 +58,12 @@ mkdir -p %{buildroot}%{_prefix}/lib/build/
 install -m 0755 %{SOURCE2} %{SOURCE3} %{SOURCE4} %{SOURCE5} %{buildroot}%{_prefix}/lib/build/
 
 %files
+%if 0%{?suse_version} < 1500
+%defattr(-,root,root)
+%doc COPYING
+%else
 %license COPYING
+%endif
 %{_prefix}/lib/build
 
 %changelog
