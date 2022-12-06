@@ -382,6 +382,7 @@ function cmp_rpm_meta ()
     # Built packages provide the sourcerpm, for the sourcerpm itself it is "(none)"
     [ "x$(get_value QF_SOURCERPM $rpm_meta_new)" == "x(none)" ] && is_sourcerpm=1 || is_sourcerpm=0
 
+    # FIXME: PROVIDE needs to be handled independent from the other tags
     get_value QF_PROVIDES $rpm_meta_old | trim_section ${is_sourcerpm} 'PROVIDE' | trim_release_old | sort > $file1
     get_value QF_PROVIDES $rpm_meta_new | trim_section ${is_sourcerpm} 'PROVIDE' | trim_release_new | sort > $file2
     if ! comp_file PROVIDES $file1 $file2 $rpm_meta_old $rpm_meta_new; then
