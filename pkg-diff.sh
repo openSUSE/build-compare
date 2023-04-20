@@ -931,6 +931,8 @@ check_single_file()
             /\.build-id/d
             /\.gnu_debuglink/d
             /\.gnu_debugdata/d
+            /\.note\.package/d
+            /\.note\.go\.buildid/d
             p
           }
         '))
