@@ -645,6 +645,13 @@ normalize_file()
       sed -i 's/^127.0.0.1[[:blank:]].*/127.0.0.1 hst/' "old/$file"
       sed -i 's/^127.0.0.1[[:blank:]].*/127.0.0.1 hst/' "new/$file"
       ;;
+    *.dll)
+      # Only a new virtual address (VA) in ImportAddressTable esp. for Wine
+      # or related packages shouldn't cause a new release
+      # Patching VA to FF FF FF FF should release only "real" changes.
+      printf '\xff\xff\xff\xff' | dd of=old/$file bs=1 seek=216 count=4 conv=notrunc
+      printf '\xff\xff\xff\xff' | dd of=new/$file bs=1 seek=216 count=4 conv=notrunc
+      ;;
   esac
 }
 
@@ -845,8 +852,15 @@ compare_archive()
         watchdog_touch
       done
     else
-      wprint "$file has different file list"
-      diff -u 'co' 'cn'
+      # Wine .a have false positives due to --export .spec
+      if echo ${file} | grep "/wine/" > /dev/null
+      then
+        wprint "$file has different file list. Ignoring for Wine."
+        ret=0
+      else
+        wprint "$file has different file list"
+        diff -u 'co' 'cn'
+      fi
     fi
     popd > /dev/null
     rm -rf "d"
