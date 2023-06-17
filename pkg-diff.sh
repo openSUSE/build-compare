@@ -664,6 +664,9 @@ normalize_file()
       sed -i 's/^127.0.0.1[[:blank:]].*/127.0.0.1 hst/' "old/$file"
       sed -i 's/^127.0.0.1[[:blank:]].*/127.0.0.1 hst/' "new/$file"
       ;;
+    */dune-package)
+      sed -i '1s@^(lang dune [^)]\+)@(lang dune 0.0)@' "old/$file" "new/$file"
+      ;;
   esac
 }
 
