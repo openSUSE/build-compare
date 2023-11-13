@@ -28,3 +28,7 @@ build-compare test rpm
 %files
 %defattr(-,root,root)
 %doc %{outfile}
+
+%changelog
+* Sun Jan 1 2023 Firstname Lastname <user@host>
+- foo %{changes}
