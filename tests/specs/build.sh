@@ -12,12 +12,14 @@ stringtext()
     string=$2
     meta=$3
     outfile=$4
+    changes=${changes:-none}
     [ -z "$outfile" ] && outfile=string.txt
     [ -z "$meta" ] && meta="Provides: foo"
     rpmbuild -bb \
         -D "%outfile dir" \
         -D "%outcmd rm -rf dir ; mkdir -p dir ; echo $string > 'dir/$outfile'" \
         -D "%metadata $meta" \
+        -D "%changes $changes" \
         stringtext.spec || exit 15
     mv ~/rpmbuild/RPMS/x86_64/stringtext-1-0.x86_64.rpm $r/stringtext-1-$n.x86_64.rpm
 }
@@ -36,6 +38,7 @@ stringtext 0 123456
 stringtext 1 123456
 stringtext 2 X98765
 stringtext 3 123456 "Provides: bar"
+changes=change2 stringtext 4 123456
 stringtext2 10 123456 789
 stringtext2 11 123456 123
 stringtext2 12 X98765 123
