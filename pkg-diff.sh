@@ -129,7 +129,7 @@ filter_png() {
     } elsif ($b eq "tEXt") {
       $d = read($f, $c, $a);
       $b = unpack("Z$a", $c);
-      if ($b eq "date:create" || $b eq "date:modify") {
+      if ($b eq "date:create" || $b eq "date:modify" || $b eq "date:timestamp") {
         $d = seek($f, -$a, 1);
         fn($f, $a);
       }
