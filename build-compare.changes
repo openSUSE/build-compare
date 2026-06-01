@@ -1,4 +1,9 @@
 -------------------------------------------------------------------
+Wed May 13 21:56:04 UTC 2026 - Luca Boccassi <luca.boccassi@gmail.com>
+
+- Add support for comparing deb packages
+
+-------------------------------------------------------------------
 Thu Aug  1 01:01:01 UTC 2024 - olaf@aepfle.de
 
 - Remove also date:timestamp from png files
