@@ -6,10 +6,15 @@
 # Written by Adrian Schroeter <adrian@suse.de>
 # Enhanced by Andreas Jaeger <aj@suse.de>
 #
-# The script decides if the new build differes from the former one,
-# using pkg-diff.sh.
+# The script decides if the new build differs from the former one,
+# using pkg-diff.sh.  Both .rpm and .deb / .ipk packages are
+# supported; the format is auto-detected from the artefacts present
+# in NEWDIRS / OLDDIR.
+#
 # The script is called as part of the build process as:
 # /usr/lib/build/same-build-result.sh /.build.oldpackages /usr/src/packages/RPMS /usr/src/packages/SRPMS
+# or, for debian-style builds:
+# /usr/lib/build/same-build-result.sh /.build.oldpackages /usr/src/packages/DEBS
 
 CMPSCRIPT=${0%/*}/pkg-diff.sh
 SCMPSCRIPT=${0%/*}/srpm-check.sh
@@ -73,12 +78,17 @@ if [ -z "$NEWDIRS" ]; then
   exit 1
 fi
 
+# ---------------------------------------------------------------------
+# RPM comparison flow
+# ---------------------------------------------------------------------
+compare_rpms() {
+
 if test `find $NEWDIRS -name '*.rpm' -and ! -name '*.delta.rpm' | wc -l` != `find $OLDDIR -name '*.rpm' -and ! -name '*.delta.rpm' | wc -l`; then
    echo "different number of subpackages"
    find $OLDDIR  -name '*.rpm' -and ! -name '*.delta.rpm' -print0 | xargs -0 rpm -qp --qf '%{NAME}\n' | sort > ${file1}
    find $NEWDIRS -name '*.rpm' -and ! -name '*.delta.rpm' -print0 | xargs -0 rpm -qp --qf '%{NAME}\n' | sort > ${file2}
    diff -u ${file1} ${file2}
-   exit 1
+   return 1
 fi
 
 osrpm=$(find "$OLDDIR" -name \*src.rpm)
@@ -86,12 +96,12 @@ nsrpm=$(find $NEWDIRS -name \*src.rpm)
 
 if test ! -f "$osrpm"; then
   echo no old source rpm in $OLDDIR
-  exit 1
+  return 1
 fi
 
 if test ! -f "$nsrpm"; then
   echo no new source rpm in $NEWDIRS
-  exit 1
+  return 1
 fi
 
 echo "compare $osrpm $nsrpm"
@@ -99,7 +109,7 @@ if bash $SCMPSCRIPT $check_all "$osrpm" "$nsrpm"
 then
   : src.rpm identical
 else
-  test -z "${check_all}" && exit 1
+  test -z "${check_all}" && return 1
   exit_code[3]='srcrpm_differs'
 fi
 
@@ -141,7 +151,7 @@ for opac in ${OLDRPMS[*]}; do
   nname=`$rpmqp $npac`
   if test "$oname" != "$nname"; then
     echo "names differ: $oname $nname"
-    exit 1
+    return 1
   fi
   case "$opac" in
     *debuginfo*)
@@ -155,7 +165,7 @@ done
 
 if [ -n "${NEWRPMS[0]}" ]; then
   echo additional new package
-  exit 1
+  return 1
 fi
 
 OTHERDIR=
@@ -236,6 +246,146 @@ if test -n "$OTHERDIR"; then
     fi
   done
 fi
+return 0
+}
+
+# ---------------------------------------------------------------------
+# Debian / .deb / .ipk comparison flow
+# ---------------------------------------------------------------------
+#
+# Debian package filenames follow <name>_<version>_<arch>.deb so
+# stripping the middle component yields the natural pairing key, which
+# mirrors the rpm script's by-name pairing and keeps version-only
+# rebuilds (the whole point of the same-build-result check) pairable.
+deb_pair_key() {
+    local f=${1##*/}
+    f=${f%.deb}
+    f=${f%.ipk}
+    local name=${f%%_*}
+    local arch=${f##*_}
+    printf '%s_%s' "$name" "$arch"
+}
+
+list_debs() {
+    local dir
+    for dir in "$@" ; do
+        find "$dir" -type f \( -name '*.deb' -o -name '*.ipk' \)
+    done | while read -r path ; do
+        printf '%s\t%s\n' "$(deb_pair_key "$path")" "$path"
+    done | sort
+}
+
+compare_debs() {
+
+  local old_count new_count
+  old_count=$(find "$OLDDIR" -type f \( -name '*.deb' -o -name '*.ipk' \) | wc -l)
+  new_count=$(find $NEWDIRS  -type f \( -name '*.deb' -o -name '*.ipk' \) | wc -l)
+
+  if test "$old_count" != "$new_count" ; then
+    echo "different number of subpackages"
+    find "$OLDDIR" -type f \( -name '*.deb' -o -name '*.ipk' \) -printf '%f\n' | sort > "${file1}"
+    find $NEWDIRS  -type f \( -name '*.deb' -o -name '*.ipk' \) -printf '%f\n' | sort > "${file2}"
+    diff -u "${file1}" "${file2}"
+    return 1
+  fi
+
+  list_debs "$OLDDIR"  > "${file1}"
+  list_debs $NEWDIRS   > "${file2}"
+
+  if ! diff -u <(cut -f1 "${file1}") <(cut -f1 "${file2}") ; then
+    echo "set of deb (name, arch) tuples differs"
+    return 1
+  fi
+
+  exec 3<"${file1}" 4<"${file2}"
+  while IFS=$'\t' read -r okey opath <&3 ; do
+    IFS=$'\t' read -r nkey npath <&4 || break
+    echo "compare $opath $npath"
+    # ${okey%_*} drops the trailing _<arch> giving back the package name.
+    case "${okey%_*}" in
+      *-dbgsym|*-dbg)
+        # debug symbol packages legitimately differ on every build
+        # (build-id paths) without affecting installed binaries.
+        # Skip them, mirroring the rpm flow's -debuginfo skip.
+        echo "skipping debug-symbol package"
+        ;;
+      *)
+        bash "$CMPSCRIPT" $check_all "$opath" "$npath" \
+          || exit_code[0]='binaries_differ'
+        ;;
+    esac
+  done
+  exec 3<&- 4<&-
+
+  # Compare any AppStream metadata side-files dropped next to the debs
+  # (mirrors the rpm flow).
+  local newdir OTHERDIR= appdatas xml f1 f2
+  for newdir in $NEWDIRS ; do
+    test -d "$newdir" || continue
+    if find "$newdir" -maxdepth 1 -name '*-appdata.xml' | grep -q . ; then
+      OTHERDIR="$newdir"
+      break
+    fi
+  done
+
+  if test -n "$OTHERDIR" ; then
+    appdatas=$(cd "$OTHERDIR" && find . -name '*-appdata.xml')
+    for xml in $appdatas ; do
+      if test -e "$OLDDIR/$xml" && test -e "$OTHERDIR/$xml" ; then
+        f1="$OLDDIR/$xml"
+        f2="$OTHERDIR/$xml"
+        if ! cmp -s "$f1" "$f2" ; then
+          echo "$xml files differ:"
+          diff -u0 "$f1" "$f2" | head -n 20
+          exit_code[2]='appdata_differs'
+        fi
+      elif test -e "$OTHERDIR/$xml" ; then
+        echo "$xml is new"
+        exit_code[2]='appdata_new'
+      elif test -e "$OLDDIR/$xml" ; then
+        echo "$xml disappeared"
+        exit_code[2]='appdata_old'
+      fi
+    done
+  fi
+  return 0
+}
+
+# ---------------------------------------------------------------------
+# Dispatcher: detect package format and run the matching comparator(s).
+# ---------------------------------------------------------------------
+have_rpms=0
+have_debs=0
+if find $NEWDIRS -type f -name '*.rpm' -print -quit 2>/dev/null | grep -q . ; then
+  have_rpms=1
+fi
+if find $NEWDIRS -type f -name '*.deb' -print -quit 2>/dev/null | grep -q . ; then
+  have_debs=1
+fi
+
+if test "$have_rpms" = 0 -a "$have_debs" = 0 ; then
+  echo "no .rpm or .deb / .ipk packages found in $NEWDIRS"
+  exit 1
+fi
+
+ret=0
+if test "$have_rpms" = 1 ; then
+  compare_rpms || ret=1
+fi
+if test "$have_debs" = 1 ; then
+  compare_debs || ret=1
+fi
+if test "$ret" != 0 ; then
+  exit 1
+fi
+# Print every reason the build differs so callers can grep for the
+# specific marker (binaries_differ / rpmlint_differs / appdata_differs
+# / srcrpm_differs).
+for s in "${exit_code[@]}" ; do
+  if test -n "$s" ; then
+    echo "$s"
+  fi
+done
 if test -n "${exit_code[*]}"; then
   exit 1
 fi

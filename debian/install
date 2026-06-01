@@ -1,0 +1,4 @@
+same-build-result.sh usr/lib/build/
+pkg-diff.sh usr/lib/build/
+functions.sh usr/lib/build/
+srpm-check.sh usr/lib/build/

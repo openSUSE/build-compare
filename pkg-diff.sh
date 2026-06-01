@@ -466,6 +466,39 @@ normalize_file()
       sed -i -e "s,Release:.*$release1,Release: @RELEASE@," "old/$file"
       sed -i -e "s,Release:.*$release2,Release: @RELEASE@," "new/$file"
       ;;
+    /usr/share/doc/*/changelog.Debian|\
+    /usr/share/doc/*/changelog.Debian.gz|\
+    /usr/share/doc/*/changelog.gz|\
+    /usr/share/doc/*/changelog)
+      # Strip the version-release that the top changelog stanza embeds
+      # in its first line, so that a pure version bump on a rebuild
+      # with otherwise identical content still compares equal.  Older
+      # stanzas keep their literal version (which is fine: those lines
+      # are identical between the two builds anyway).
+      #
+      # The trailer line of every stanza
+      #     -- Maintainer Name <email>  Day, DD Mon YYYY HH:MM:SS +ZZZZ
+      # also embeds a build timestamp (debtransform / dch -r generate
+      # one at build time) which differs across rebuilds; normalise
+      # the date portion to @DATE@ so the trailers compare equal.
+      local debchlog_date_sed='s/^\( -- .*\)  [A-Z][a-z][a-z], [ 0-9][0-9] [A-Z][a-z][a-z] [0-9]\{4\} [0-9]\{2\}:[0-9]\{2\}:[0-9]\{2\} [-+][0-9]\{4\}$/\1  @DATE@/'
+      case "$file" in
+        *.gz)
+          for f in old/$file new/$file ; do
+            test -f "$f" || continue
+            gunzip -f "$f"
+          done
+          local plain=${file%.gz}
+          trim_release_old < "old/$plain" | sed -e "$debchlog_date_sed" > "old/$plain.norm" && mv "old/$plain.norm" "old/$plain"
+          trim_release_new < "new/$plain" | sed -e "$debchlog_date_sed" > "new/$plain.norm" && mv "new/$plain.norm" "new/$plain"
+          gzip -n "old/$plain" "new/$plain"
+          ;;
+        *)
+          trim_release_old < "old/$file" | sed -e "$debchlog_date_sed" > "old/$file.norm" && mv "old/$file.norm" "old/$file"
+          trim_release_new < "new/$file" | sed -e "$debchlog_date_sed" > "new/$file.norm" && mv "new/$file.norm" "new/$file"
+          ;;
+      esac
+      ;;
     */xen*.efi)
       filter_generic xenefi
       ;;
@@ -1213,9 +1246,35 @@ fi
 echo "Comparing `basename $oldpkg` to `basename $newpkg`"
 
 case $oldpkg in
-  *.deb|*.ipk)
-    : cmp_deb_meta missing
+  *.ipk)
+    : cmd_ipk_meta missing
     RES=0
+  ;;
+  *.deb)
+    cmp_deb_meta "$oldpkg" "$newpkg"
+    RES=$?
+    case $RES in
+    0)
+      echo "deb meta information is identical"
+      if test -z "$check_all"; then
+        exit 0
+      fi
+      ;;
+    1)
+      echo "deb meta information is different"
+      if test -z "$check_all"; then
+        exit 1
+      fi
+      ;;
+    2)
+      echo "deb file checksum differs."
+      RES=0
+      ;;
+    *)
+      echo "Wrong exit code!"
+      exit 1
+      ;;
+    esac
   ;;
   *.rpm)
     cmp_rpm_meta "$rename_script" "$oldpkg" "$newpkg"
@@ -1251,7 +1310,7 @@ unpackage $newpkg $dir/new &
 wait
 
 case $oldpkg in
-  *.deb|*.ipk)
+  *.ipk)
     adjust_controlfile $dir/old $dir/new
     files=()
     while read
