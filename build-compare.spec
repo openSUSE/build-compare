@@ -23,7 +23,7 @@ Summary:        Build Result Compare Script
 License:        GPL-2.0-or-later
 Group:          Development/Tools/Building
 URL:            https://github.com/openSUSE/build-compare
-Source1:        %{name}-%{version}.tar.gz
+Source0:        %{name}-%{version}.tar.gz
 BuildRoot:      %{_tmppath}/%{name}-%{version}-build
 #!BuildIgnore:  build-compare
 BuildArch:      noarch
