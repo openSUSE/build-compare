@@ -2,3 +2,7 @@
 
 %:
 	dh $@
+
+# OBS strips +x from files storage
+execute_before_dh_install:
+	chmod +x $(CURDIR)/*.sh
