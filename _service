@@ -5,6 +5,7 @@
 		<param name="exclude">build-compare.dsc</param>
 		<param name="exclude">build-compare.spec</param>
 		<param name="exclude">tests</param>
+		<param name="extract">_service</param>
 		<param name="extract">build-compare.changes</param>
 		<param name="extract">build-compare.dsc</param>
 		<param name="extract">build-compare.spec</param>
