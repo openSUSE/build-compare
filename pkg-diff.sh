@@ -90,6 +90,32 @@ filter_pyc() {
    ' "$f"
 }
 
+filter_gcno() {
+    perl -e "
+    open my \$fh, '+<', '$f';
+    binmode \$fh;
+    seek \$fh, 0, 0;
+    print \$fh \"\x00\" x 16;
+    close \$fh;
+    "
+}
+
+filter_gcov(){
+    perl -e '
+    my $f = shift;
+    open my $fh, "+<", $f;
+    binmode $fh;
+    local $/;
+    my $d = <$fh>;
+    my $p = pack("H*", "20323442") . ("\x00" x 12);
+    if ($d =~ /\Q$p\E(....)/sx) {
+        my $offset = $-[1];
+        seek $fh, $offset, 0;
+        print $fh "\x00\x00\x00\x00";
+    }
+  ' "$1"
+}
+
 filter_dvi() {
    # Opcodes 247: pre; i[1], num[4], den[4], mag[4], k[1], x[k]
    perl -e "
@@ -462,6 +488,9 @@ normalize_file()
   local f
 
   case "$file" in
+    *.gcno)
+      filter_generic gcno
+      ;;
     *.spec)
       sed -i -e "s,Release:.*$release1,Release: @RELEASE@," "old/$file"
       sed -i -e "s,Release:.*$release2,Release: @RELEASE@," "new/$file"
@@ -1020,9 +1049,14 @@ check_single_file()
             /\.gnu_debugdata/d
             /\.note\.package/d
             /\.note\.go\.buildid/d
+            /\.gcov_info/d
+            /\.gcno/d
             p
           }
         '))
+
+      filter_generic gcov
+
       (cd old && exec $OBJDUMP -s ${sections[@]} ./$file ) > old/$file.objdump &
       (cd new && exec $OBJDUMP -s ${sections[@]} ./$file ) > new/$file.objdump &
       wait
