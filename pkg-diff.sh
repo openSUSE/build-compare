@@ -733,6 +733,11 @@ normalize_file()
     */dune-package)
       sed -i '1s@^(lang dune [^)]\+)@(lang dune 0.0)@' "old/$file" "new/$file"
       ;;
+    */bom.json)
+      # remove hashes
+      sed -i -z -E 's/[[:space:]]*"hashes"[[:space:]]*:[[:space:]]*\[[^]]*\][[:space:]]*,?//g' "old/$file"
+      sed -i -z -E 's/[[:space:]]*"hashes"[[:space:]]*:[[:space:]]*\[[^]]*\][[:space:]]*,?//g' "new/$file"
+      ;;
   esac
 }
 
