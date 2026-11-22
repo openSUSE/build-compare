@@ -201,6 +201,10 @@ function unpackage()
     mkdir -p $dir
     pushd $dir 1>/dev/null
     case $file in
+        *.pkg.tar|*.pkg.tar.*)
+            [[ $file = /* ]] || file=$OLDPWD/$file
+            arch_extract "$file"
+            ;;
         *.bz2)
             bzip2 -d $file
             ;;
@@ -668,5 +672,110 @@ function cmp_deb_meta()
     return 2
 }
 
+# Keep archived attributes, since extraction as an ordinary user cannot preserve
+# ownership. .MTREE is an optional, derived index, so compare the actual members.
+arch_extract() (
+    set -o pipefail
+    export LC_ALL=C
+    local pkg=$1
+    local -a decompress=()
+    case $pkg in
+        *.tar.lz4) decompress=(-I lz4) ;;
+        *.tar.lrz) decompress=(-I lrzip) ;;
+    esac
+    # C quoting keeps the name (and any link target) on one line, starting
+    # at the first quote after tar's mode, owner, size and timestamp columns.
+    tar "${decompress[@]}" --numeric-owner --no-same-owner --quoting-style=c \
+        -xvvf "$pkg" | awk '{
+        attrs = $1 " " $2
+        if ($1 ~ /^[bc]/) attrs = attrs " " $3
+        sub(/^[^"]*/, "")
+        sub(/^"\.\//, "\"")
+        if ($0 ~ /^"(\.PKGINFO|\.BUILDINFO|\.MTREE)?"$/) next
+        if (attrs ~ /^h/) sub(/ link to "\.\//, " link to \"")
+        print attrs, $0
+    }' | sort > "$PWD.filelist.tmp" || return 1
+    # Only a complete extraction has a filelist for cmp_arch_meta to compare.
+    mv "$PWD.filelist.tmp" "$PWD.filelist"
+)
+
+arch_filter_pkginfo() (
+    set -o pipefail
+    LC_ALL=C awk -v version="$2" '
+        BEGIN { upstream = version; sub(/-[^-]+$/, "", upstream) }
+        NR == FNR { peer[$0] = 1; next }
+        /^#/ || /^$/ || /^(pkgver|builddate|packager|size) = / { next }
+        !($0 in peer) && /^(depend|makedepend|checkdepend|optdepend|provides|conflict|replaces) = / {
+            # Split packages can pin peers to pkgver with or without pkgrel.
+            if (match($3, /^[^<>=]+=/)) {
+                dep = substr($3, 1, RLENGTH)
+                pin = substr($3, RLENGTH + 1)
+                colon = ($1 == "optdepend" && sub(/:$/, "", pin)) ? ":" : ""
+                if (pin == version) $3 = dep "@VERSION@-@RELEASE@" colon
+                else if (pin == upstream) $3 = dep "@VERSION@" colon
+            }
+        }
+        { print }
+    ' "$3" "$1" | LC_ALL=C sort
+)
+
+cmp_arch_meta() {
+    local old=$1 new=$2 side info name_old ret=0 entry path
+    local -A oldhashes
+    files=()
+    for side in "$old" "$new"; do
+        if test ! -f "$side.filelist"; then
+            echo "failed to extract ${side##*/} Arch package"
+            return 1
+        fi
+        info=$side/.PKGINFO
+        if [[ ! -f $info || -L $info ]] ||
+            ! grep -q '^pkgname = [^ ]' "$info" ||
+            ! grep -q '^pkgver = [^ ]' "$info" ||
+            ! grep -q '^arch = [^ ]' "$info"; then
+            echo "missing or invalid .PKGINFO in ${side##*/} package"
+            return 1
+        fi
+    done
+    name_old=$(sed -n 's/^pkgname = //p' "$old/.PKGINFO")
+    name_new=$(sed -n 's/^pkgname = //p' "$new/.PKGINFO")
+    version_release_old=$(sed -n 's/^pkgver = //p' "$old/.PKGINFO")
+    version_release_new=$(sed -n 's/^pkgver = //p' "$new/.PKGINFO")
+    name_ver_rel_old=$name_old-$version_release_old
+    name_ver_rel_new=$name_new-$version_release_new
+    set_regex
+
+    arch_filter_pkginfo "$old/.PKGINFO" "$version_release_old" "$new/.PKGINFO" > "$old.pkginfo" || return 1
+    arch_filter_pkginfo "$new/.PKGINFO" "$version_release_new" "$old/.PKGINFO" > "$new.pkginfo" || return 1
+    if ! diff -u --label old-.PKGINFO --label new-.PKGINFO "$old.pkginfo" "$new.pkginfo"; then
+        test -n "$check_all" || return 1
+        ret=1
+    fi
+    if ! diff -u --label old-filelist --label new-filelist "$old.filelist" "$new.filelist"; then
+        test -n "$check_all" || return 1
+        ret=1
+    fi
+
+    # Hash in batches, including .INSTALL and .CHANGELOG. Only pass common
+    # regular files with changed contents to the per-file filters.
+    for side in "$old" "$new"; do
+        (set -o pipefail; cd "$side" && find . -type f ! -path ./.PKGINFO \
+            ! -path ./.BUILDINFO ! -path ./.MTREE -exec sha256sum -z -- {} + |
+            LC_ALL=C sort -z) > "$side.sums" || return 1
+    done
+    if ! cmp -s "$old.sums" "$new.sums"; then
+        # sha256sum -z writes "hash  ./path<NUL>", even for unusual names.
+        while IFS= read -r -d '' entry; do
+            oldhashes["${entry#*  .}"]=${entry%% *}
+        done < "$old.sums"
+        while IFS= read -r -d '' entry; do
+            path=${entry#*  .}
+            if [[ -n ${oldhashes[$path]} && ${oldhashes[$path]} != "${entry%% *}" ]]; then
+                files+=( "$path" )
+            fi
+        done < "$new.sums"
+    fi
+    return "$ret"
+}
 
 # vim: tw=666 ts=2 shiftwidth=2 et
