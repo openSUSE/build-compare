@@ -7,8 +7,8 @@
 # Enhanced by Andreas Jaeger <aj@suse.de>
 #
 # The script decides if the new build differs from the former one,
-# using pkg-diff.sh.  Both .rpm and .deb / .ipk packages are
-# supported; the format is auto-detected from the artefacts present
+# using pkg-diff.sh. RPM, Debian (.deb / .ipk) and Arch Linux
+# (.pkg.tar*) packages are auto-detected from the artefacts present
 # in NEWDIRS / OLDDIR.
 #
 # The script is called as part of the build process as:
@@ -275,6 +275,20 @@ list_debs() {
     done | sort
 }
 
+arch_match=( -regextype posix-extended -regex '.*\.pkg\.tar(\.(zst|xz|gz|bz2|lz4|lrz|lzo|lz|Z))?' )
+
+list_arch_packages() (
+    set -o pipefail
+    local path f
+    find "$@" -type f "${arch_match[@]}" -print0 | while IFS= read -r -d '' path; do
+        # <name>-<pkgver>-<pkgrel>-<arch>.pkg.tar[.<compression>]
+        # Only the name may contain hyphens, e.g. util-linux.
+        f=${path##*/}
+        f=${f%.pkg.tar*}
+        printf '%s/%s\t%s\n' "${f%-*-*-*}" "${f##*-}" "$path"
+    done | LC_ALL=C sort
+)
+
 compare_debs() {
 
   local old_count new_count
@@ -291,9 +305,24 @@ compare_debs() {
 
   list_debs "$OLDDIR"  > "${file1}"
   list_debs $NEWDIRS   > "${file2}"
+  compare_package_lists deb
+}
 
+compare_arch_packages() {
+  list_arch_packages "$OLDDIR" > "$file1" || return 1
+  list_arch_packages "$@" > "$file2" || return 1
+  if test "$(wc -l < "$file1")" != "$(wc -l < "$file2")"; then
+    echo "different number of subpackages"
+    diff -u <(cut -f1 "$file1") <(cut -f1 "$file2")
+    return 1
+  fi
+  compare_package_lists arch
+}
+
+compare_package_lists() {
+  local format=$1
   if ! diff -u <(cut -f1 "${file1}") <(cut -f1 "${file2}") ; then
-    echo "set of deb (name, arch) tuples differs"
+    echo "set of $format (name, arch) tuples differs"
     return 1
   fi
 
@@ -301,9 +330,8 @@ compare_debs() {
   while IFS=$'\t' read -r okey opath <&3 ; do
     IFS=$'\t' read -r nkey npath <&4 || break
     echo "compare $opath $npath"
-    # ${okey%_*} drops the trailing _<arch> giving back the package name.
-    case "${okey%_*}" in
-      *-dbgsym|*-dbg)
+    case "$format:$okey" in
+      deb:*-dbgsym_*|deb:*-dbg_*|arch:*-debug/*)
         # debug symbol packages legitimately differ on every build
         # (build-id paths) without affecting installed binaries.
         # Skip them, mirroring the rpm flow's -debuginfo skip.
@@ -317,7 +345,7 @@ compare_debs() {
   done
   exec 3<&- 4<&-
 
-  # Compare any AppStream metadata side-files dropped next to the debs
+  # Compare any AppStream metadata side-files dropped next to the packages
   # (mirrors the rpm flow).
   local newdir OTHERDIR= appdatas xml f1 f2
   for newdir in $NEWDIRS ; do
@@ -356,19 +384,26 @@ compare_debs() {
 # ---------------------------------------------------------------------
 have_rpms=0
 have_debs=0
+have_arch=0
 if find $NEWDIRS -type f -name '*.rpm' -print -quit 2>/dev/null | grep -q . ; then
   have_rpms=1
 fi
 if find $NEWDIRS -type f -name '*.deb' -print -quit 2>/dev/null | grep -q . ; then
   have_debs=1
 fi
+if find "$OLDDIR" "$@" -type f "${arch_match[@]}" -print -quit 2>/dev/null | grep -q . ; then
+  have_arch=1
+fi
 
-if test "$have_rpms" = 0 -a "$have_debs" = 0 ; then
-  echo "no .rpm or .deb / .ipk packages found in $NEWDIRS"
+if test "$have_rpms" = 0 -a "$have_debs" = 0 -a "$have_arch" = 0 ; then
+  echo "no .rpm, .deb / .ipk or Arch Linux packages found in $NEWDIRS"
   exit 1
 fi
 
 ret=0
+if test "$have_arch" = 1 ; then
+  compare_arch_packages "$@" || ret=1
+fi
 if test "$have_rpms" = 1 ; then
   compare_rpms || ret=1
 fi

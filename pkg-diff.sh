@@ -1344,6 +1344,13 @@ unpackage $newpkg $dir/new &
 wait
 
 case $oldpkg in
+  *.pkg.tar|*.pkg.tar.*)
+    cmp_arch_meta "$dir/old" "$dir/new"
+    RES=$?
+    if test "$RES" != 0 && test -z "$check_all"; then
+      exit 1
+    fi
+  ;;
   *.ipk)
     adjust_controlfile $dir/old $dir/new
     files=()
